@@ -1,4 +1,4 @@
-module Animal exposing (Animal, animalCollision, moveAnimal, moveToNearest, newAnimal, restAnimal)
+module Animal exposing (Animal, animalCollision, isColliding, moveAnimal, moveToNearest, newAnimal, restAnimal)
 
 import Physics exposing (Physics)
 import Vector2 exposing (Vector2)
@@ -62,6 +62,22 @@ moveToNearest resources animal =
         animal
 
 
+isColliding : List { a | position : Vector2, radius : Float } -> Animal -> Animal
+isColliding resources animal =
+    let
+        collision =
+            resources
+                |> List.filter (Physics.isColliding animal.physics)
+                |> List.isEmpty
+                |> not
+    in
+    if collision then
+        { animal | stamina = max 0 (animal.stamina - 1) }
+
+    else
+        animal
+
+
 animalCollision : List { a | position : Vector2, radius : Float } -> Animal -> Animal
 animalCollision resources animal =
     let
@@ -72,7 +88,7 @@ animalCollision resources animal =
     in
     case collision of
         Just r ->
-            { animal | stamina = max 0 (animal.stamina - 1) }
+            animal
                 |> (\a -> { a | physics = Physics.resolveCollision r a.physics })
                 |> reverseAnimal
                 |> applyForceToAnimal (Vector2.direction r.position animal.physics.position |> Vector2.scale (animal.physics.mass * 0.4))

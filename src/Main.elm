@@ -5,6 +5,7 @@ import Browser
 import Browser.Events
 import Console exposing (Console)
 import Html exposing (Html, main_)
+import Physics
 import Svg exposing (Svg)
 import Svg.Attributes
 import Vector2 exposing (Vector2)
@@ -17,12 +18,35 @@ import Vector2 exposing (Vector2)
 type alias Resource =
     { position : Vector2
     , radius : Float
+    , hitCooldown : Float
     }
 
 
 newResource : Float -> Float -> Resource
 newResource x y =
-    Resource (Vector2.new x y) 25
+    Resource (Vector2.new x y) 25 0
+
+
+isColliding : List Animal -> Resource -> Resource
+isColliding animals resource =
+    let
+        collision =
+            animals
+                |> List.map .physics
+                |> List.filter (Physics.isCollidingVector resource)
+                |> List.isEmpty
+                |> not
+    in
+    if collision then
+        { resource | hitCooldown = 200 }
+
+    else
+        resource
+
+
+tickState : Float -> Resource -> Resource
+tickState dt resource =
+    { resource | hitCooldown = max 0 (resource.hitCooldown - dt) }
 
 
 
@@ -86,6 +110,11 @@ animalAi model =
     { model | animals = List.map (Animal.moveToNearest model.resources) model.animals }
 
 
+animalHitDetection : Model -> Model
+animalHitDetection model =
+    { model | animals = List.map (Animal.isColliding model.resources) model.animals }
+
+
 animalCollision : Model -> Model
 animalCollision model =
     { model | animals = List.map (Animal.animalCollision model.resources) model.animals }
@@ -96,9 +125,14 @@ animalMovement dt model =
     { model | animals = List.map (Animal.moveAnimal dt) model.animals }
 
 
-resourceCollision : Model -> Model
-resourceCollision model =
-    model
+resourceHitDetection : Model -> Model
+resourceHitDetection model =
+    { model | resources = List.map (isColliding model.animals) model.resources }
+
+
+resourceUpdate : Float -> Model -> Model
+resourceUpdate dt model =
+    { model | resources = List.map (tickState dt) model.resources }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -108,8 +142,10 @@ update msg model =
             ( model
                 |> animalAi
                 |> animalMovement dt
+                |> animalHitDetection
+                |> resourceHitDetection
                 |> animalCollision
-                |> resourceCollision
+                |> resourceUpdate dt
             , Cmd.none
             )
 
@@ -173,8 +209,7 @@ viewAnimal animal =
 viewResource : Resource -> Svg msg
 viewResource resource =
     Svg.circle
-        [ Svg.Attributes.class "entity"
-        , Svg.Attributes.class "resource"
+        [ svgClassList [ ( "entity", True ), ( "resource", True ), ( "hit", resource.hitCooldown /= 0 ) ]
         , Svg.Attributes.transform <| transformString resource.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"

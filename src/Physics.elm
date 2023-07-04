@@ -5,6 +5,7 @@ module Physics exposing
     , applyFriction
     , initPhysics
     , isColliding
+    , isCollidingVector
     , move
     , movePosition
     , resolveCollision
@@ -122,6 +123,18 @@ isColliding physics target =
 
         sumRadii =
             physics.radius + target.radius
+    in
+    dist.x ^ 2 + dist.y ^ 2 <= sumRadii ^ 2
+
+
+isCollidingVector : { a | position : Vector2, radius : Float } -> Physics -> Bool
+isCollidingVector vector target =
+    let
+        dist =
+            Vector2.subtract vector.position target.position
+
+        sumRadii =
+            vector.radius + target.radius
     in
     dist.x ^ 2 + dist.y ^ 2 <= sumRadii ^ 2
 
