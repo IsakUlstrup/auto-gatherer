@@ -127,17 +127,18 @@ update msg model =
 -- VIEW
 
 
+transformString : Vector2 -> String
+transformString position =
+    "translate("
+        ++ String.fromFloat position.x
+        ++ ", "
+        ++ String.fromFloat position.y
+        ++ ")"
+
+
 viewAnimal : Animal -> Svg msg
 viewAnimal animal =
-    let
-        transformString =
-            "translate("
-                ++ String.fromFloat animal.physics.position.x
-                ++ ", "
-                ++ String.fromFloat animal.physics.position.y
-                ++ ")"
-    in
-    Svg.g [ Svg.Attributes.transform transformString ]
+    Svg.g [ Svg.Attributes.transform <| transformString animal.physics.position ]
         [ Svg.circle
             [ Svg.Attributes.cx "0"
             , Svg.Attributes.cy "0"
@@ -155,16 +156,8 @@ viewAnimal animal =
 
 viewResource : Resource -> Svg msg
 viewResource resource =
-    let
-        transformString =
-            "translate("
-                ++ String.fromFloat resource.position.x
-                ++ ", "
-                ++ String.fromFloat resource.position.y
-                ++ ")"
-    in
     Svg.circle
-        [ Svg.Attributes.transform transformString
+        [ Svg.Attributes.transform <| transformString resource.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"
         , Svg.Attributes.r <| String.fromFloat <| resource.radius
