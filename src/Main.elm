@@ -96,12 +96,9 @@ animalMovement dt model =
     { model | animals = List.map (Animal.moveAnimal dt) model.animals }
 
 
-animalUpdate : Float -> List Resource -> Animal -> Animal
-animalUpdate dt resources animal =
-    animal
-        |> Animal.moveToNearest resources
-        |> Animal.animalCollision resources
-        |> Animal.moveAnimal dt
+resourceCollision : Model -> Model
+resourceCollision model =
+    model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -112,6 +109,7 @@ update msg model =
                 |> animalAi
                 |> animalMovement dt
                 |> animalCollision
+                |> resourceCollision
             , Cmd.none
             )
 
