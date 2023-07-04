@@ -15,9 +15,9 @@ type alias Animal =
     }
 
 
-newAnimal : Float -> Float -> Float -> Animal
-newAnimal x y mass =
-    Animal (Physics.initPhysics x y 20 mass) (Ready 10)
+newAnimal : Float -> Float -> Animal
+newAnimal x y =
+    Animal (Physics.initPhysics x y 20) (Ready 10)
 
 
 moveAnimal : Float -> Animal -> Animal
@@ -87,7 +87,7 @@ reverseAnimal animal =
     { animal | physics = Physics.reverseVelocity animal.physics }
 
 
-moveToNearest : List { a | position : Vector2 } -> Animal -> Animal
+moveToNearest : List Physics -> Animal -> Animal
 moveToNearest resources animal =
     let
         nearest =
@@ -99,7 +99,7 @@ moveToNearest resources animal =
     if not <| isExhausted animal then
         case nearest of
             Just r ->
-                applyForceToAnimal (Vector2.direction animal.physics.position r) animal
+                applyForceToAnimal (Vector2.direction animal.physics.position r |> Vector2.scale 0.1) animal
 
             Nothing ->
                 animal
@@ -110,7 +110,7 @@ moveToNearest resources animal =
 
 {-| Detect collisions and remove stamina
 -}
-isColliding : List { a | position : Vector2, radius : Float } -> Animal -> Animal
+isColliding : List Physics -> Animal -> Animal
 isColliding resources animal =
     let
         collision =
@@ -128,14 +128,14 @@ isColliding resources animal =
 
 {-| Detect and react to collisions
 -}
-animalCollision : List { a | position : Vector2, radius : Float } -> Animal -> Animal
+animalCollision : List Physics -> Animal -> Animal
 animalCollision resources animal =
     let
         resolveCollision res anml =
             anml
                 |> (\a -> { a | physics = Physics.resolveCollision res a.physics })
                 |> reverseAnimal
-                |> applyForceToAnimal (Vector2.direction res.position animal.physics.position |> Vector2.scale (animal.physics.mass * 0.4))
+                |> applyForceToAnimal (Vector2.direction res.position animal.physics.position |> Vector2.scale 0.5)
     in
     resources
         |> List.filter (Physics.isColliding animal.physics)

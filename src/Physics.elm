@@ -22,7 +22,6 @@ type alias Physics =
     , velocity : Vector2
     , acceleration : Vector2
     , radius : Float
-    , mass : Float
     }
 
 
@@ -30,13 +29,12 @@ type alias Physics =
 ---- BUILDER ----
 
 
-initPhysics : Float -> Float -> Float -> Float -> Physics
-initPhysics x y radius mass =
+initPhysics : Float -> Float -> Float -> Physics
+initPhysics x y radius =
     Physics (Vector2.new x y)
         (Vector2.new 0 0)
         (Vector2.new 0 0)
         radius
-        mass
 
 
 
@@ -88,7 +86,6 @@ applyForces forces physics =
     { physics
         | acceleration =
             List.foldl Vector2.add Vector2.zero forces
-                |> Vector2.divide physics.mass
                 |> Vector2.add physics.acceleration
     }
 
@@ -98,7 +95,6 @@ applyForce force physics =
     { physics
         | acceleration =
             force
-                |> Vector2.divide physics.mass
                 |> Vector2.add physics.acceleration
     }
 

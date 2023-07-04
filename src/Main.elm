@@ -41,10 +41,10 @@ initConsole =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Animal.newAnimal 0 0 50
-        , Animal.newAnimal 20 -20 30
-        , Animal.newAnimal -20 40 40
-        , Animal.newAnimal 30 -20 60
+        [ Animal.newAnimal 0 0
+        , Animal.newAnimal 20 -20
+        , Animal.newAnimal -20 40
+        , Animal.newAnimal 30 -20
         ]
         [ Resource.newResource -10 -80
         , Resource.newResource -100 100
@@ -88,11 +88,11 @@ update msg model =
                     min 200 dt
             in
             ( model
-                |> updateAnimals (Animal.moveToNearest model.resources)
+                |> updateAnimals (Animal.moveToNearest (List.map .physics model.resources))
                 |> updateAnimals (Animal.moveAnimal cappedDt)
-                |> updateAnimals (Animal.isColliding model.resources)
+                |> updateAnimals (Animal.isColliding (List.map .physics model.resources))
                 |> updateResources (Resource.isColliding model.animals)
-                |> updateAnimals (Animal.animalCollision model.resources)
+                |> updateAnimals (Animal.animalCollision (List.map .physics model.resources))
                 |> updateResources (Resource.tickState cappedDt)
                 |> updateAnimals (Animal.tickState cappedDt)
             , Cmd.none
@@ -163,10 +163,10 @@ viewResource : Resource -> Svg msg
 viewResource resource =
     Svg.circle
         [ svgClassList [ ( "entity", True ), ( "resource", True ), ( "hit", resource.hitCooldown /= 0 ) ]
-        , Svg.Attributes.transform <| transformString resource.position
+        , Svg.Attributes.transform <| transformString resource.physics.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"
-        , Svg.Attributes.r <| String.fromFloat <| resource.radius
+        , Svg.Attributes.r <| String.fromFloat <| resource.physics.radius
         ]
         []
 
