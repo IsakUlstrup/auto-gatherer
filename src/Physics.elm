@@ -89,7 +89,7 @@ reverseVelocity physics =
 ---- COLLISION ----
 
 
-isColliding : Physics -> { a | position : Vector2, radius : Float } -> Bool
+isColliding : Physics -> Physics -> Bool
 isColliding physics target =
     let
         dist : Vector2
@@ -103,7 +103,7 @@ isColliding physics target =
     dist.x ^ 2 + dist.y ^ 2 <= sumRadii ^ 2
 
 
-resolveCollision : { a | radius : Float, position : Vector2 } -> Physics -> Physics
+resolveCollision : Physics -> Physics -> Physics
 resolveCollision target physics =
     let
         pos : Vector2
