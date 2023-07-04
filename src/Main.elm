@@ -12,7 +12,6 @@ import Vector2 exposing (Vector2)
 
 
 
--- RESOURCE
 -- MODEL
 
 
