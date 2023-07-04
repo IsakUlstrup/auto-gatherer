@@ -138,32 +138,26 @@ transformString position =
 
 viewAnimal : Animal -> Svg msg
 viewAnimal animal =
-    Svg.g [ Svg.Attributes.transform <| transformString animal.physics.position ]
-        [ Svg.circle
-            [ Svg.Attributes.cx "0"
-            , Svg.Attributes.cy "0"
-            , Svg.Attributes.r <| String.fromFloat <| animal.physics.radius
-            , Svg.Attributes.fill "cyan"
-            ]
-            []
-        , Svg.text_
-            [ Svg.Attributes.textAnchor "middle"
-            , Svg.Attributes.alignmentBaseline "central"
-            ]
-            [ Svg.text <| String.fromInt animal.stamina ]
+    Svg.circle
+        [ Svg.Attributes.class "entity"
+        , Svg.Attributes.class "animal"
+        , Svg.Attributes.transform <| transformString animal.physics.position
+        , Svg.Attributes.cx "0"
+        , Svg.Attributes.cy "0"
+        , Svg.Attributes.r <| String.fromFloat <| animal.physics.radius
         ]
+        []
 
 
 viewResource : Resource -> Svg msg
 viewResource resource =
     Svg.circle
-        [ Svg.Attributes.transform <| transformString resource.position
+        [ Svg.Attributes.class "entity"
+        , Svg.Attributes.class "resource"
+        , Svg.Attributes.transform <| transformString resource.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"
         , Svg.Attributes.r <| String.fromFloat <| resource.radius
-        , Svg.Attributes.fill "magenta"
-        , Svg.Attributes.stroke "magenta"
-        , Svg.Attributes.strokeWidth "3"
         ]
         []
 
