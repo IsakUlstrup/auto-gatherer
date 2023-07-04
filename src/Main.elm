@@ -5,6 +5,7 @@ import Browser
 import Browser.Events
 import Console exposing (Console)
 import Html exposing (Html, main_)
+import Physics exposing (Physics)
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -137,32 +138,41 @@ transformString position =
         ++ ")"
 
 
+viewCircle : List (Svg.Attribute msg) -> Physics -> Svg msg
+viewCircle attrs physics =
+    Svg.circle
+        ([ Svg.Attributes.transform <| transformString physics.position
+         , Svg.Attributes.cx "0"
+         , Svg.Attributes.cy "0"
+         , Svg.Attributes.r <| String.fromFloat <| physics.radius
+         ]
+            ++ attrs
+        )
+        []
+
+
 viewAnimal : Animal -> Svg msg
 viewAnimal animal =
-    Svg.circle
+    viewCircle
         [ svgClassList
             [ ( "entity", True )
             , ( "animal", True )
             , ( "exhausted", Animal.isExhausted animal )
             ]
-        , Svg.Attributes.transform <| transformString animal.physics.position
-        , Svg.Attributes.cx "0"
-        , Svg.Attributes.cy "0"
-        , Svg.Attributes.r <| String.fromFloat <| animal.physics.radius
         ]
-        []
+        animal.physics
 
 
 viewResource : Resource -> Svg msg
 viewResource resource =
-    Svg.circle
-        [ svgClassList [ ( "entity", True ), ( "resource", True ), ( "hit", resource.hitCooldown /= 0 ) ]
-        , Svg.Attributes.transform <| transformString resource.physics.position
-        , Svg.Attributes.cx "0"
-        , Svg.Attributes.cy "0"
-        , Svg.Attributes.r <| String.fromFloat <| resource.physics.radius
+    viewCircle
+        [ svgClassList
+            [ ( "entity", True )
+            , ( "resource", True )
+            , ( "hit", resource.hitCooldown /= 0 )
+            ]
         ]
-        []
+        resource.physics
 
 
 view : Model -> Html Msg
