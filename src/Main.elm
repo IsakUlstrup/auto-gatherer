@@ -107,14 +107,19 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
+            let
+                -- cap dt to 5 fps, to prevent crazy updates of refocus
+                cappedDt =
+                    min 200 dt
+            in
             ( model
                 |> animalAi
-                |> animalMovement dt
+                |> animalMovement cappedDt
                 |> animalHitDetection
                 |> resourceHitDetection
                 |> animalCollision
-                |> resourceUpdate dt
-                |> animalStamina dt
+                |> resourceUpdate cappedDt
+                |> animalStamina cappedDt
             , Cmd.none
             )
 
