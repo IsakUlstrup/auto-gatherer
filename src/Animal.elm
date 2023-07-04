@@ -128,11 +128,9 @@ isColliding resources animal =
     let
         collision : Bool
         collision =
-            resources
-                |> List.map .physics
-                |> List.filter (Physics.isColliding animal.physics)
-                |> List.isEmpty
-                |> not
+            Physics.isCollidingList
+                (List.map .physics resources)
+                animal.physics
     in
     if collision then
         removeStamina 1 animal

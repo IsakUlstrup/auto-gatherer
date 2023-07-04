@@ -19,11 +19,9 @@ isColliding animals resource =
     let
         collision : Bool
         collision =
-            animals
-                |> List.map .physics
-                |> List.filter (Physics.isColliding resource.physics)
-                |> List.isEmpty
-                |> not
+            Physics.isCollidingList
+                (List.map .physics animals)
+                resource.physics
     in
     if collision then
         { resource | hitCooldown = 200 }

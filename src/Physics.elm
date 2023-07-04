@@ -4,6 +4,7 @@ module Physics exposing
     , applyFriction
     , initPhysics
     , isColliding
+    , isCollidingList
     , move
     , resolveCollision
     , reverseVelocity
@@ -101,6 +102,14 @@ isColliding physics target =
             physics.radius + target.radius
     in
     dist.x ^ 2 + dist.y ^ 2 <= sumRadii ^ 2
+
+
+isCollidingList : List Physics -> Physics -> Bool
+isCollidingList targets physics =
+    targets
+        |> List.filter (isColliding physics)
+        |> List.isEmpty
+        |> not
 
 
 resolveCollision : Physics -> Physics -> Physics
