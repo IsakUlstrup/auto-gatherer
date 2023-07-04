@@ -17,6 +17,7 @@ newResource x y =
 isColliding : List { a | physics : Physics.Physics } -> Resource -> Resource
 isColliding animals resource =
     let
+        collision : Bool
         collision =
             animals
                 |> List.map .physics

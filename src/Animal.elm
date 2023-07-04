@@ -1,4 +1,15 @@
-module Animal exposing (Animal, animalCollision, isColliding, isExhausted, moveAnimal, moveToNearest, newAnimal, restAnimal, tickState)
+module Animal exposing
+    ( Animal
+    , AnimalState
+    , animalCollision
+    , isColliding
+    , isExhausted
+    , moveAnimal
+    , moveToNearest
+    , newAnimal
+    , restAnimal
+    , tickState
+    )
 
 import Physics exposing (Physics)
 import Vector2 exposing (Vector2)
@@ -90,14 +101,15 @@ reverseAnimal animal =
 
 moveToNearest : List Physics -> Animal -> Animal
 moveToNearest resources animal =
-    let
-        nearest =
-            resources
-                |> List.map .position
-                |> List.sortBy (Vector2.distance animal.physics.position)
-                |> List.head
-    in
     if not <| isExhausted animal then
+        let
+            nearest : Maybe Vector2
+            nearest =
+                resources
+                    |> List.map .position
+                    |> List.sortBy (Vector2.distance animal.physics.position)
+                    |> List.head
+        in
         case nearest of
             Just r ->
                 applyForceToAnimal (Vector2.direction animal.physics.position r |> Vector2.scale animal.moveSpeed) animal
@@ -114,6 +126,7 @@ moveToNearest resources animal =
 isColliding : List Physics -> Animal -> Animal
 isColliding resources animal =
     let
+        collision : Bool
         collision =
             resources
                 |> List.filter (Physics.isColliding animal.physics)
@@ -132,6 +145,7 @@ isColliding resources animal =
 animalCollision : List Physics -> Animal -> Animal
 animalCollision resources animal =
     let
+        resolveCollision : Physics -> Animal -> Animal
         resolveCollision res anml =
             anml
                 |> (\a -> { a | physics = Physics.resolveCollision res a.physics })

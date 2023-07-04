@@ -1,19 +1,16 @@
 module Physics exposing
     ( Physics
     , applyForce
-    , applyForces
     , applyFriction
     , initPhysics
     , isColliding
     , move
-    , movePosition
     , resolveCollision
     , reverseVelocity
-    , setPosition
     , stopIfSlow
     )
 
-import Vector2 as Vector2 exposing (Vector2)
+import Vector2 exposing (Vector2)
 
 
 type alias Physics =
@@ -54,11 +51,6 @@ move dt phys =
         |> resetAcceleration
 
 
-movePosition : Vector2 -> Physics -> Physics
-movePosition vector physics =
-    { physics | position = Vector2.add physics.position vector }
-
-
 setPosition : Vector2 -> Physics -> Physics
 setPosition pos physics =
     { physics | position = pos }
@@ -78,15 +70,6 @@ stopIfSlow limit physics =
 
     else
         physics
-
-
-applyForces : List Vector2 -> Physics -> Physics
-applyForces forces physics =
-    { physics
-        | acceleration =
-            List.foldl Vector2.add Vector2.zero forces
-                |> Vector2.add physics.acceleration
-    }
 
 
 applyForce : Vector2 -> Physics -> Physics
@@ -109,9 +92,11 @@ reverseVelocity physics =
 isColliding : Physics -> { a | position : Vector2, radius : Float } -> Bool
 isColliding physics target =
     let
+        dist : Vector2
         dist =
             Vector2.subtract physics.position target.position
 
+        sumRadii : Float
         sumRadii =
             physics.radius + target.radius
     in
@@ -121,6 +106,7 @@ isColliding physics target =
 resolveCollision : { a | radius : Float, position : Vector2 } -> Physics -> Physics
 resolveCollision target physics =
     let
+        pos : Vector2
         pos =
             Vector2.add
                 (Vector2.singleton (physics.radius + target.radius)

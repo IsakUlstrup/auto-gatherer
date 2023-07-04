@@ -10,9 +10,7 @@ module Console exposing
     , argInt
     , argString
     , constructor
-    , constructor1
     , constructor2
-    , constructor3
     , new
     , update
     , viewConsole
@@ -43,19 +41,9 @@ constructor c =
     Constructor c
 
 
-constructor1 : (a -> b) -> ((a -> Message b) -> c) -> c
-constructor1 c x =
-    x <| \a -> constructor <| c a
-
-
 constructor2 : (a -> b -> c) -> ((a -> d) -> e) -> ((b -> Message c) -> d) -> e
 constructor2 c x y =
     x <| \a -> y <| \b -> constructor <| c a b
-
-
-constructor3 : (a -> b -> c -> d) -> ((a -> e) -> f) -> ((b -> g) -> e) -> ((c -> Message d) -> g) -> f
-constructor3 c x y z =
-    x <| \a -> y <| \b -> z <| \d -> constructor <| c a b d
 
 
 argInt : String -> (Int -> Message a) -> Message a
