@@ -1,4 +1,4 @@
-module Animal exposing (Animal, animalCollision, isColliding, isExhausted, moveAnimal, moveToNearest, newAnimal, restAnimal, staminaUpdate)
+module Animal exposing (Animal, animalCollision, isColliding, isExhausted, moveAnimal, moveToNearest, newAnimal, restAnimal, tickState)
 
 import Physics exposing (Physics)
 import Vector2 exposing (Vector2)
@@ -68,8 +68,8 @@ removeStamina amount animal =
             animal
 
 
-staminaUpdate : Float -> Animal -> Animal
-staminaUpdate dt animal =
+tickState : Float -> Animal -> Animal
+tickState dt animal =
     case animal.state of
         Ready _ ->
             animal

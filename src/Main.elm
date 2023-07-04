@@ -68,39 +68,14 @@ type Msg
     | ConsoleMsg (Console.ConsoleMsg Msg)
 
 
-animalAi : Model -> Model
-animalAi model =
-    { model | animals = List.map (Animal.moveToNearest model.resources) model.animals }
+updateAnimals : (Animal -> Animal) -> Model -> Model
+updateAnimals f model =
+    { model | animals = List.map f model.animals }
 
 
-animalHitDetection : Model -> Model
-animalHitDetection model =
-    { model | animals = List.map (Animal.isColliding model.resources) model.animals }
-
-
-animalCollision : Model -> Model
-animalCollision model =
-    { model | animals = List.map (Animal.animalCollision model.resources) model.animals }
-
-
-animalMovement : Float -> Model -> Model
-animalMovement dt model =
-    { model | animals = List.map (Animal.moveAnimal dt) model.animals }
-
-
-animalStamina : Float -> Model -> Model
-animalStamina dt model =
-    { model | animals = List.map (Animal.staminaUpdate dt) model.animals }
-
-
-resourceHitDetection : Model -> Model
-resourceHitDetection model =
-    { model | resources = List.map (Resource.isColliding model.animals) model.resources }
-
-
-resourceUpdate : Float -> Model -> Model
-resourceUpdate dt model =
-    { model | resources = List.map (Resource.tickState dt) model.resources }
+updateResources : (Resource -> Resource) -> Model -> Model
+updateResources f model =
+    { model | resources = List.map f model.resources }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -113,13 +88,13 @@ update msg model =
                     min 200 dt
             in
             ( model
-                |> animalAi
-                |> animalMovement cappedDt
-                |> animalHitDetection
-                |> resourceHitDetection
-                |> animalCollision
-                |> resourceUpdate cappedDt
-                |> animalStamina cappedDt
+                |> updateAnimals (Animal.moveToNearest model.resources)
+                |> updateAnimals (Animal.moveAnimal cappedDt)
+                |> updateAnimals (Animal.isColliding model.resources)
+                |> updateResources (Resource.isColliding model.animals)
+                |> updateAnimals (Animal.animalCollision model.resources)
+                |> updateResources (Resource.tickState cappedDt)
+                |> updateAnimals (Animal.tickState cappedDt)
             , Cmd.none
             )
 
