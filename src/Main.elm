@@ -81,6 +81,21 @@ type Msg
     | ConsoleMsg (Console.ConsoleMsg Msg)
 
 
+animalAi : Model -> Model
+animalAi model =
+    { model | animals = List.map (Animal.moveToNearest model.resources) model.animals }
+
+
+animalCollision : Model -> Model
+animalCollision model =
+    { model | animals = List.map (Animal.animalCollision model.resources) model.animals }
+
+
+animalMovement : Float -> Model -> Model
+animalMovement dt model =
+    { model | animals = List.map (Animal.moveAnimal dt) model.animals }
+
+
 animalUpdate : Float -> List Resource -> Animal -> Animal
 animalUpdate dt resources animal =
     animal
@@ -93,11 +108,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            ( { model
-                | animals =
-                    model.animals
-                        |> List.map (animalUpdate dt model.resources)
-              }
+            ( model
+                |> animalAi
+                |> animalMovement dt
+                |> animalCollision
             , Cmd.none
             )
 
