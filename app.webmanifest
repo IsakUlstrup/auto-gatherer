@@ -1,0 +1,10 @@
+{
+    "theme_color": "#2d5e51",
+    "background_color": "#2d5e51",
+    "display": "fullscreen",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Auto Gather",
+    "short_name": "Gathering",
+    "description": "A game"
+}
