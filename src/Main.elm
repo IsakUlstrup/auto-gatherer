@@ -34,8 +34,8 @@ initConsole =
             )
         |> Console.addMessage "Remove resources"
             (Console.constructor RemoveResources)
-        |> Console.addMessage "Rest animal"
-            (Console.constructor RechargeAnimal)
+        |> Console.addMessage "Rest animals"
+            (Console.constructor RechargeAnimals)
 
 
 init : () -> ( Model, Cmd Msg )
@@ -63,7 +63,7 @@ init _ =
 type Msg
     = Tick Float
     | AddResource Float Float
-    | RechargeAnimal
+    | RechargeAnimals
     | RemoveResources
     | ConsoleMsg (Console.ConsoleMsg Msg)
 
@@ -115,7 +115,7 @@ update msg model =
         AddResource x y ->
             ( { model | resources = Resource.newResource x y :: model.resources }, Cmd.none )
 
-        RechargeAnimal ->
+        RechargeAnimals ->
             ( { model | animals = List.map Animal.restAnimal model.animals }, Cmd.none )
 
         RemoveResources ->
