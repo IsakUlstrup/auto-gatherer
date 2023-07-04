@@ -5,7 +5,7 @@ import Browser
 import Browser.Events
 import Console exposing (Console)
 import Html exposing (Html, main_)
-import Physics
+import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Vector2 exposing (Vector2)
@@ -13,43 +13,6 @@ import Vector2 exposing (Vector2)
 
 
 -- RESOURCE
-
-
-type alias Resource =
-    { position : Vector2
-    , radius : Float
-    , hitCooldown : Float
-    }
-
-
-newResource : Float -> Float -> Resource
-newResource x y =
-    Resource (Vector2.new x y) 25 0
-
-
-isColliding : List Animal -> Resource -> Resource
-isColliding animals resource =
-    let
-        collision =
-            animals
-                |> List.map .physics
-                |> List.filter (Physics.isCollidingVector resource)
-                |> List.isEmpty
-                |> not
-    in
-    if collision then
-        { resource | hitCooldown = 200 }
-
-    else
-        resource
-
-
-tickState : Float -> Resource -> Resource
-tickState dt resource =
-    { resource | hitCooldown = max 0 (resource.hitCooldown - dt) }
-
-
-
 -- MODEL
 
 
@@ -83,10 +46,10 @@ init _ =
         , Animal.newAnimal -20 40 40
         , Animal.newAnimal 30 -20 60
         ]
-        [ newResource -10 -80
-        , newResource -100 100
-        , newResource -150 50
-        , newResource -10 100
+        [ Resource.newResource -10 -80
+        , Resource.newResource -100 100
+        , Resource.newResource -150 50
+        , Resource.newResource -10 100
         ]
         initConsole
     , Cmd.none
@@ -127,12 +90,12 @@ animalMovement dt model =
 
 resourceHitDetection : Model -> Model
 resourceHitDetection model =
-    { model | resources = List.map (isColliding model.animals) model.resources }
+    { model | resources = List.map (Resource.isColliding model.animals) model.resources }
 
 
 resourceUpdate : Float -> Model -> Model
 resourceUpdate dt model =
-    { model | resources = List.map (tickState dt) model.resources }
+    { model | resources = List.map (Resource.tickState dt) model.resources }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -150,7 +113,7 @@ update msg model =
             )
 
         AddResource x y ->
-            ( { model | resources = newResource x y :: model.resources }, Cmd.none )
+            ( { model | resources = Resource.newResource x y :: model.resources }, Cmd.none )
 
         RechargeAnimal ->
             ( { model | animals = List.map Animal.restAnimal model.animals }, Cmd.none )
