@@ -81,19 +81,14 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            let
-                -- cap dt to 5 fps, to prevent crazy updates of refocus
-                cappedDt =
-                    min 200 dt
-            in
             ( model
                 |> updateAnimals (Animal.moveToNearest (List.map .physics model.resources))
-                |> updateAnimals (Animal.moveAnimal cappedDt)
+                |> updateAnimals (Animal.moveAnimal dt)
                 |> updateAnimals (Animal.isColliding (List.map .physics model.resources))
                 |> updateResources (Resource.isColliding model.animals)
                 |> updateAnimals (Animal.animalCollision (List.map .physics model.resources))
-                |> updateResources (Resource.tickState cappedDt)
-                |> updateAnimals (Animal.tickState cappedDt)
+                |> updateResources (Resource.tickState dt)
+                |> updateAnimals (Animal.tickState dt)
             , Cmd.none
             )
 
@@ -191,7 +186,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onAnimationFrameDelta Tick
+    Browser.Events.onAnimationFrameDelta (min 200 >> Tick)
 
 
 
