@@ -99,14 +99,14 @@ reverseAnimal animal =
     { animal | physics = Physics.reverseVelocity animal.physics }
 
 
-moveToNearest : List Physics -> Animal -> Animal
+moveToNearest : List { a | physics : Physics.Physics } -> Animal -> Animal
 moveToNearest resources animal =
     if not <| isExhausted animal then
         let
             nearest : Maybe Vector2
             nearest =
                 resources
-                    |> List.map .position
+                    |> List.map (.physics >> .position)
                     |> List.sortBy (Vector2.distance animal.physics.position)
                     |> List.head
         in
@@ -123,12 +123,13 @@ moveToNearest resources animal =
 
 {-| Detect collisions and remove stamina
 -}
-isColliding : List Physics -> Animal -> Animal
+isColliding : List { a | physics : Physics.Physics } -> Animal -> Animal
 isColliding resources animal =
     let
         collision : Bool
         collision =
             resources
+                |> List.map .physics
                 |> List.filter (Physics.isColliding animal.physics)
                 |> List.isEmpty
                 |> not
@@ -142,7 +143,7 @@ isColliding resources animal =
 
 {-| Detect and react to collisions
 -}
-animalCollision : List Physics -> Animal -> Animal
+animalCollision : List { a | physics : Physics.Physics } -> Animal -> Animal
 animalCollision resources animal =
     let
         resolveCollision : Physics -> Animal -> Animal
@@ -153,5 +154,6 @@ animalCollision resources animal =
                 |> applyForceToAnimal (Vector2.direction res.position animal.physics.position |> Vector2.scale 0.5)
     in
     resources
+        |> List.map .physics
         |> List.filter (Physics.isColliding animal.physics)
         |> List.foldl resolveCollision animal

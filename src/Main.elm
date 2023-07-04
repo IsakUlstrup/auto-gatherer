@@ -83,11 +83,11 @@ update msg model =
     case msg of
         Tick dt ->
             ( model
-                |> updateAnimals (Animal.moveToNearest (List.map .physics model.resources))
+                |> updateAnimals (Animal.moveToNearest model.resources)
                 |> updateAnimals (Animal.moveAnimal dt)
-                |> updateAnimals (Animal.isColliding (List.map .physics model.resources))
+                |> updateAnimals (Animal.isColliding model.resources)
                 |> updateResources (Resource.isColliding model.animals)
-                |> updateAnimals (Animal.animalCollision (List.map .physics model.resources))
+                |> updateAnimals (Animal.animalCollision model.resources)
                 |> updateResources (Resource.tickState dt)
                 |> updateAnimals (Animal.tickState dt)
             , Cmd.none
