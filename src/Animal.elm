@@ -62,6 +62,8 @@ moveToNearest resources animal =
         animal
 
 
+{-| Detect collisions and remove stamina
+-}
 isColliding : List { a | position : Vector2, radius : Float } -> Animal -> Animal
 isColliding resources animal =
     let
@@ -78,20 +80,17 @@ isColliding resources animal =
         animal
 
 
+{-| Detect and react to collisions
+-}
 animalCollision : List { a | position : Vector2, radius : Float } -> Animal -> Animal
 animalCollision resources animal =
     let
-        collision =
-            resources
-                |> List.filter (Physics.isColliding animal.physics)
-                |> List.head
-    in
-    case collision of
-        Just r ->
-            animal
-                |> (\a -> { a | physics = Physics.resolveCollision r a.physics })
+        resolveCollision res anml =
+            anml
+                |> (\a -> { a | physics = Physics.resolveCollision res a.physics })
                 |> reverseAnimal
-                |> applyForceToAnimal (Vector2.direction r.position animal.physics.position |> Vector2.scale (animal.physics.mass * 0.4))
-
-        Nothing ->
-            animal
+                |> applyForceToAnimal (Vector2.direction res.position animal.physics.position |> Vector2.scale (animal.physics.mass * 0.4))
+    in
+    resources
+        |> List.filter (Physics.isColliding animal.physics)
+        |> List.foldl resolveCollision animal
