@@ -88,6 +88,11 @@ animalMovement dt model =
     { model | animals = List.map (Animal.moveAnimal dt) model.animals }
 
 
+animalStamina : Float -> Model -> Model
+animalStamina dt model =
+    { model | animals = List.map (Animal.staminaUpdate dt) model.animals }
+
+
 resourceHitDetection : Model -> Model
 resourceHitDetection model =
     { model | resources = List.map (Resource.isColliding model.animals) model.resources }
@@ -109,6 +114,7 @@ update msg model =
                 |> resourceHitDetection
                 |> animalCollision
                 |> resourceUpdate dt
+                |> animalStamina dt
             , Cmd.none
             )
 
@@ -160,7 +166,11 @@ transformString position =
 viewAnimal : Animal -> Svg msg
 viewAnimal animal =
     Svg.circle
-        [ svgClassList [ ( "entity", True ), ( "animal", True ), ( "exhausted", animal.stamina == 0 ) ]
+        [ svgClassList
+            [ ( "entity", True )
+            , ( "animal", True )
+            , ( "exhausted", Animal.isExhausted animal )
+            ]
         , Svg.Attributes.transform <| transformString animal.physics.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"

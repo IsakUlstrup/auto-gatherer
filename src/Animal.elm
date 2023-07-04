@@ -1,18 +1,23 @@
-module Animal exposing (Animal, animalCollision, isColliding, moveAnimal, moveToNearest, newAnimal, restAnimal)
+module Animal exposing (Animal, animalCollision, isColliding, isExhausted, moveAnimal, moveToNearest, newAnimal, restAnimal, staminaUpdate)
 
 import Physics exposing (Physics)
 import Vector2 exposing (Vector2)
 
 
+type AnimalState
+    = Ready Int
+    | Exhausted Float
+
+
 type alias Animal =
     { physics : Physics
-    , stamina : Int
+    , state : AnimalState
     }
 
 
 newAnimal : Float -> Float -> Float -> Animal
 newAnimal x y mass =
-    Animal (Physics.initPhysics x y 20 mass) 10
+    Animal (Physics.initPhysics x y 20 mass) (Ready 10)
 
 
 moveAnimal : Float -> Animal -> Animal
@@ -33,7 +38,48 @@ applyForceToAnimal force animal =
 
 restAnimal : Animal -> Animal
 restAnimal animal =
-    { animal | stamina = 10 }
+    { animal | state = Ready 10 }
+
+
+isExhausted : Animal -> Bool
+isExhausted animal =
+    case animal.state of
+        Ready 0 ->
+            True
+
+        Ready _ ->
+            False
+
+        Exhausted _ ->
+            True
+
+
+removeStamina : Int -> Animal -> Animal
+removeStamina amount animal =
+    case animal.state of
+        Ready s ->
+            if s - amount <= 0 then
+                { animal | state = Exhausted 5000 }
+
+            else
+                { animal | state = Ready <| max 0 (s - amount) }
+
+        _ ->
+            animal
+
+
+staminaUpdate : Float -> Animal -> Animal
+staminaUpdate dt animal =
+    case animal.state of
+        Ready _ ->
+            animal
+
+        Exhausted cd ->
+            if cd <= 0 then
+                { animal | state = Ready 10 }
+
+            else
+                { animal | state = Exhausted <| max 0 (cd - dt) }
 
 
 reverseAnimal : Animal -> Animal
@@ -50,7 +96,7 @@ moveToNearest resources animal =
                 |> List.sortBy (Vector2.distance animal.physics.position)
                 |> List.head
     in
-    if animal.stamina > 0 then
+    if not <| isExhausted animal then
         case nearest of
             Just r ->
                 applyForceToAnimal (Vector2.direction animal.physics.position r) animal
@@ -74,7 +120,7 @@ isColliding resources animal =
                 |> not
     in
     if collision then
-        { animal | stamina = max 0 (animal.stamina - 1) }
+        removeStamina 1 animal
 
     else
         animal
