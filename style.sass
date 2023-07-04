@@ -1,10 +1,13 @@
+$animal_color: rgb(243, 203, 58)
+$resource_color: rgb(233, 67, 130)
+
 *
     padding: 0
     margin: 0
     box-sizing: border-box
 
 body
-    background: #751d3f
+    background: #2d5e51
     color: beige
     font-family: Arial, Helvetica, sans-serif
 
@@ -19,16 +22,14 @@ main
 
     .entity
         transition: fill 300ms
-        stroke-width: 3
-        &.exhausted
-            fill: transparent
 
     .animal
-        fill: cyan
-        stroke: cyan
+        fill: $animal_color
+        &.exhausted
+            fill: desaturate($animal_color, 40 )
 
     .resource
-        fill: magenta
-        stroke: magenta
+        fill: $resource_color
+
         &.hit
             fill: white
