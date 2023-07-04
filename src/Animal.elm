@@ -12,12 +12,13 @@ type AnimalState
 type alias Animal =
     { physics : Physics
     , state : AnimalState
+    , moveSpeed : Float
     }
 
 
-newAnimal : Float -> Float -> Animal
-newAnimal x y =
-    Animal (Physics.initPhysics x y 20) (Ready 10)
+newAnimal : Float -> Float -> Float -> Animal
+newAnimal x y speed =
+    Animal (Physics.initPhysics x y 20) (Ready 10) speed
 
 
 moveAnimal : Float -> Animal -> Animal
@@ -99,7 +100,7 @@ moveToNearest resources animal =
     if not <| isExhausted animal then
         case nearest of
             Just r ->
-                applyForceToAnimal (Vector2.direction animal.physics.position r |> Vector2.scale 0.1) animal
+                applyForceToAnimal (Vector2.direction animal.physics.position r |> Vector2.scale animal.moveSpeed) animal
 
             Nothing ->
                 animal
