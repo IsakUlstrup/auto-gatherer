@@ -19,9 +19,16 @@ main
 
     .entity
         transition: fill 300ms
+        stroke-width: 3
+        &.exhausted
+            fill: transparent
 
     .animal
         fill: cyan
+        stroke: cyan
 
     .resource
         fill: magenta
+        stroke: magenta
+        &.hit
+            fill: white

@@ -127,6 +127,16 @@ update msg model =
 -- VIEW
 
 
+svgClassList : List ( String, Bool ) -> Svg.Attribute msg
+svgClassList classes =
+    classes
+        |> List.filter Tuple.second
+        |> List.map Tuple.first
+        |> List.intersperse " "
+        |> String.concat
+        |> Svg.Attributes.class
+
+
 transformString : Vector2 -> String
 transformString position =
     "translate("
@@ -139,8 +149,7 @@ transformString position =
 viewAnimal : Animal -> Svg msg
 viewAnimal animal =
     Svg.circle
-        [ Svg.Attributes.class "entity"
-        , Svg.Attributes.class "animal"
+        [ svgClassList [ ( "entity", True ), ( "animal", True ), ( "exhausted", animal.stamina == 0 ) ]
         , Svg.Attributes.transform <| transformString animal.physics.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"
