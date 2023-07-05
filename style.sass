@@ -26,20 +26,20 @@ main
 
     .animal
         fill: $animal_color
-        stroke: rgb(255, 249, 199)
+        stroke: lighten($animal_color, 25)
 
         .trail
-            fill: rgb(255, 249, 199)
+            fill: lighten($animal_color, 25)
 
         &.exhausted
-            fill: desaturate($animal_color, 40 )
+            fill: desaturate($animal_color, 20 )
 
     .resource
         fill: $resource_color
-        stroke: rgb(255, 199, 233)
+        stroke: lighten($resource_color, 25)
 
         &.exhausted
-            fill: desaturate($resource_color, 40 )
+            fill: desaturate($resource_color, 20 )
 
         &.hit
-            fill: white
+            fill: lighten($resource_color, 35)
