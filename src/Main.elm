@@ -84,11 +84,21 @@ update msg model =
     case msg of
         Tick dt ->
             ( model
-                |> updateAnimals (Animal.moveToNearest model.resources)
+                |> updateAnimals (Animal.moveToNearest (List.filter (Resource.isExhausted >> not) model.resources))
                 |> updateAnimals (Animal.moveAnimal dt)
-                |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) model.resources)
-                |> updateResources (PhysicsInteraction.isColliding (Resource.hitCooldown >> Resource.hit) model.animals)
-                |> updateAnimals (PhysicsInteraction.resolveCollision model.resources)
+                |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) (List.filter (Resource.isExhausted >> not) model.resources))
+                |> updateResources
+                    (PhysicsInteraction.isColliding
+                        (\r ->
+                            if Resource.isExhausted r then
+                                r
+
+                            else
+                                r |> Resource.hitCooldown |> Resource.hit
+                        )
+                        model.animals
+                    )
+                |> updateAnimals (PhysicsInteraction.resolveCollision (List.filter (Resource.isExhausted >> not) model.resources))
                 |> updateResources (Resource.tickState dt)
                 |> updateAnimals (Animal.tickState dt)
             , Cmd.none

@@ -43,7 +43,7 @@ hit resource =
     case resource.state of
         Ready hp ->
             if hp - 1 <= 0 then
-                { resource | state = Exhausted 5000 }
+                { resource | state = Exhausted 10000 }
 
             else
                 { resource | state = Ready (hp - 1) }
