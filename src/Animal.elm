@@ -94,11 +94,6 @@ tickState dt animal =
                 { animal | state = Exhausted <| max 0 (cd - dt) }
 
 
-reverseAnimal : Animal -> Animal
-reverseAnimal animal =
-    { animal | physics = Physics.reverseVelocity animal.physics }
-
-
 moveToNearest : List { a | physics : Physics.Physics } -> Animal -> Animal
 moveToNearest resources animal =
     if not <| isExhausted animal then
@@ -148,7 +143,6 @@ animalCollision resources animal =
         resolveCollision res anml =
             anml
                 |> (\a -> { a | physics = Physics.resolveCollision res a.physics })
-                |> reverseAnimal
                 |> applyForceToAnimal (Vector2.direction res.position animal.physics.position |> Vector2.scale 0.5)
     in
     resources
