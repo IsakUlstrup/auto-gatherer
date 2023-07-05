@@ -175,7 +175,7 @@ viewResource resource =
         [ svgClassList
             [ ( "entity", True )
             , ( "resource", True )
-            , ( "hit", resource.hitCooldown /= 0 )
+            , ( "hit", Resource.isHit resource )
             , ( "exhausted", Resource.isExhausted resource )
             ]
         ]
