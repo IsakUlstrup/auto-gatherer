@@ -49,10 +49,10 @@ initConsole =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Animal.newAnimal 0 0 0.01
-        , Animal.newAnimal 20 -20 0.05
-        , Animal.newAnimal -20 40 0.09
-        , Animal.newAnimal 30 -20 0.02
+        [ Animal.new 0 0 0.01
+        , Animal.new 20 -20 0.05
+        , Animal.new -20 40 0.09
+        , Animal.new 30 -20 0.02
         ]
         [ Resource.newResource -10 -80
         , Resource.newResource -100 100
@@ -102,8 +102,8 @@ update msg model =
                 |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)
                 |> updateResources (Resource.tickState dt)
-                |> updateAnimals (Animal.tickState dt)
-                |> updateAnimals (Animal.moveAnimal dt)
+                |> updateAnimals (Animal.update dt)
+                |> updateAnimals (Animal.movement 0.93 dt)
             , Cmd.none
             )
 
@@ -111,10 +111,10 @@ update msg model =
             ( { model | resources = Resource.newResource x y :: model.resources }, Cmd.none )
 
         AddAnimal x y speed ->
-            ( { model | animals = Animal.newAnimal x y speed :: model.animals }, Cmd.none )
+            ( { model | animals = Animal.new x y speed :: model.animals }, Cmd.none )
 
         RechargeAnimals ->
-            ( { model | animals = List.map Animal.restAnimal model.animals }, Cmd.none )
+            ( { model | animals = List.map Animal.rest model.animals }, Cmd.none )
 
         RemoveResources ->
             ( { model | resources = [] }, Cmd.none )
