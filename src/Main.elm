@@ -54,10 +54,11 @@ init _ =
         , Animal.new -20 40 0.09
         , Animal.new 30 -20 0.02
         ]
-        [ Resource.newResource -10 -80
-        , Resource.newResource -100 100
-        , Resource.newResource -150 50
-        , Resource.newResource -10 100
+        [ Resource.newResource -10 -180
+        , Resource.newResource 160 20
+        , Resource.newResource 165 -10
+        , Resource.newResource -250 70
+        , Resource.newResource -10 120
         ]
         initConsole
     , Cmd.none
