@@ -23,12 +23,13 @@ type alias Animal =
     { physics : Physics
     , state : AnimalState
     , moveSpeed : Float
+    , trail : List Vector2
     }
 
 
 newAnimal : Float -> Float -> Float -> Animal
 newAnimal x y speed =
-    Animal (Engine.Physics.initPhysics x y 20) (Ready 10) speed
+    Animal (Engine.Physics.initPhysics x y 20) (Ready 10) speed []
 
 
 moveAnimal : Float -> Animal -> Animal
@@ -81,16 +82,19 @@ removeStamina amount animal =
 
 tickState : Float -> Animal -> Animal
 tickState dt animal =
-    case animal.state of
-        Ready _ ->
-            animal
+    { animal | trail = animal.physics.position :: animal.trail |> List.take 20 }
+        |> (\a ->
+                case a.state of
+                    Ready _ ->
+                        a
 
-        Exhausted cd ->
-            if cd <= 0 then
-                { animal | state = Ready 10 }
+                    Exhausted cd ->
+                        if cd <= 0 then
+                            { a | state = Ready 10 }
 
-            else
-                { animal | state = Exhausted <| max 0 (cd - dt) }
+                        else
+                            { a | state = Exhausted <| max 0 (cd - dt) }
+           )
 
 
 moveToNearest : List { a | physics : Physics } -> Animal -> Animal
