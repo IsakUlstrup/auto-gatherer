@@ -44,6 +44,8 @@ initConsole =
             (Console.constructor RemoveResources)
         |> Console.addMessage "Rest animals"
             (Console.constructor RechargeAnimals)
+        |> Console.addMessage "Reset state"
+            (Console.constructor Reset)
 
 
 init : () -> ( Model, Cmd Msg )
@@ -75,6 +77,7 @@ type Msg
     | AddAnimal Float Float Float
     | RechargeAnimals
     | RemoveResources
+    | Reset
     | ConsoleMsg (Console.ConsoleMsg Msg)
 
 
@@ -119,6 +122,9 @@ update msg model =
 
         RemoveResources ->
             ( { model | resources = [] }, Cmd.none )
+
+        Reset ->
+            init ()
 
         ConsoleMsg cmsg ->
             let
