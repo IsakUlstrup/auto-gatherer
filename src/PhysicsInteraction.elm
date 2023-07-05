@@ -1,5 +1,6 @@
 module PhysicsInteraction exposing
-    ( isColliding
+    ( HasPhysics
+    , isColliding
     , resolveCollision
     )
 
@@ -34,6 +35,7 @@ isColliding action targets entity =
 resolveCollision : List (HasPhysics a) -> HasPhysics b -> HasPhysics b
 resolveCollision targets entity =
     let
+        resolve : Physics -> HasPhysics b -> HasPhysics b
         resolve res e =
             e
                 |> (\a -> { a | physics = Engine.Physics.resolveCollision res a.physics })

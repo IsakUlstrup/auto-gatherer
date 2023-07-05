@@ -7,7 +7,6 @@ module Engine.Physics exposing
     , isCollidingList
     , move
     , resolveCollision
-    , reverseVelocity
     , stopIfSlow
     )
 
@@ -79,11 +78,6 @@ applyForce force physics =
         | acceleration =
             Engine.Vector2.add physics.acceleration force
     }
-
-
-reverseVelocity : Physics -> Physics
-reverseVelocity physics =
-    { physics | velocity = Engine.Vector2.negate physics.velocity }
 
 
 

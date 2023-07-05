@@ -5,7 +5,6 @@ module Engine.Vector2 exposing
     , distance
     , magnitude
     , multiply
-    , negate
     , new
     , scale
     , singleton
@@ -35,11 +34,6 @@ singleton n =
 zero : Vector2
 zero =
     Vector2 0 0
-
-
-negate : Vector2 -> Vector2
-negate vector =
-    scale -1 vector
 
 
 multiply : Vector2 -> Vector2 -> Vector2

@@ -1,4 +1,13 @@
-module Resource exposing (Resource, collideables, handleHit, hit, hitCooldown, isExhausted, isHit, newResource, tickState)
+module Resource exposing
+    ( Resource
+    , ResourceState
+    , collideables
+    , handleHit
+    , isExhausted
+    , isHit
+    , newResource
+    , tickState
+    )
 
 import Engine.Physics exposing (Physics)
 

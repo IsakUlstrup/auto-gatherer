@@ -1,4 +1,4 @@
-module Physics exposing (..)
+module Physics exposing (collision)
 
 import Engine.Physics as Physics
 import Expect
