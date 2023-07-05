@@ -1,6 +1,6 @@
 module Resource exposing (Resource, hitCooldown, newResource, tickState)
 
-import Physics exposing (Physics)
+import Engine.Physics exposing (Physics)
 
 
 type alias Resource =
@@ -11,7 +11,7 @@ type alias Resource =
 
 newResource : Float -> Float -> Resource
 newResource x y =
-    Resource (Physics.initPhysics x y 25) 0
+    Resource (Engine.Physics.initPhysics x y 25) 0
 
 
 hitCooldown : Resource -> Resource

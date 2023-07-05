@@ -1,4 +1,4 @@
-module Physics exposing
+module Engine.Physics exposing
     ( Physics
     , applyForce
     , applyFriction
@@ -11,7 +11,7 @@ module Physics exposing
     , stopIfSlow
     )
 
-import Vector2 exposing (Vector2)
+import Engine.Vector2 exposing (Vector2)
 
 
 type alias Physics =
@@ -28,9 +28,9 @@ type alias Physics =
 
 initPhysics : Float -> Float -> Float -> Physics
 initPhysics x y radius =
-    Physics (Vector2.new x y)
-        (Vector2.new 0 0)
-        (Vector2.new 0 0)
+    Physics (Engine.Vector2.new x y)
+        (Engine.Vector2.new 0 0)
+        (Engine.Vector2.new 0 0)
         radius
 
 
@@ -40,14 +40,14 @@ initPhysics x y radius =
 
 resetAcceleration : Physics -> Physics
 resetAcceleration physics =
-    { physics | acceleration = Vector2.zero }
+    { physics | acceleration = Engine.Vector2.zero }
 
 
 move : Float -> Physics -> Physics
 move dt phys =
     { phys
-        | velocity = Vector2.add phys.velocity phys.acceleration
-        , position = Vector2.add phys.position (Vector2.scale dt phys.velocity)
+        | velocity = Engine.Vector2.add phys.velocity phys.acceleration
+        , position = Engine.Vector2.add phys.position (Engine.Vector2.scale dt phys.velocity)
     }
         |> resetAcceleration
 
@@ -59,15 +59,15 @@ setPosition pos physics =
 
 applyFriction : Float -> Physics -> Physics
 applyFriction friction physics =
-    { physics | velocity = Vector2.scale friction physics.velocity }
+    { physics | velocity = Engine.Vector2.scale friction physics.velocity }
 
 
 {-| Set velocity to zero if it's magnitude is below a given limit
 -}
 stopIfSlow : Float -> Physics -> Physics
 stopIfSlow limit physics =
-    if Vector2.magnitude physics.velocity < limit then
-        { physics | velocity = Vector2.zero }
+    if Engine.Vector2.magnitude physics.velocity < limit then
+        { physics | velocity = Engine.Vector2.zero }
 
     else
         physics
@@ -77,13 +77,13 @@ applyForce : Vector2 -> Physics -> Physics
 applyForce force physics =
     { physics
         | acceleration =
-            Vector2.add physics.acceleration force
+            Engine.Vector2.add physics.acceleration force
     }
 
 
 reverseVelocity : Physics -> Physics
 reverseVelocity physics =
-    { physics | velocity = Vector2.negate physics.velocity }
+    { physics | velocity = Engine.Vector2.negate physics.velocity }
 
 
 
@@ -95,7 +95,7 @@ isColliding physics target =
     let
         dist : Vector2
         dist =
-            Vector2.subtract physics.position target.position
+            Engine.Vector2.subtract physics.position target.position
 
         sumRadii : Float
         sumRadii =
@@ -117,9 +117,9 @@ resolveCollision target physics =
     let
         pos : Vector2
         pos =
-            Vector2.add
-                (Vector2.singleton (physics.radius + target.radius)
-                    |> Vector2.multiply (Vector2.direction target.position physics.position)
+            Engine.Vector2.add
+                (Engine.Vector2.singleton (physics.radius + target.radius)
+                    |> Engine.Vector2.multiply (Engine.Vector2.direction target.position physics.position)
                 )
                 target.position
     in

@@ -1,4 +1,4 @@
-module Vector2 exposing
+module Engine.Vector2 exposing
     ( Vector2
     , add
     , direction

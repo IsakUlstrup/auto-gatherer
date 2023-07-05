@@ -4,13 +4,13 @@ import Animal exposing (Animal)
 import Browser
 import Browser.Events
 import Console exposing (Console)
+import Engine.Physics exposing (Physics)
+import Engine.Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
-import Physics exposing (Physics)
 import PhysicsInteraction
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
-import Vector2 exposing (Vector2)
 
 
 

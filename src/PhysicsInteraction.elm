@@ -3,8 +3,8 @@ module PhysicsInteraction exposing
     , resolveCollision
     )
 
-import Physics exposing (Physics)
-import Vector2
+import Engine.Physics exposing (Physics)
+import Engine.Vector2
 
 
 type alias HasPhysics a =
@@ -18,7 +18,7 @@ isColliding action targets entity =
     let
         collision : Bool
         collision =
-            Physics.isCollidingList
+            Engine.Physics.isCollidingList
                 (List.map .physics targets)
                 entity.physics
     in
@@ -36,10 +36,10 @@ resolveCollision targets entity =
     let
         resolve res e =
             e
-                |> (\a -> { a | physics = Physics.resolveCollision res a.physics })
-                |> (\a -> { a | physics = Physics.applyForce (Vector2.direction res.position entity.physics.position |> Vector2.scale 0.5) a.physics })
+                |> (\a -> { a | physics = Engine.Physics.resolveCollision res a.physics })
+                |> (\a -> { a | physics = Engine.Physics.applyForce (Engine.Vector2.direction res.position entity.physics.position |> Engine.Vector2.scale 0.5) a.physics })
     in
     targets
         |> List.map .physics
-        |> List.filter (Physics.isColliding entity.physics)
+        |> List.filter (Engine.Physics.isColliding entity.physics)
         |> List.foldl resolve entity
