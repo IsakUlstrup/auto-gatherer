@@ -87,7 +87,7 @@ update msg model =
                 |> updateAnimals (Animal.moveToNearest model.resources)
                 |> updateAnimals (Animal.moveAnimal dt)
                 |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) model.resources)
-                |> updateResources (PhysicsInteraction.isColliding Resource.hitCooldown model.animals)
+                |> updateResources (PhysicsInteraction.isColliding (Resource.hitCooldown >> Resource.hit) model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision model.resources)
                 |> updateResources (Resource.tickState dt)
                 |> updateAnimals (Animal.tickState dt)
@@ -171,6 +171,7 @@ viewResource resource =
             [ ( "entity", True )
             , ( "resource", True )
             , ( "hit", resource.hitCooldown /= 0 )
+            , ( "exhausted", Resource.isExhausted resource )
             ]
         ]
         resource.physics

@@ -31,5 +31,8 @@ main
     .resource
         fill: $resource_color
 
+        &.exhausted
+            fill: desaturate($resource_color, 40 )
+
         &.hit
             fill: white
