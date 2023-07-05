@@ -28,10 +28,11 @@ initConsole : Console Msg
 initConsole =
     Console.new
         |> Console.addMessage "Add resource"
-            (Console.constructor2
+            (Console.constructor3
                 AddResource
                 (Console.argFloat "x")
                 (Console.argFloat "y")
+                (Console.argFloat "radius")
             )
         |> Console.addMessage "Add animal"
             (Console.constructor3
@@ -56,11 +57,11 @@ init _ =
         , Animal.new -20 40 0.09
         , Animal.new 30 -20 0.02
         ]
-        [ Resource.newResource -10 -180
-        , Resource.newResource 160 20
-        , Resource.newResource 165 -10
-        , Resource.newResource -250 70
-        , Resource.newResource -10 120
+        [ Resource.new -10 -180 40
+        , Resource.new 165 -10 20
+        , Resource.new 160 20 30
+        , Resource.new -250 70 25
+        , Resource.new -10 120 32
         ]
         initConsole
     , Cmd.none
@@ -73,7 +74,7 @@ init _ =
 
 type Msg
     = Tick Float
-    | AddResource Float Float
+    | AddResource Float Float Float
     | AddAnimal Float Float Float
     | RechargeAnimals
     | RemoveResources
@@ -111,8 +112,8 @@ update msg model =
             , Cmd.none
             )
 
-        AddResource x y ->
-            ( { model | resources = Resource.newResource x y :: model.resources }, Cmd.none )
+        AddResource x y radius ->
+            ( { model | resources = Resource.new x y radius :: model.resources }, Cmd.none )
 
         AddAnimal x y speed ->
             ( { model | animals = Animal.new x y speed :: model.animals }, Cmd.none )

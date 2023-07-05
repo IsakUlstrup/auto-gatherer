@@ -5,7 +5,7 @@ module Resource exposing
     , handleHit
     , isExhausted
     , isHit
-    , newResource
+    , new
     , tickState
     )
 
@@ -24,9 +24,9 @@ type alias Resource =
     }
 
 
-newResource : Float -> Float -> Resource
-newResource x y =
-    Resource (Engine.Physics.initPhysics x y 25) 0 (Ready 10)
+new : Float -> Float -> Float -> Resource
+new x y radius =
+    Resource (Engine.Physics.initPhysics x y radius) 0 (Ready 10)
 
 
 hitCooldown : Resource -> Resource
