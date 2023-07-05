@@ -97,7 +97,7 @@ update msg model =
                     Resource.collideables model.resources
             in
             ( model
-                |> updateAnimals (Animal.moveToNearest collideableResources)
+                |> updateAnimals (Animal.movementAi collideableResources)
                 |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources)
                 |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)

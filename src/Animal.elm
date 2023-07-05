@@ -4,7 +4,7 @@ module Animal exposing
     , exhaustedSort
     , isExhausted
     , moveAnimal
-    , moveToNearest
+    , movementAi
     , newAnimal
     , removeStamina
     , restAnimal
@@ -124,26 +124,33 @@ derivedMovementSpeed animal =
             animal.moveSpeed * 0.5
 
 
+moveHome : Animal -> Animal
+moveHome animal =
+    applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
+
+
 moveToNearest : List { a | physics : Physics } -> Animal -> Animal
 moveToNearest resources animal =
+    let
+        nearest : Maybe Vector2
+        nearest =
+            resources
+                |> List.map (.physics >> .position)
+                |> List.sortBy (Engine.Vector2.distance animal.physics.position)
+                |> List.head
+    in
+    case nearest of
+        Just r ->
+            applyForceToAnimal (Engine.Vector2.direction animal.physics.position r |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
+
+        Nothing ->
+            moveHome animal
+
+
+movementAi : List { a | physics : Physics } -> Animal -> Animal
+movementAi resources animal =
     if not <| isExhausted animal then
-        let
-            nearest : Maybe Vector2
-            nearest =
-                resources
-                    |> List.map (.physics >> .position)
-                    |> List.sortBy (Engine.Vector2.distance animal.physics.position)
-                    |> List.head
-        in
-        case nearest of
-            Just r ->
-                applyForceToAnimal (Engine.Vector2.direction animal.physics.position r |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
-
-            Nothing ->
-                applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
-
-    else if Engine.Vector2.distance animal.physics.position Engine.Vector2.zero > 20 then
-        applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
+        moveToNearest resources animal
 
     else
-        animal
+        moveHome animal
