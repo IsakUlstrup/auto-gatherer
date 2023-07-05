@@ -111,5 +111,8 @@ moveToNearest resources animal =
             Nothing ->
                 animal
 
+    else if Engine.Vector2.distance animal.physics.position Engine.Vector2.zero > 20 then
+        applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale animal.moveSpeed) animal
+
     else
         animal
