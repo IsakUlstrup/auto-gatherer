@@ -231,6 +231,18 @@ viewResource resource =
         resource.physics
 
 
+viewHome : Vector2 -> Svg msg
+viewHome position =
+    Svg.circle
+        [ Svg.Attributes.transform <| transformString position
+        , Svg.Attributes.cx "0"
+        , Svg.Attributes.cy "0"
+        , Svg.Attributes.r <| String.fromFloat 10
+        , Svg.Attributes.class "home"
+        ]
+        []
+
+
 view : Model -> Html Msg
 view model =
     main_ []
@@ -241,6 +253,7 @@ view model =
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
             [ Svg.g [] (List.map viewResource model.resources)
+            , viewHome model.homePosition
             , Svg.g []
                 (model.animals
                     |> List.sortWith Animal.exhaustedSort
