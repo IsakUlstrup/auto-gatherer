@@ -43,16 +43,14 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         [ Animal.newAnimal 0 0 0.01
-
-        -- , Animal.newAnimal 20 -20 0.05
-        -- , Animal.newAnimal -20 40 0.09
-        -- , Animal.newAnimal 30 -20 0.02
+        , Animal.newAnimal 20 -20 0.05
+        , Animal.newAnimal -20 40 0.09
+        , Animal.newAnimal 30 -20 0.02
         ]
         [ Resource.newResource -10 -80
-
-        -- , Resource.newResource -100 100
-        -- , Resource.newResource -150 50
-        -- , Resource.newResource -10 100
+        , Resource.newResource -100 100
+        , Resource.newResource -150 50
+        , Resource.newResource -10 100
         ]
         initConsole
     , Cmd.none
@@ -92,12 +90,12 @@ update msg model =
             in
             ( model
                 |> updateAnimals (Animal.moveToNearest collideableResources)
-                |> updateAnimals (Animal.moveAnimal dt)
                 |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources)
                 |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)
                 |> updateResources (Resource.tickState dt)
                 |> updateAnimals (Animal.tickState dt)
+                |> updateAnimals (Animal.moveAnimal dt)
             , Cmd.none
             )
 
