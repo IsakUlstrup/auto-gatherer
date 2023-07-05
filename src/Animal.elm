@@ -97,6 +97,16 @@ tickState dt animal =
            )
 
 
+derivedMovementSpeed : Animal -> Float
+derivedMovementSpeed animal =
+    case animal.state of
+        Ready _ ->
+            animal.moveSpeed
+
+        Exhausted _ ->
+            animal.moveSpeed * 0.5
+
+
 moveToNearest : List { a | physics : Physics } -> Animal -> Animal
 moveToNearest resources animal =
     if not <| isExhausted animal then
@@ -110,13 +120,13 @@ moveToNearest resources animal =
         in
         case nearest of
             Just r ->
-                applyForceToAnimal (Engine.Vector2.direction animal.physics.position r |> Engine.Vector2.scale animal.moveSpeed) animal
+                applyForceToAnimal (Engine.Vector2.direction animal.physics.position r |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
 
             Nothing ->
-                animal
+                applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
 
     else if Engine.Vector2.distance animal.physics.position Engine.Vector2.zero > 20 then
-        applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale animal.moveSpeed) animal
+        applyForceToAnimal (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
 
     else
         animal
