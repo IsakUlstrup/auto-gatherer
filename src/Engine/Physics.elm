@@ -72,6 +72,11 @@ stopIfSlow limit physics =
         physics
 
 
+stop : Physics -> Physics
+stop physics =
+    { physics | velocity = Engine.Vector2.zero }
+
+
 applyForce : Vector2 -> Physics -> Physics
 applyForce force physics =
     { physics
@@ -117,4 +122,4 @@ resolveCollision target physics =
                 )
                 target.position
     in
-    setPosition pos physics
+    setPosition pos physics |> stop
