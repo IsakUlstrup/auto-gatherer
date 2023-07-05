@@ -5,7 +5,7 @@ import Browser
 import Browser.Events
 import Console exposing (Console)
 import Engine.Physics exposing (Physics)
-import Engine.Vector2 exposing (Vector2)
+import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
 import PhysicsInteraction
 import Resource exposing (Resource)
@@ -21,6 +21,7 @@ type alias Model =
     { animals : List Animal
     , resources : List Resource
     , console : Console Msg
+    , homePosition : Vector2
     }
 
 
@@ -33,6 +34,12 @@ initConsole =
                 (Console.argFloat "x")
                 (Console.argFloat "y")
                 (Console.argFloat "radius")
+            )
+        |> Console.addMessage "Set home position"
+            (Console.constructor2
+                SetHome
+                (Console.argFloat "x")
+                (Console.argFloat "y")
             )
         |> Console.addMessage "Add animal"
             (Console.constructor3
@@ -64,6 +71,7 @@ init _ =
         , Resource.new -10 120 32
         ]
         initConsole
+        Vector2.zero
     , Cmd.none
     )
 
@@ -76,6 +84,7 @@ type Msg
     = Tick Float
     | AddResource Float Float Float
     | AddAnimal Float Float Float
+    | SetHome Float Float
     | RechargeAnimals
     | RemoveResources
     | Reset
@@ -102,7 +111,7 @@ update msg model =
                     Resource.collideables model.resources
             in
             ( model
-                |> updateAnimals (Animal.movementAi collideableResources)
+                |> updateAnimals (Animal.movementAi model.homePosition collideableResources)
                 |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources)
                 |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)
@@ -117,6 +126,9 @@ update msg model =
 
         AddAnimal x y speed ->
             ( { model | animals = Animal.new x y speed :: model.animals }, Cmd.none )
+
+        SetHome x y ->
+            ( { model | homePosition = Vector2.new x y }, Cmd.none )
 
         RechargeAnimals ->
             ( { model | animals = List.map Animal.rest model.animals }, Cmd.none )

@@ -156,9 +156,9 @@ derivedMovementSpeed animal =
 
 {-| Apply force towards home
 -}
-moveHome : Animal -> Animal
-moveHome animal =
-    applyForce (Engine.Vector2.direction animal.physics.position Engine.Vector2.zero |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
+moveHome : Vector2 -> Animal -> Animal
+moveHome home animal =
+    applyForce (Engine.Vector2.direction animal.physics.position home |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
 
 
 {-| Apply force towards nearest resource
@@ -166,8 +166,8 @@ moveHome animal =
 If none are present, move home
 
 -}
-moveToNearest : List { a | physics : Physics } -> Animal -> Animal
-moveToNearest resources animal =
+moveToNearest : Vector2 -> List { a | physics : Physics } -> Animal -> Animal
+moveToNearest home resources animal =
     let
         nearest : Maybe Vector2
         nearest =
@@ -185,7 +185,7 @@ moveToNearest resources animal =
             applyForce (force r) animal
 
         Nothing ->
-            moveHome animal
+            moveHome home animal
 
 
 {-| Main movement AI
@@ -193,10 +193,10 @@ moveToNearest resources animal =
 Move towards closest resource if animal has stamina, otherwise move home
 
 -}
-movementAi : List { a | physics : Physics } -> Animal -> Animal
-movementAi resources animal =
+movementAi : Vector2 -> List { a | physics : Physics } -> Animal -> Animal
+movementAi home resources animal =
     if not <| isExhausted animal then
-        moveToNearest resources animal
+        moveToNearest home resources animal
 
     else
-        moveHome animal
+        moveHome home animal
