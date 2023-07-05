@@ -1,4 +1,4 @@
-module Resource exposing (Resource, hit, hitCooldown, isExhausted, newResource, tickState)
+module Resource exposing (Resource, collideables, handleHit, hit, hitCooldown, isExhausted, newResource, tickState)
 
 import Engine.Physics exposing (Physics)
 
@@ -52,6 +52,15 @@ hit resource =
             resource
 
 
+handleHit : Resource -> Resource
+handleHit resource =
+    if isExhausted resource then
+        resource
+
+    else
+        resource |> hitCooldown |> hit
+
+
 tickState : Float -> Resource -> Resource
 tickState dt resource =
     case resource.state of
@@ -64,3 +73,8 @@ tickState dt resource =
 
             else
                 { resource | hitCooldown = max 0 (resource.hitCooldown - dt), state = Exhausted (cd - dt) }
+
+
+collideables : List Resource -> List Resource
+collideables resources =
+    List.filter (isExhausted >> not) resources
