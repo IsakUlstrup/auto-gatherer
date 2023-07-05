@@ -221,7 +221,11 @@ view model =
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
             [ Svg.g [] (List.map viewResource model.resources)
-            , Svg.g [] (List.map viewAnimal model.animals)
+            , Svg.g []
+                (model.animals
+                    |> List.sortWith Animal.exhaustedSort
+                    |> List.map viewAnimal
+                )
             ]
         ]
 

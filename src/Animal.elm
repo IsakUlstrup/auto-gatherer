@@ -1,6 +1,7 @@
 module Animal exposing
     ( Animal
     , AnimalState
+    , exhaustedSort
     , isExhausted
     , moveAnimal
     , moveToNearest
@@ -64,6 +65,22 @@ isExhausted animal =
 
         Exhausted _ ->
             True
+
+
+exhaustedSort : Animal -> Animal -> Order
+exhaustedSort a1 a2 =
+    case ( a1.state, a2.state ) of
+        ( Ready _, Ready _ ) ->
+            EQ
+
+        ( Exhausted _, Ready _ ) ->
+            LT
+
+        ( Ready _, Exhausted _ ) ->
+            GT
+
+        ( Exhausted _, Exhausted _ ) ->
+            EQ
 
 
 removeStamina : Int -> Animal -> Animal
