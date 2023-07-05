@@ -10,7 +10,9 @@ module Console exposing
     , argInt
     , argString
     , constructor
+    , constructor1
     , constructor2
+    , constructor3
     , new
     , update
     , viewConsole
@@ -41,9 +43,19 @@ constructor c =
     Constructor c
 
 
+constructor1 : (a -> b) -> ((a -> Message b) -> c) -> c
+constructor1 c x =
+    x <| \a -> constructor <| c a
+
+
 constructor2 : (a -> b -> c) -> ((a -> d) -> e) -> ((b -> Message c) -> d) -> e
 constructor2 c x y =
     x <| \a -> y <| \b -> constructor <| c a b
+
+
+constructor3 : (a -> b -> c -> d) -> ((a -> e) -> f) -> ((b -> g) -> e) -> ((c -> Message d) -> g) -> f
+constructor3 c x y z =
+    x <| \a -> y <| \b -> z <| \d -> constructor <| c a b d
 
 
 argInt : String -> (Int -> Message a) -> Message a
@@ -404,6 +416,8 @@ selectors =
         , ( "display", "flex" )
         , ( "gap", "0.5rem" )
         , ( "font-family", "monospace" )
+        , ( "font-size", "16px" )
+        , ( "color", "#262626" )
         , ( "background-color", "rgba(200, 200, 200, 0.5)" )
         ]
       )
@@ -429,8 +443,8 @@ selectors =
     , ( ".console .message-presets"
       , [ ( "position", "absolute" )
         , ( "top", "3rem" )
-        , ( "left", "3rem" )
-        , ( "right", "3rem" )
+        , ( "left", "0.5rem" )
+        , ( "right", "0.5rem" )
         , ( "list-style", "none" )
         , ( "background-color", "rgba(200, 200, 200, 0.5)" )
         ]
@@ -491,12 +505,6 @@ viewConsole console =
                 form [ class "filter", class "console" ]
                     [ div [ class "filter-input" ]
                         [ input
-                            [ value "x"
-                            , type_ "button"
-                            , onClick <| SetFilter ""
-                            ]
-                            []
-                        , input
                             [ onInput <| SetFilter
                             , value f
                             , type_ "search"
