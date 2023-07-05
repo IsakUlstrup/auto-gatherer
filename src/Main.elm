@@ -177,22 +177,22 @@ viewAnimal animal =
                 , Svg.Attributes.cy <| String.fromFloat p.y
                 , Svg.Attributes.r <| String.fromInt <| 20 - i
                 , Svg.Attributes.fillOpacity <| String.fromInt <| 100 - (i * 3)
-                , Svg.Attributes.class "trail"
                 ]
                 []
     in
-    Svg.g []
-        [ Svg.g [] (animal.trail |> List.indexedMap viewTrail)
+    Svg.g
+        [ svgClassList
+            [ ( "entity", True )
+            , ( "animal", True )
+            , ( "exhausted", Animal.isExhausted animal )
+            ]
+        ]
+        [ Svg.g [ Svg.Attributes.class "trail" ] (animal.trail |> List.indexedMap viewTrail)
         , Svg.circle
             [ Svg.Attributes.transform <| transformString animal.physics.position
             , Svg.Attributes.cx "0"
             , Svg.Attributes.cy "0"
             , Svg.Attributes.r <| String.fromFloat <| animal.physics.radius
-            , svgClassList
-                [ ( "entity", True )
-                , ( "animal", True )
-                , ( "exhausted", Animal.isExhausted animal )
-                ]
             ]
             []
         ]
