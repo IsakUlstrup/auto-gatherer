@@ -416,7 +416,7 @@ selectors =
         , ( "display", "flex" )
         , ( "gap", "0.5rem" )
         , ( "font-family", "monospace" )
-        , ( "font-size", "16px" )
+        , ( "font-size", "14px" )
         , ( "color", "#262626" )
         , ( "background-color", "rgba(200, 200, 200, 0.5)" )
         ]
@@ -429,7 +429,9 @@ selectors =
       , [ ( "border-top", "1px solid grey" ) ]
       )
     , ( ".console input"
-      , [ ( "padding", "0.5rem" ) ]
+      , [ ( "padding", "0.5rem" )
+        , ( "font-size", "16px" )
+        ]
       )
     , ( ".console input[type=search]"
       , [ ( "flex", "auto" ) ]
