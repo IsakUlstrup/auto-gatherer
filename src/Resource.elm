@@ -1,4 +1,4 @@
-module Resource exposing (Resource, isColliding, newResource, tickState)
+module Resource exposing (Resource, hitCooldown, newResource, tickState)
 
 import Physics exposing (Physics)
 
@@ -14,20 +14,9 @@ newResource x y =
     Resource (Physics.initPhysics x y 25) 0
 
 
-isColliding : List { a | physics : Physics.Physics } -> Resource -> Resource
-isColliding animals resource =
-    let
-        collision : Bool
-        collision =
-            Physics.isCollidingList
-                (List.map .physics animals)
-                resource.physics
-    in
-    if collision then
-        { resource | hitCooldown = 200 }
-
-    else
-        resource
+hitCooldown : Resource -> Resource
+hitCooldown resource =
+    { resource | hitCooldown = 200 }
 
 
 tickState : Float -> Resource -> Resource

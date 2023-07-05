@@ -6,6 +6,7 @@ import Browser.Events
 import Console exposing (Console)
 import Html exposing (Html, main_)
 import Physics exposing (Physics)
+import PhysicsInteraction
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -85,9 +86,9 @@ update msg model =
             ( model
                 |> updateAnimals (Animal.moveToNearest model.resources)
                 |> updateAnimals (Animal.moveAnimal dt)
-                |> updateAnimals (Animal.isColliding model.resources)
-                |> updateResources (Resource.isColliding model.animals)
-                |> updateAnimals (Animal.animalCollision model.resources)
+                |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) model.resources)
+                |> updateResources (PhysicsInteraction.isColliding Resource.hitCooldown model.animals)
+                |> updateAnimals (PhysicsInteraction.resolveCollision model.resources)
                 |> updateResources (Resource.tickState dt)
                 |> updateAnimals (Animal.tickState dt)
             , Cmd.none

@@ -1,12 +1,11 @@
 module Animal exposing
     ( Animal
     , AnimalState
-    , animalCollision
-    , isColliding
     , isExhausted
     , moveAnimal
     , moveToNearest
     , newAnimal
+    , removeStamina
     , restAnimal
     , tickState
     )
@@ -114,38 +113,3 @@ moveToNearest resources animal =
 
     else
         animal
-
-
-{-| Detect collisions and remove stamina
--}
-isColliding : List { a | physics : Physics.Physics } -> Animal -> Animal
-isColliding resources animal =
-    let
-        collision : Bool
-        collision =
-            Physics.isCollidingList
-                (List.map .physics resources)
-                animal.physics
-    in
-    if collision then
-        removeStamina 1 animal
-
-    else
-        animal
-
-
-{-| Detect and react to collisions
--}
-animalCollision : List { a | physics : Physics.Physics } -> Animal -> Animal
-animalCollision resources animal =
-    let
-        resolveCollision : Physics -> Animal -> Animal
-        resolveCollision res anml =
-            anml
-                |> (\a -> { a | physics = Physics.resolveCollision res a.physics })
-                |> applyForceToAnimal (Vector2.direction res.position animal.physics.position |> Vector2.scale 0.5)
-    in
-    resources
-        |> List.map .physics
-        |> List.filter (Physics.isColliding animal.physics)
-        |> List.foldl resolveCollision animal
