@@ -92,47 +92,77 @@ type Msg
     | ConsoleMsg (Console.ConsoleMsg Msg)
 
 
-updateAnimals : (Animal -> Animal) -> Model -> Model
-updateAnimals f model =
-    { model | animals = List.map f model.animals }
+forces : Model -> Model
+forces model =
+    let
+        collideableResources : List Resource
+        collideableResources =
+            Resource.collideables model.resources
+    in
+    { model
+        | animals = List.map (Animal.movementAi model.player.physics.position collideableResources) model.animals
+        , resources = List.map Resource.movementAi model.resources
+        , player = Player.moveAi model.player
+    }
 
 
-updateResources : (Resource -> Resource) -> Model -> Model
-updateResources f model =
-    { model | resources = List.map f model.resources }
+movement : Float -> Model -> Model
+movement dt model =
+    { model
+        | animals = List.map (Animal.movement 0.93 dt) model.animals
+        , resources = List.map (Resource.move dt) model.resources
+        , player = Player.move dt model.player
+    }
 
 
-updatePlayer : (Player -> Player) -> Model -> Model
-updatePlayer f model =
-    { model | player = f model.player }
+collisionInteraction : Model -> Model
+collisionInteraction model =
+    let
+        collideableResources : List Resource
+        collideableResources =
+            Resource.collideables model.resources
+    in
+    { model
+        | animals = List.map (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources) model.animals
+        , resources = List.map (PhysicsInteraction.isColliding Resource.handleHit model.animals) model.resources
+    }
+
+
+collisionResolution : Model -> Model
+collisionResolution model =
+    let
+        collideableResources : List Resource
+        collideableResources =
+            Resource.collideables model.resources
+
+        collideadbleAnimals : List Animal
+        collideadbleAnimals =
+            model.animals |> List.filter (Animal.isExhausted >> not)
+    in
+    { model
+        | animals = List.map (PhysicsInteraction.resolveCollision collideableResources) model.animals
+        , resources = List.map (PhysicsInteraction.resolveCollision collideadbleAnimals) model.resources
+    }
+
+
+stateUpdate : Float -> Model -> Model
+stateUpdate dt model =
+    { model
+        | animals = List.map (Animal.update dt) model.animals
+        , resources = List.map (Resource.tickState dt) model.resources
+    }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            let
-                collideableResources : List Resource
-                collideableResources =
-                    Resource.collideables model.resources
-
-                collideadbleAnimals : List Animal
-                collideadbleAnimals =
-                    model.animals |> List.filter (Animal.isExhausted >> not)
-            in
             ( model
-                |> updatePlayer Player.moveAi
-                |> updatePlayer (Player.move dt)
-                |> updateAnimals (Animal.movementAi model.player.physics.position collideableResources)
-                |> updateResources Resource.movementAi
-                |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources)
-                |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
-                |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)
-                |> updateResources (PhysicsInteraction.resolveCollision collideadbleAnimals)
-                |> updateResources (Resource.move dt)
-                |> updateAnimals (Animal.movement 0.93 dt)
-                |> updateResources (Resource.tickState dt)
-                |> updateAnimals (Animal.update dt)
+                |> forces
+                |> movement dt
+                |> collisionInteraction
+                |> collisionResolution
+                |> stateUpdate dt
             , Cmd.none
             )
 
