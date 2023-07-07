@@ -7,12 +7,13 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 type alias Player =
     { physics : Physics
     , target : Vector2
+    , movementSpeed : Float
     }
 
 
 new : Player
 new =
-    Player (Physics.initPhysics 0 0 20) Vector2.zero
+    Player (Physics.initPhysics 0 0 20) Vector2.zero 0.01
 
 
 setTarget : Vector2 -> Player -> Player
@@ -27,7 +28,7 @@ moveAi player =
             Vector2.direction player.physics.position player.target
     in
     player
-        |> (\p -> { p | physics = Physics.applyForce (force |> Vector2.scale 0.02) p.physics })
+        |> (\p -> { p | physics = Physics.applyForce (force |> Vector2.scale player.movementSpeed) p.physics })
 
 
 move : Float -> Player -> Player
