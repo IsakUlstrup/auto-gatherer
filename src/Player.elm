@@ -13,7 +13,7 @@ type alias Player =
 
 new : Player
 new =
-    Player (Physics.initPhysics 0 0 20) Vector2.zero 0.01
+    Player (Physics.initPhysics 0 0 20) Vector2.zero 0.02
 
 
 setTarget : Vector2 -> Player -> Player
@@ -25,7 +25,11 @@ moveAi : Player -> Player
 moveAi player =
     let
         force =
-            Vector2.direction player.physics.position player.target
+            if Vector2.distance player.physics.position player.target < 5 then
+                Vector2.zero
+
+            else
+                Vector2.direction player.physics.position player.target
     in
     player
         |> (\p -> { p | physics = Physics.applyForce (force |> Vector2.scale player.movementSpeed) p.physics })
