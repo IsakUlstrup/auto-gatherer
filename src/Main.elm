@@ -115,17 +115,24 @@ update msg model =
                 collideableResources : List Resource
                 collideableResources =
                     Resource.collideables model.resources
+
+                collideadbleAnimals : List Animal
+                collideadbleAnimals =
+                    model.animals |> List.filter (Animal.isExhausted >> not)
             in
             ( model
                 |> updatePlayer Player.moveAi
                 |> updatePlayer (Player.move dt)
                 |> updateAnimals (Animal.movementAi model.player.physics.position collideableResources)
+                |> updateResources Resource.movementAi
                 |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources)
                 |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)
+                |> updateResources (PhysicsInteraction.resolveCollision collideadbleAnimals)
+                |> updateResources (Resource.move dt)
+                |> updateAnimals (Animal.movement 0.93 dt)
                 |> updateResources (Resource.tickState dt)
                 |> updateAnimals (Animal.update dt)
-                |> updateAnimals (Animal.movement 0.93 dt)
             , Cmd.none
             )
 

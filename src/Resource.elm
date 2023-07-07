@@ -5,11 +5,14 @@ module Resource exposing
     , handleHit
     , isExhausted
     , isHit
+    , move
+    , movementAi
     , new
     , tickState
     )
 
 import Engine.Physics exposing (Physics)
+import Engine.Vector2 exposing (Vector2)
 
 
 type ResourceState
@@ -21,12 +24,13 @@ type alias Resource =
     { physics : Physics
     , hitCooldown : Float
     , state : ResourceState
+    , startPosition : Vector2
     }
 
 
 new : Float -> Float -> Float -> Resource
 new x y radius =
-    Resource (Engine.Physics.initPhysics x y radius) 0 (Ready 10)
+    Resource (Engine.Physics.initPhysics x y radius) 0 (Ready 10) (Engine.Vector2.new x y)
 
 
 hitCooldown : Resource -> Resource
@@ -92,3 +96,26 @@ tickState dt resource =
 collideables : List Resource -> List Resource
 collideables resources =
     List.filter (isExhausted >> not) resources
+
+
+movementAi : Resource -> Resource
+movementAi resource =
+    let
+        force =
+            if Engine.Vector2.distance resource.physics.position resource.startPosition < 5 then
+                Engine.Vector2.zero
+
+            else
+                Engine.Vector2.direction resource.physics.position resource.startPosition |> Engine.Vector2.scale 0.05
+    in
+    { resource | physics = Engine.Physics.applyForce force resource.physics }
+
+
+move : Float -> Resource -> Resource
+move dt resource =
+    { resource
+        | physics =
+            resource.physics
+                |> Engine.Physics.move dt
+                |> Engine.Physics.applyFriction 0.8
+    }
