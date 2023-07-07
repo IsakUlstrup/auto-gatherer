@@ -8,6 +8,7 @@ import Engine.Physics exposing (Physics)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
 import PhysicsInteraction
+import Player exposing (Player)
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -21,7 +22,7 @@ type alias Model =
     { animals : List Animal
     , resources : List Resource
     , console : Console Msg
-    , homePosition : Vector2
+    , player : Player
     }
 
 
@@ -35,9 +36,9 @@ initConsole =
                 (Console.argFloat "y")
                 (Console.argFloat "radius")
             )
-        |> Console.addMessage "Set home position"
+        |> Console.addMessage "Set player target"
             (Console.constructor2
-                SetHome
+                SetPlayerTarget
                 (Console.argFloat "x")
                 (Console.argFloat "y")
             )
@@ -71,7 +72,7 @@ init _ =
         , Resource.new -10 120 32
         ]
         initConsole
-        Vector2.zero
+        Player.new
     , Cmd.none
     )
 
@@ -84,7 +85,7 @@ type Msg
     = Tick Float
     | AddResource Float Float Float
     | AddAnimal Float Float Float
-    | SetHome Float Float
+    | SetPlayerTarget Float Float
     | RechargeAnimals
     | RemoveResources
     | Reset
@@ -101,6 +102,11 @@ updateResources f model =
     { model | resources = List.map f model.resources }
 
 
+updatePlayer : (Player -> Player) -> Model -> Model
+updatePlayer f model =
+    { model | player = f model.player }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -111,7 +117,9 @@ update msg model =
                     Resource.collideables model.resources
             in
             ( model
-                |> updateAnimals (Animal.movementAi model.homePosition collideableResources)
+                |> updatePlayer Player.moveAi
+                |> updatePlayer (Player.move dt)
+                |> updateAnimals (Animal.movementAi model.player.physics.position collideableResources)
                 |> updateAnimals (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources)
                 |> updateResources (PhysicsInteraction.isColliding Resource.handleHit model.animals)
                 |> updateAnimals (PhysicsInteraction.resolveCollision collideableResources)
@@ -127,8 +135,8 @@ update msg model =
         AddAnimal x y speed ->
             ( { model | animals = Animal.new x y speed :: model.animals }, Cmd.none )
 
-        SetHome x y ->
-            ( { model | homePosition = Vector2.new x y }, Cmd.none )
+        SetPlayerTarget x y ->
+            ( { model | player = Player.setTarget (Vector2.new x y) model.player }, Cmd.none )
 
         RechargeAnimals ->
             ( { model | animals = List.map Animal.rest model.animals }, Cmd.none )
@@ -231,13 +239,13 @@ viewResource resource =
         resource.physics
 
 
-viewHome : Vector2 -> Svg msg
-viewHome position =
+viewPlayer : Player -> Svg msg
+viewPlayer player =
     Svg.circle
-        [ Svg.Attributes.transform <| transformString position
+        [ Svg.Attributes.transform <| transformString player.physics.position
         , Svg.Attributes.cx "0"
         , Svg.Attributes.cy "0"
-        , Svg.Attributes.r <| String.fromFloat 10
+        , Svg.Attributes.r <| String.fromFloat player.physics.radius
         , Svg.Attributes.class "home"
         ]
         []
@@ -253,12 +261,12 @@ view model =
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
             [ Svg.g [] (List.map viewResource model.resources)
-            , viewHome model.homePosition
             , Svg.g []
                 (model.animals
                     |> List.sortWith Animal.exhaustedSort
                     |> List.map viewAnimal
                 )
+            , viewPlayer model.player
             ]
         ]
 

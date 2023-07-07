@@ -158,7 +158,11 @@ derivedMovementSpeed animal =
 -}
 moveHome : Vector2 -> Animal -> Animal
 moveHome home animal =
-    applyForce (Engine.Vector2.direction animal.physics.position home |> Engine.Vector2.scale (derivedMovementSpeed animal)) animal
+    applyForce
+        (Engine.Vector2.direction animal.physics.position home
+            |> Engine.Vector2.scale (derivedMovementSpeed animal)
+        )
+        animal
 
 
 {-| Apply force towards nearest resource
