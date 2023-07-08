@@ -28,7 +28,12 @@ main
     .entity
         transition: fill 100ms
         stroke-width: 2
-        text-anchor: middle
+        .hit-count
+            font-size: 1rem
+            font-weight: bold
+            text-anchor: middle
+            stroke: none
+            fill: rgba(255, 255, 255, 0.77)
 
     .blob
         fill: $animal_color
