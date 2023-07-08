@@ -1,29 +1,18 @@
 module Main exposing (Model, Msg, main)
 
-import Animal exposing (Animal)
+import Blob exposing (Blob)
 import Browser
 import Browser.Events
 import Console exposing (Console)
-import Engine.Physics exposing (Physics)
+import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
-import PhysicsInteraction
-import Player exposing (Player)
-import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
 
 
 
--- MODEL
-
-
-type alias Model =
-    { animals : List Animal
-    , resources : List Resource
-    , console : Console Msg
-    , player : Player
-    }
+-- CONSOLE
 
 
 initConsole : Console Msg
@@ -36,43 +25,58 @@ initConsole =
                 (Console.argFloat "y")
                 (Console.argFloat "radius")
             )
-        |> Console.addMessage "Set player target"
+        |> Console.addMessage "Apply force to blobs"
             (Console.constructor2
-                SetPlayerTarget
+                BlobForce
                 (Console.argFloat "x")
                 (Console.argFloat "y")
             )
-        |> Console.addMessage "Add animal"
+        |> Console.addMessage "Apply force to resources"
+            (Console.constructor2
+                ResourceForce
+                (Console.argFloat "x")
+                (Console.argFloat "y")
+            )
+        |> Console.addMessage "Add blob"
             (Console.constructor3
-                AddAnimal
+                AddBlob
                 (Console.argFloat "x")
                 (Console.argFloat "y")
-                (Console.argFloat "speed")
+                (Console.argFloat "radius")
             )
-        |> Console.addMessage "Remove resources"
-            (Console.constructor RemoveResources)
-        |> Console.addMessage "Rest animals"
-            (Console.constructor RechargeAnimals)
         |> Console.addMessage "Reset state"
             (Console.constructor Reset)
+        |> Console.addMessage "Disable resource collision"
+            (Console.constructor DisableResourceCollision)
+
+
+
+-- MODEL
+
+
+type alias Model =
+    { blobs : List Blob
+    , resources : List (PhysicsObject { hitCount : Int, home : Vector2 })
+    , console : Console Msg
+    }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Animal.new 0 0 0.01
-        , Animal.new 20 -20 0.05
-        , Animal.new -20 40 0.09
-        , Animal.new 30 -20 0.02
+        [ Blob.new 0 0 20 100
+        , Blob.new 100 50 20 100
+        , Blob.new -100 -50 20 100
+        , Blob.new 100 50 20 100
+        , Blob.new -150 -250 20 100
+        , Blob.new -150 250 20 100
         ]
-        [ Resource.new -10 -180 40
-        , Resource.new 165 -10 20
-        , Resource.new 160 20 30
-        , Resource.new -250 70 25
-        , Resource.new -10 120 32
+        [ PhysicsObject.new 200 0 40 1000 { hitCount = 0, home = Vector2.new 200 0 }
+        , PhysicsObject.new 200 -200 40 1000 { hitCount = 0, home = Vector2.new 200 -200 }
+        , PhysicsObject.new 0 -200 40 1000 { hitCount = 0, home = Vector2.new 0 -200 }
+        , PhysicsObject.new -200 200 40 1000 { hitCount = 0, home = Vector2.new -200 200 }
         ]
         initConsole
-        Player.new
     , Cmd.none
     )
 
@@ -84,72 +88,56 @@ init _ =
 type Msg
     = Tick Float
     | AddResource Float Float Float
-    | AddAnimal Float Float Float
-    | SetPlayerTarget Float Float
-    | RechargeAnimals
-    | RemoveResources
+    | AddBlob Float Float Float
+    | DisableResourceCollision
+    | BlobForce Float Float
+    | ResourceForce Float Float
     | Reset
     | ConsoleMsg (Console.ConsoleMsg Msg)
 
 
 forces : Model -> Model
 forces model =
-    let
-        collideableResources : List Resource
-        collideableResources =
-            Resource.collideables model.resources
-    in
     { model
-        | animals = List.map (Animal.movementAi model.player.physics.position collideableResources) model.animals
-        , resources = List.map Resource.movementAi model.resources
-        , player = Player.moveAi model.player
+        | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.2) model.blobs
+        , resources = List.map (PhysicsObject.moveToPosition (\r -> r.home) (\r -> r.mass * 0.002)) model.resources
     }
 
 
 movement : Float -> Model -> Model
 movement dt model =
+    let
+        f =
+            PhysicsObject.applyFriciton 0.1
+                >> PhysicsObject.move dt
+                >> PhysicsObject.stopIfSlow 0.0001
+    in
     { model
-        | animals = List.map (Animal.movement 0.93 dt) model.animals
-        , resources = List.map (Resource.move dt) model.resources
-        , player = Player.move dt model.player
+        | blobs = List.map f model.blobs
+        , resources = List.map f model.resources
     }
 
 
 collisionInteraction : Model -> Model
 collisionInteraction model =
-    let
-        collideableResources : List Resource
-        collideableResources =
-            Resource.collideables model.resources
-    in
     { model
-        | animals = List.map (PhysicsInteraction.isColliding (Animal.removeStamina 1) collideableResources) model.animals
-        , resources = List.map (PhysicsInteraction.isColliding Resource.handleHit model.animals) model.resources
+        | blobs = List.map (PhysicsObject.collisionAction Blob.incrementHits model.resources) model.blobs
+        , resources = List.map (PhysicsObject.collisionAction (\o -> { o | state = { hitCount = o.state.hitCount + 1, home = o.state.home } }) model.blobs) model.resources
     }
 
 
 collisionResolution : Model -> Model
 collisionResolution model =
-    let
-        collideableResources : List Resource
-        collideableResources =
-            Resource.collideables model.resources
-
-        collideadbleAnimals : List Animal
-        collideadbleAnimals =
-            model.animals |> List.filter (Animal.isExhausted >> not)
-    in
     { model
-        | animals = List.map (PhysicsInteraction.resolveCollision collideableResources) model.animals
-        , resources = List.map (PhysicsInteraction.resolveCollision collideadbleAnimals) model.resources
+        | blobs = List.map (PhysicsObject.resolveCollisions model.resources) model.blobs
+        , resources = List.map (PhysicsObject.resolveCollisions model.blobs) model.resources
     }
 
 
 stateUpdate : Float -> Model -> Model
-stateUpdate dt model =
+stateUpdate _ model =
     { model
-        | animals = List.map (Animal.update dt) model.animals
-        , resources = List.map (Resource.tickState dt) model.resources
+        | blobs = List.map Blob.addTrail model.blobs
     }
 
 
@@ -167,22 +155,22 @@ update msg model =
             )
 
         AddResource x y radius ->
-            ( { model | resources = Resource.new x y radius :: model.resources }, Cmd.none )
+            ( { model | resources = PhysicsObject.new x y radius 100 { hitCount = 0, home = Vector2.new x y } :: model.resources }, Cmd.none )
 
-        AddAnimal x y speed ->
-            ( { model | animals = Animal.new x y speed :: model.animals }, Cmd.none )
+        AddBlob x y radius ->
+            ( { model | blobs = Blob.new x y radius 50 :: model.blobs }, Cmd.none )
 
-        SetPlayerTarget x y ->
-            ( { model | player = Player.setTarget (Vector2.new x y) model.player }, Cmd.none )
+        BlobForce x y ->
+            ( { model | blobs = List.map (PhysicsObject.applyForce <| Vector2.new x y) model.blobs }, Cmd.none )
 
-        RechargeAnimals ->
-            ( { model | animals = List.map Animal.rest model.animals }, Cmd.none )
-
-        RemoveResources ->
-            ( { model | resources = [] }, Cmd.none )
+        ResourceForce x y ->
+            ( { model | resources = List.map (PhysicsObject.applyForce <| Vector2.new x y) model.resources }, Cmd.none )
 
         Reset ->
             init ()
+
+        DisableResourceCollision ->
+            ( { model | resources = List.map PhysicsObject.disableCollision model.resources }, Cmd.none )
 
         ConsoleMsg cmsg ->
             let
@@ -220,27 +208,45 @@ transformString position =
         ++ ")"
 
 
-viewCircle : List (Svg.Attribute msg) -> Physics -> Svg msg
-viewCircle attrs physics =
-    Svg.circle
-        ([ Svg.Attributes.transform <| transformString physics.position
-         , Svg.Attributes.cx "0"
-         , Svg.Attributes.cy "0"
-         , Svg.Attributes.r <| String.fromFloat <| physics.radius
+viewObject : List (Svg.Attribute msg) -> List (Svg msg) -> PhysicsObject state -> Svg msg
+viewObject attrs children object =
+    Svg.g
+        ([ Svg.Attributes.transform <| transformString object.position
+         , Svg.Attributes.class "object"
          ]
             ++ attrs
         )
-        []
+        children
 
 
-viewAnimal : Animal -> Svg msg
-viewAnimal animal =
+viewResource : PhysicsObject { hitCount : Int, home : Vector2 } -> Svg msg
+viewResource resource =
+    viewObject
+        [ svgClassList
+            [ ( "entity", True )
+            , ( "resource", True )
+            ]
+        ]
+        [ Svg.circle
+            [ Svg.Attributes.cx "0"
+            , Svg.Attributes.cy "0"
+            , Svg.Attributes.r <| String.fromFloat <| resource.radius
+            ]
+            []
+        , Svg.text_ [] [ Svg.text <| String.fromInt resource.state.hitCount ]
+        ]
+        resource
+
+
+viewBlob : Blob -> Svg msg
+viewBlob blob =
     let
-        viewTrail i p =
+        viewTrail : Float -> Int -> Vector2 -> Svg msg
+        viewTrail r i p =
             Svg.circle
                 [ Svg.Attributes.cx <| String.fromFloat p.x
                 , Svg.Attributes.cy <| String.fromFloat p.y
-                , Svg.Attributes.r <| String.fromInt <| 20 - i
+                , Svg.Attributes.r <| String.fromFloat <| r - toFloat i
                 , Svg.Attributes.fillOpacity <| String.fromInt <| 100 - (i * 3)
                 ]
                 []
@@ -248,44 +254,20 @@ viewAnimal animal =
     Svg.g
         [ svgClassList
             [ ( "entity", True )
-            , ( "animal", True )
-            , ( "exhausted", Animal.isExhausted animal )
+            , ( "blob", True )
             ]
         ]
-        [ Svg.g [ Svg.Attributes.class "trail" ] (animal.trail |> List.indexedMap viewTrail)
-        , Svg.circle
-            [ Svg.Attributes.transform <| transformString animal.physics.position
-            , Svg.Attributes.cx "0"
-            , Svg.Attributes.cy "0"
-            , Svg.Attributes.r <| String.fromFloat <| animal.physics.radius
-            ]
-            []
-        ]
-
-
-viewResource : Resource -> Svg msg
-viewResource resource =
-    viewCircle
-        [ svgClassList
-            [ ( "entity", True )
-            , ( "resource", True )
-            , ( "hit", Resource.isHit resource )
-            , ( "exhausted", Resource.isExhausted resource )
+        [ Svg.g [ Svg.Attributes.class "trail" ] (blob.state.trail |> List.indexedMap (viewTrail blob.radius))
+        , Svg.g [ Svg.Attributes.transform <| transformString blob.position ]
+            [ Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| blob.radius
+                ]
+                []
+            , Svg.text_ [] [ Svg.text <| String.fromInt blob.state.hitCount ]
             ]
         ]
-        resource.physics
-
-
-viewPlayer : Player -> Svg msg
-viewPlayer player =
-    Svg.circle
-        [ Svg.Attributes.transform <| transformString player.physics.position
-        , Svg.Attributes.cx "0"
-        , Svg.Attributes.cy "0"
-        , Svg.Attributes.r <| String.fromFloat player.physics.radius
-        , Svg.Attributes.class "home"
-        ]
-        []
 
 
 view : Model -> Html Msg
@@ -298,12 +280,7 @@ view model =
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
             [ Svg.g [] (List.map viewResource model.resources)
-            , Svg.g []
-                (model.animals
-                    |> List.sortWith Animal.exhaustedSort
-                    |> List.map viewAnimal
-                )
-            , viewPlayer model.player
+            , Svg.g [] (List.map viewBlob model.blobs)
             ]
         ]
 
@@ -314,7 +291,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onAnimationFrameDelta (min 200 >> Tick)
+    Browser.Events.onAnimationFrameDelta (min 100 >> Tick)
 
 
 

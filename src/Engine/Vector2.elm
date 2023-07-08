@@ -3,6 +3,7 @@ module Engine.Vector2 exposing
     , add
     , direction
     , distance
+    , divide
     , magnitude
     , multiply
     , negate
@@ -10,6 +11,7 @@ module Engine.Vector2 exposing
     , scale
     , singleton
     , subtract
+    , sum
     , zero
     )
 
@@ -35,6 +37,13 @@ singleton n =
 zero : Vector2
 zero =
     Vector2 0 0
+
+
+{-| Get the sum of vector components
+-}
+sum : Vector2 -> Float
+sum vector =
+    vector.x + vector.y
 
 
 multiply : Vector2 -> Vector2 -> Vector2
