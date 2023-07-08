@@ -64,17 +64,17 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Blob.new 0 0 20 100
-        , Blob.new 100 50 20 100
-        , Blob.new -100 -50 20 100
-        , Blob.new 100 50 20 100
-        , Blob.new -150 -250 20 100
-        , Blob.new -150 250 20 100
+        [ Blob.new 0 0 20 75
+        , Blob.new 100 50 20 75
+        , Blob.new -100 -50 20 75
+        , Blob.new 100 50 20 75
+        , Blob.new -150 -250 20 75
+        , Blob.new -150 250 20 75
         ]
-        [ PhysicsObject.new 200 0 40 1000 { hitCount = 0, home = Vector2.new 200 0 }
-        , PhysicsObject.new 200 -200 40 1000 { hitCount = 0, home = Vector2.new 200 -200 }
-        , PhysicsObject.new 0 -200 40 1000 { hitCount = 0, home = Vector2.new 0 -200 }
-        , PhysicsObject.new -200 200 40 1000 { hitCount = 0, home = Vector2.new -200 200 }
+        [ PhysicsObject.new 200 0 40 500 { hitCount = 0, home = Vector2.new 200 0 }
+        , PhysicsObject.new 200 -200 40 500 { hitCount = 0, home = Vector2.new 200 -200 }
+        , PhysicsObject.new 0 -200 40 500 { hitCount = 0, home = Vector2.new 0 -200 }
+        , PhysicsObject.new -200 200 40 500 { hitCount = 0, home = Vector2.new -200 200 }
         ]
         initConsole
     , Cmd.none
@@ -100,7 +100,7 @@ forces : Model -> Model
 forces model =
     { model
         | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.2) model.blobs
-        , resources = List.map (PhysicsObject.moveToPosition (\r -> r.home) (\r -> r.mass * 0.002)) model.resources
+        , resources = List.map (PhysicsObject.moveToPosition (\r -> r.home) (\r -> r.mass * 0.001)) model.resources
     }
 
 
