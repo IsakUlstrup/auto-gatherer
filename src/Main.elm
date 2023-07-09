@@ -99,7 +99,7 @@ type Msg
 forces : Model -> Model
 forces model =
     { model
-        | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.2) model.blobs
+        | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.1) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition (\r -> r.home) (\r -> r.mass * 0.001)) model.resources
     }
 

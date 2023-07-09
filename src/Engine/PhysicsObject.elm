@@ -184,7 +184,7 @@ resolveCollision target object =
             (Vector2.direction target.position object.position
                 -- |> Vector2.add (Vector2.add target.velocity object.velocity)
                 -- |> Vector2.scale ((target.mass - object.mass) / totalMass)
-                |> Vector2.scale 5
+                |> Vector2.scale 2
             )
 
 
