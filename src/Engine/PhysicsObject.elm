@@ -10,6 +10,7 @@ module Engine.PhysicsObject exposing
     , new
     , resolveCollisions
     , stopIfSlow
+    , updateState
     )
 
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -255,3 +256,12 @@ moveToPosition position speed object =
                 Vector2.direction object.position (position object.state) |> Vector2.scale (speed object)
     in
     applyForce force object
+
+
+
+-- STATE
+
+
+updateState : (a -> a) -> PhysicsObject a -> PhysicsObject a
+updateState f object =
+    { object | state = f object.state }

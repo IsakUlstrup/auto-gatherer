@@ -18,19 +18,9 @@ new x y radius mass =
 
 incrementHits : Blob -> Blob
 incrementHits blob =
-    { blob
-        | state =
-            { hitCount = blob.state.hitCount + 1
-            , trail = blob.state.trail
-            }
-    }
+    PhysicsObject.updateState (\s -> { s | hitCount = blob.state.hitCount + 1 }) blob
 
 
 addTrail : Blob -> Blob
 addTrail blob =
-    { blob
-        | state =
-            { hitCount = blob.state.hitCount
-            , trail = blob.position :: blob.state.trail |> List.take 20
-            }
-    }
+    PhysicsObject.updateState (\s -> { s | trail = blob.position :: blob.state.trail |> List.take 20 }) blob

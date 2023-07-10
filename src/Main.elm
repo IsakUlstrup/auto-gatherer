@@ -112,7 +112,7 @@ movement : Float -> Model -> Model
 movement dt model =
     let
         f =
-            PhysicsObject.applyFriciton 0.1
+            PhysicsObject.applyFriciton 0.05
                 >> PhysicsObject.move dt
                 >> PhysicsObject.stopIfSlow 0.0001
     in

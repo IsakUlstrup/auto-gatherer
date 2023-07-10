@@ -19,12 +19,12 @@ new x y =
 
 incrementHits : Resource -> Resource
 incrementHits resource =
-    { resource | state = { hitCount = resource.state.hitCount + 1, home = resource.state.home, hitCooldown = resource.state.hitCooldown } }
+    PhysicsObject.updateState (\s -> { s | hitCount = resource.state.hitCount + 1 }) resource
 
 
 hit : Resource -> Resource
 hit resource =
-    { resource | state = { hitCount = resource.state.hitCount, home = resource.state.home, hitCooldown = 100 } }
+    PhysicsObject.updateState (\s -> { s | hitCooldown = 100 }) resource
 
 
 isHit : Resource -> Bool
@@ -34,4 +34,4 @@ isHit resource =
 
 update : Float -> Resource -> Resource
 update dt resource =
-    { resource | state = { hitCount = resource.state.hitCount, home = resource.state.home, hitCooldown = max 0 resource.state.hitCooldown - dt } }
+    PhysicsObject.updateState (\s -> { s | hitCooldown = max 0 resource.state.hitCooldown - dt }) resource
