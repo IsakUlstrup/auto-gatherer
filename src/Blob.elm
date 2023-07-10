@@ -1,20 +1,34 @@
-module Blob exposing (Blob, addTrail, ai, incrementHits, new, reduceEnergy, resetEnergy)
+module Blob exposing
+    ( Blob
+    , ai
+    , incrementHits
+    , isResting
+    , new
+    , reduceEnergy
+    , resetEnergy
+    , update
+    )
 
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 exposing (Vector2)
+
+
+type EnergyState
+    = Resting Float
+    | Energy Int
 
 
 type alias Blob =
     PhysicsObject
         { hitCount : Int
         , trail : List Vector2
-        , energy : Int
+        , energy : EnergyState
         }
 
 
 new : Float -> Float -> Float -> Float -> Blob
 new x y radius mass =
-    PhysicsObject.new x y radius mass { hitCount = 0, trail = [], energy = 10 }
+    PhysicsObject.new x y radius mass { hitCount = 0, trail = [], energy = Energy 10 }
 
 
 incrementHits : Blob -> Blob
@@ -24,30 +38,62 @@ incrementHits blob =
 
 reduceEnergy : Blob -> Blob
 reduceEnergy blob =
-    if blob.state.energy - 1 <= 0 then
-        blob
-            |> PhysicsObject.setcollisionState False
-            |> PhysicsObject.updateState (\s -> { s | energy = 0 })
+    case blob.state.energy of
+        Energy e ->
+            if e - 1 <= 0 then
+                blob
+                    |> PhysicsObject.setcollisionState False
+                    |> PhysicsObject.updateState (\s -> { s | energy = Resting 5000 })
 
-    else
-        PhysicsObject.updateState (\s -> { s | energy = max 0 (s.energy - 1) }) blob
+            else
+                blob
+                    |> PhysicsObject.updateState (\s -> { s | energy = Energy <| max 0 (e - 1) })
+
+        Resting _ ->
+            blob
+
+
+tickRest : Float -> Blob -> Blob
+tickRest dt blob =
+    case blob.state.energy of
+        Resting e ->
+            if e - dt <= 0 then
+                resetEnergy blob
+
+            else
+                PhysicsObject.updateState (\s -> { s | energy = Resting (max 0 (e - dt)) }) blob
+
+        Energy _ ->
+            blob
 
 
 resetEnergy : Blob -> Blob
 resetEnergy blob =
     blob
         |> PhysicsObject.setcollisionState True
-        |> PhysicsObject.updateState (\s -> { s | energy = 10 })
+        |> PhysicsObject.updateState (\s -> { s | energy = Energy 10 })
 
 
-addTrail : Blob -> Blob
-addTrail blob =
-    PhysicsObject.updateState (\s -> { s | trail = blob.position :: blob.state.trail |> List.take 20 }) blob
+isResting : Blob -> Bool
+isResting blob =
+    case blob.state.energy of
+        Resting _ ->
+            True
+
+        Energy _ ->
+            False
+
+
+update : Float -> Blob -> Blob
+update dt blob =
+    blob
+        |> PhysicsObject.updateState (\s -> { s | trail = blob.position :: blob.state.trail |> List.take 20 })
+        |> tickRest dt
 
 
 ai : List (PhysicsObject b) -> Float -> Blob -> Blob
 ai resources speed blob =
-    if blob.state.energy > 0 then
+    if not <| isResting blob then
         PhysicsObject.moveToNearest resources speed blob
 
     else

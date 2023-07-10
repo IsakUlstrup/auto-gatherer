@@ -168,7 +168,7 @@ collisionResolution model =
 stateUpdate : Float -> Model -> Model
 stateUpdate dt model =
     { model
-        | blobs = List.map Blob.addTrail model.blobs
+        | blobs = List.map (Blob.update dt) model.blobs
         , resources = List.map (Resource.update dt) model.resources
     }
 
@@ -318,6 +318,7 @@ viewBlob blob =
         [ svgClassList
             [ ( "entity", True )
             , ( "blob", True )
+            , ( "resting", Blob.isResting blob )
             ]
         ]
         [ Svg.g [ Svg.Attributes.class "trail" ] (blob.state.trail |> List.indexedMap (viewTrail blob.radius))
