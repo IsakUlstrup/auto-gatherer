@@ -150,22 +150,16 @@ stateUpdate dt model =
     }
 
 
-fixedUpdate : Float -> Model -> Model
-fixedUpdate dt model =
+fixedUpdate : (Model -> Model) -> Float -> Model -> Model
+fixedUpdate f dt model =
     if dt >= model.physicsStepTime then
         { model | physicsStepAccumulator = dt - model.physicsStepTime }
-            |> forces
-            |> movement model.physicsStepTime
-            |> collisionInteraction
-            |> collisionResolution
-            |> fixedUpdate (dt - model.physicsStepTime)
+            |> f
+            |> fixedUpdate f (dt - model.physicsStepTime)
 
     else
-        model
-            |> forces
-            |> movement model.physicsStepTime
-            |> collisionInteraction
-            |> collisionResolution
+        f
+            model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -179,7 +173,13 @@ update msg model =
             if deltaSum >= model.physicsStepTime then
                 ( model
                     |> stateUpdate dt
-                    |> fixedUpdate deltaSum
+                    |> fixedUpdate
+                        (forces
+                            >> movement model.physicsStepTime
+                            >> collisionInteraction
+                            >> collisionResolution
+                        )
+                        deltaSum
                 , Cmd.none
                 )
 
