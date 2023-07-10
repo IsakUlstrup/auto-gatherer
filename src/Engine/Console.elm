@@ -1,4 +1,4 @@
-module Console exposing
+module Engine.Console exposing
     ( ArgumentInput
     , Console
     , ConsoleInput

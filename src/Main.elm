@@ -3,7 +3,7 @@ module Main exposing (Model, Msg, main)
 import Blob exposing (Blob)
 import Browser
 import Browser.Events
-import Console exposing (Console)
+import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
@@ -18,36 +18,36 @@ import Svg.Attributes
 
 initConsole : Console Msg
 initConsole =
-    Console.new
-        |> Console.addMessage "Add resource"
-            (Console.constructor2
+    Engine.Console.new
+        |> Engine.Console.addMessage "Add resource"
+            (Engine.Console.constructor2
                 AddResource
-                (Console.argFloat "x")
-                (Console.argFloat "y")
+                (Engine.Console.argFloat "x")
+                (Engine.Console.argFloat "y")
             )
-        |> Console.addMessage "Apply force to blobs"
-            (Console.constructor2
+        |> Engine.Console.addMessage "Apply force to blobs"
+            (Engine.Console.constructor2
                 BlobForce
-                (Console.argFloat "x")
-                (Console.argFloat "y")
+                (Engine.Console.argFloat "x")
+                (Engine.Console.argFloat "y")
             )
-        |> Console.addMessage "Apply force to resources"
-            (Console.constructor2
+        |> Engine.Console.addMessage "Apply force to resources"
+            (Engine.Console.constructor2
                 ResourceForce
-                (Console.argFloat "x")
-                (Console.argFloat "y")
+                (Engine.Console.argFloat "x")
+                (Engine.Console.argFloat "y")
             )
-        |> Console.addMessage "Add blob"
-            (Console.constructor3
+        |> Engine.Console.addMessage "Add blob"
+            (Engine.Console.constructor3
                 AddBlob
-                (Console.argFloat "x")
-                (Console.argFloat "y")
-                (Console.argFloat "radius")
+                (Engine.Console.argFloat "x")
+                (Engine.Console.argFloat "y")
+                (Engine.Console.argFloat "radius")
             )
-        |> Console.addMessage "Reset state"
-            (Console.constructor Reset)
-        |> Console.addMessage "Disable resource collision"
-            (Console.constructor DisableResourceCollision)
+        |> Engine.Console.addMessage "Reset state"
+            (Engine.Console.constructor Reset)
+        |> Engine.Console.addMessage "Disable resource collision"
+            (Engine.Console.constructor DisableResourceCollision)
 
 
 
@@ -97,7 +97,7 @@ type Msg
     | BlobForce Float Float
     | ResourceForce Float Float
     | Reset
-    | ConsoleMsg (Console.ConsoleMsg Msg)
+    | ConsoleMsg (ConsoleMsg Msg)
 
 
 forces : Model -> Model
@@ -226,7 +226,7 @@ update msg model =
         ConsoleMsg cmsg ->
             let
                 ( newConsole, mmsg ) =
-                    Console.update cmsg model.console
+                    Engine.Console.update cmsg model.console
             in
             case mmsg of
                 Just m ->
@@ -327,7 +327,7 @@ viewBlob blob =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.map ConsoleMsg (Console.viewConsole model.console)
+        [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
         , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
