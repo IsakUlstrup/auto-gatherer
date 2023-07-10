@@ -109,7 +109,7 @@ type Msg
 forces : Model -> Model
 forces model =
     { model
-        | blobs = List.map (Blob.ai model.resources 0.02) model.blobs
+        | blobs = List.map (Blob.ai (List.filter .enableCollisions model.resources) 0.02) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition .home (always 0.02)) model.resources
     }
 
