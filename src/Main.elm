@@ -48,6 +48,8 @@ initConsole =
             (Engine.Console.constructor Reset)
         |> Engine.Console.addMessage "Disable resource collision"
             (Engine.Console.constructor DisableResourceCollision)
+        |> Engine.Console.addMessage "Rest blobs"
+            (Engine.Console.constructor RestBlobs)
 
 
 
@@ -96,6 +98,7 @@ type Msg
     | DisableResourceCollision
     | BlobForce Float Float
     | ResourceForce Float Float
+    | RestBlobs
     | Reset
     | ConsoleMsg (ConsoleMsg Msg)
 
@@ -103,7 +106,7 @@ type Msg
 forces : Model -> Model
 forces model =
     { model
-        | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.02) model.blobs
+        | blobs = List.map (Blob.ai model.resources 0.02) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition .home (always 0.02)) model.resources
     }
 
@@ -131,6 +134,7 @@ collisionInteraction model =
                     (\target object ->
                         object
                             |> Blob.incrementHits
+                            |> Blob.reduceEnergy
                             |> PhysicsObject.applyForce (Vector2.direction target.position object.position)
                     )
                     model.resources
@@ -219,6 +223,9 @@ update msg model =
 
         Reset ->
             init ()
+
+        RestBlobs ->
+            ( { model | blobs = List.map Blob.resetEnergy model.blobs }, Cmd.none )
 
         DisableResourceCollision ->
             ( { model | resources = List.map PhysicsObject.disableCollision model.resources }, Cmd.none )
