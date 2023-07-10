@@ -104,7 +104,7 @@ forces : Model -> Model
 forces model =
     { model
         | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.02) model.blobs
-        , resources = List.map (PhysicsObject.moveToPosition (\r -> r.home) (\r -> r.mass * 0.001)) model.resources
+        , resources = List.map (PhysicsObject.moveToPosition .home (always 0.02)) model.resources
     }
 
 
@@ -127,10 +127,26 @@ collisionInteraction model =
     { model
         | blobs =
             List.map
-                (PhysicsObject.collisionAction (\target object -> object |> Blob.incrementHits |> PhysicsObject.applyForce (Vector2.direction target.position object.position)) model.resources)
+                (PhysicsObject.collisionAction
+                    (\target object ->
+                        object
+                            |> Blob.incrementHits
+                            |> PhysicsObject.applyForce (Vector2.direction target.position object.position)
+                    )
+                    model.resources
+                )
                 model.blobs
         , resources =
-            List.map (PhysicsObject.collisionAction (\_ o -> o |> Resource.incrementHits |> Resource.hit) model.blobs) model.resources
+            List.map
+                (PhysicsObject.collisionAction
+                    (\_ o ->
+                        o
+                            |> Resource.incrementHits
+                            |> Resource.hit
+                    )
+                    model.blobs
+                )
+                model.resources
     }
 
 
