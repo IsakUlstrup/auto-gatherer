@@ -103,7 +103,7 @@ type Msg
 forces : Model -> Model
 forces model =
     { model
-        | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.1) model.blobs
+        | blobs = List.map (PhysicsObject.moveToNearest model.resources 0.02) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition (\r -> r.home) (\r -> r.mass * 0.001)) model.resources
     }
 
@@ -150,18 +150,44 @@ stateUpdate dt model =
     }
 
 
+fixedUpdate : Float -> Model -> Model
+fixedUpdate dt model =
+    if dt >= model.physicsStepTime then
+        { model | physicsStepAccumulator = dt - model.physicsStepTime }
+            |> forces
+            |> movement model.physicsStepTime
+            |> collisionInteraction
+            |> collisionResolution
+            |> fixedUpdate (dt - model.physicsStepTime)
+
+    else
+        model
+            |> forces
+            |> movement model.physicsStepTime
+            |> collisionInteraction
+            |> collisionResolution
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Tick _ ->
-            ( model
-                |> forces
-                |> movement 20
-                |> collisionInteraction
-                |> collisionResolution
-                |> stateUpdate 20
-            , Cmd.none
-            )
+        Tick dt ->
+            let
+                deltaSum =
+                    model.physicsStepAccumulator + dt
+            in
+            if deltaSum >= model.physicsStepTime then
+                ( model
+                    |> stateUpdate dt
+                    |> fixedUpdate deltaSum
+                , Cmd.none
+                )
+
+            else
+                ( { model | physicsStepAccumulator = deltaSum }
+                    |> stateUpdate dt
+                , Cmd.none
+                )
 
         AddResource x y ->
             ( { model | resources = Resource.new x y :: model.resources }, Cmd.none )
