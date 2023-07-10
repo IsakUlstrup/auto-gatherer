@@ -243,7 +243,8 @@ viewResource resource =
             , Svg.Attributes.r <| String.fromFloat <| resource.radius
             ]
             []
-        , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt resource.state.hitCount ]
+
+        -- , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt resource.state.hitCount ]
         ]
         resource
 
@@ -275,7 +276,8 @@ viewBlob blob =
                 , Svg.Attributes.r <| String.fromFloat <| blob.radius
                 ]
                 []
-            , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt blob.state.hitCount ]
+
+            -- , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt blob.state.hitCount ]
             ]
         ]
 
