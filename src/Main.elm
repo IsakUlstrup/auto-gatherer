@@ -51,6 +51,11 @@ initConsole =
                 SetResourceCollisionState
                 (Engine.Console.argBool "Enabled")
             )
+        |> Engine.Console.addMessage "Set camera zoom"
+            (Engine.Console.constructor1
+                SetCameraZoom
+                (Engine.Console.argFloat "Zoom")
+            )
         |> Engine.Console.addMessage "Rest blobs"
             (Engine.Console.constructor RestBlobs)
 
@@ -65,6 +70,7 @@ type alias Model =
     , console : Console Msg
     , physicsStepTime : Float
     , physicsStepAccumulator : Float
+    , cameraZoom : Float
     }
 
 
@@ -86,6 +92,7 @@ init _ =
         initConsole
         20
         0
+        1
     , Cmd.none
     )
 
@@ -103,6 +110,7 @@ type Msg
     | ResourceForce Float Float
     | RestBlobs
     | Reset
+    | SetCameraZoom Float
     | ConsoleMsg (ConsoleMsg Msg)
 
 
@@ -233,6 +241,9 @@ update msg model =
         SetResourceCollisionState flag ->
             ( { model | resources = List.map (PhysicsObject.setcollisionState flag) model.resources }, Cmd.none )
 
+        SetCameraZoom zoom ->
+            ( { model | cameraZoom = zoom }, Cmd.none )
+
         ConsoleMsg cmsg ->
             let
                 ( newConsole, mmsg ) =
@@ -335,6 +346,11 @@ viewBlob blob =
         ]
 
 
+cameraTransform : Float -> Svg.Attribute msg
+cameraTransform zoom =
+    Svg.Attributes.style <| "transform: scale(" ++ String.fromFloat zoom ++ ")"
+
+
 view : Model -> Html Msg
 view model =
     main_ []
@@ -344,8 +360,13 @@ view model =
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
-            [ Svg.g [] (List.map viewResource model.resources)
-            , Svg.g [] (List.map viewBlob model.blobs)
+            [ Svg.g
+                [ Svg.Attributes.class "camera"
+                , cameraTransform model.cameraZoom
+                ]
+                [ Svg.g [] (List.map viewResource model.resources)
+                , Svg.g [] (List.map viewBlob model.blobs)
+                ]
             ]
         ]
 
