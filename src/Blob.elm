@@ -34,7 +34,8 @@ reduceEnergy blob =
 
 resetEnergy : Blob -> Blob
 resetEnergy blob =
-    PhysicsObject.updateState (\s -> { s | energy = 10 }) blob
+    { blob | enableCollisions = True }
+        |> PhysicsObject.updateState (\s -> { s | energy = 10 })
 
 
 addTrail : Blob -> Blob
