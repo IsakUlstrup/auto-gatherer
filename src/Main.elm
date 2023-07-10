@@ -46,8 +46,11 @@ initConsole =
             )
         |> Engine.Console.addMessage "Reset state"
             (Engine.Console.constructor Reset)
-        |> Engine.Console.addMessage "Disable resource collision"
-            (Engine.Console.constructor DisableResourceCollision)
+        |> Engine.Console.addMessage "Set resource collision enabled"
+            (Engine.Console.constructor1
+                SetResourceCollisionState
+                (Engine.Console.argBool "Enabled")
+            )
         |> Engine.Console.addMessage "Rest blobs"
             (Engine.Console.constructor RestBlobs)
 
@@ -95,7 +98,7 @@ type Msg
     = Tick Float
     | AddResource Float Float
     | AddBlob Float Float Float
-    | DisableResourceCollision
+    | SetResourceCollisionState Bool
     | BlobForce Float Float
     | ResourceForce Float Float
     | RestBlobs
@@ -227,8 +230,8 @@ update msg model =
         RestBlobs ->
             ( { model | blobs = List.map Blob.resetEnergy model.blobs }, Cmd.none )
 
-        DisableResourceCollision ->
-            ( { model | resources = List.map PhysicsObject.disableCollision model.resources }, Cmd.none )
+        SetResourceCollisionState flag ->
+            ( { model | resources = List.map (PhysicsObject.setcollisionState flag) model.resources }, Cmd.none )
 
         ConsoleMsg cmsg ->
             let

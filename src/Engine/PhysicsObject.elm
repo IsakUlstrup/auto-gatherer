@@ -3,12 +3,12 @@ module Engine.PhysicsObject exposing
     , applyForce
     , applyFriciton
     , collisionAction
-    , disableCollision
     , move
     , moveToNearest
     , moveToPosition
     , new
     , resolveCollisions
+    , setcollisionState
     , stopIfSlow
     , updateState
     )
@@ -113,9 +113,9 @@ stop object =
 -- ---- COLLISION ----
 
 
-disableCollision : PhysicsObject a -> PhysicsObject a
-disableCollision object =
-    { object | enableCollisions = False }
+setcollisionState : Bool -> PhysicsObject a -> PhysicsObject a
+setcollisionState flag object =
+    { object | enableCollisions = flag }
 
 
 {-| Check if two objects are colliding

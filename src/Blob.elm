@@ -25,7 +25,8 @@ incrementHits blob =
 reduceEnergy : Blob -> Blob
 reduceEnergy blob =
     if blob.state.energy - 1 <= 0 then
-        { blob | enableCollisions = False }
+        blob
+            |> PhysicsObject.setcollisionState False
             |> PhysicsObject.updateState (\s -> { s | energy = 0 })
 
     else
@@ -34,7 +35,8 @@ reduceEnergy blob =
 
 resetEnergy : Blob -> Blob
 resetEnergy blob =
-    { blob | enableCollisions = True }
+    blob
+        |> PhysicsObject.setcollisionState True
         |> PhysicsObject.updateState (\s -> { s | energy = 10 })
 
 
