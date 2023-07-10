@@ -138,13 +138,18 @@ isColliding object target =
 
 {-| if object is colliding with target, run function f on object and return
 -}
-collisionAction : (PhysicsObject a -> PhysicsObject a) -> List (PhysicsObject b) -> PhysicsObject a -> PhysicsObject a
+collisionAction : (PhysicsObject b -> PhysicsObject a -> PhysicsObject a) -> List (PhysicsObject b) -> PhysicsObject a -> PhysicsObject a
 collisionAction f targets object =
     let
+        collisions : List (PhysicsObject b)
         collisions =
             List.filter (isColliding object) targets
+
+        helper : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
+        helper target obj =
+            f target obj
     in
-    List.foldl (\_ b -> f b) object collisions
+    List.foldl helper object collisions
 
 
 {-| Resolve collision between two objects
@@ -152,22 +157,25 @@ collisionAction f targets object =
 resolveCollision : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
 resolveCollision target object =
     let
-        -- totalMass =
-        --     target.mass + object.mass
-        -- newVx =
-        --     (object.mass - target.mass)
-        --         / totalMass
-        --         * object.velocity.x
-        --         + (2 * target.mass)
-        --         / totalMass
-        --         * target.velocity.x
-        -- newVy =
-        --     (object.mass - target.mass)
-        --         / totalMass
-        --         * object.velocity.y
-        --         + (2 * target.mass)
-        --         / totalMass
-        --         * target.velocity.y
+        totalMass =
+            target.mass + object.mass
+
+        newVx =
+            (object.mass - target.mass)
+                / totalMass
+                * object.velocity.x
+                + (2 * target.mass)
+                / totalMass
+                * target.velocity.x
+
+        newVy =
+            (object.mass - target.mass)
+                / totalMass
+                * object.velocity.y
+                + (2 * target.mass)
+                / totalMass
+                * target.velocity.y
+
         pos : Vector2
         pos =
             Vector2.add
@@ -178,14 +186,17 @@ resolveCollision target object =
     in
     object
         |> setPosition pos
-        -- |> (\o -> { o | velocity = Vector2.new newVx newVy })
-        |> stop
-        |> applyForce
-            (Vector2.direction target.position object.position
-                -- |> Vector2.add (Vector2.add target.velocity object.velocity)
-                -- |> Vector2.scale ((target.mass - object.mass) / totalMass)
-                |> Vector2.scale 2
-            )
+        |> (\o -> { o | velocity = Vector2.new newVx newVy })
+
+
+
+-- |> stop
+-- |> applyForce
+--     (Vector2.direction target.position object.position
+--         -- |> Vector2.add (Vector2.add target.velocity object.velocity)
+--         -- |> Vector2.scale ((target.mass - object.mass) / totalMass)
+--         |> Vector2.scale 2
+--     )
 
 
 {-| Detect and react to collisions

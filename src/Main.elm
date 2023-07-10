@@ -7,6 +7,7 @@ import Console exposing (Console)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
+import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -19,11 +20,10 @@ initConsole : Console Msg
 initConsole =
     Console.new
         |> Console.addMessage "Add resource"
-            (Console.constructor3
+            (Console.constructor2
                 AddResource
                 (Console.argFloat "x")
                 (Console.argFloat "y")
-                (Console.argFloat "radius")
             )
         |> Console.addMessage "Apply force to blobs"
             (Console.constructor2
@@ -56,8 +56,10 @@ initConsole =
 
 type alias Model =
     { blobs : List Blob
-    , resources : List (PhysicsObject { hitCount : Int, home : Vector2 })
+    , resources : List Resource
     , console : Console Msg
+    , physicsStepTime : Float
+    , physicsStepAccumulator : Float
     }
 
 
@@ -65,18 +67,20 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         [ Blob.new 0 0 20 75
-        , Blob.new 100 50 20 75
         , Blob.new -100 -50 20 75
         , Blob.new 100 50 20 75
+        , Blob.new 120 70 20 75
         , Blob.new -150 -250 20 75
         , Blob.new -150 250 20 75
         ]
-        [ PhysicsObject.new 200 0 40 500 { hitCount = 0, home = Vector2.new 200 0 }
-        , PhysicsObject.new 200 -200 40 500 { hitCount = 0, home = Vector2.new 200 -200 }
-        , PhysicsObject.new 0 -200 40 500 { hitCount = 0, home = Vector2.new 0 -200 }
-        , PhysicsObject.new -200 200 40 500 { hitCount = 0, home = Vector2.new -200 200 }
+        [ Resource.new 200 0
+        , Resource.new 200 -200
+        , Resource.new 0 -200
+        , Resource.new -200 200
         ]
         initConsole
+        20
+        0
     , Cmd.none
     )
 
@@ -87,7 +91,7 @@ init _ =
 
 type Msg
     = Tick Float
-    | AddResource Float Float Float
+    | AddResource Float Float
     | AddBlob Float Float Float
     | DisableResourceCollision
     | BlobForce Float Float
@@ -121,8 +125,12 @@ movement dt model =
 collisionInteraction : Model -> Model
 collisionInteraction model =
     { model
-        | blobs = List.map (PhysicsObject.collisionAction Blob.incrementHits model.resources) model.blobs
-        , resources = List.map (PhysicsObject.collisionAction (\o -> { o | state = { hitCount = o.state.hitCount + 1, home = o.state.home } }) model.blobs) model.resources
+        | blobs =
+            List.map
+                (PhysicsObject.collisionAction (\target object -> object |> Blob.incrementHits |> PhysicsObject.applyForce (Vector2.direction target.position object.position)) model.resources)
+                model.blobs
+        , resources =
+            List.map (PhysicsObject.collisionAction (\_ o -> o |> Resource.incrementHits |> Resource.hit) model.blobs) model.resources
     }
 
 
@@ -135,27 +143,28 @@ collisionResolution model =
 
 
 stateUpdate : Float -> Model -> Model
-stateUpdate _ model =
+stateUpdate dt model =
     { model
         | blobs = List.map Blob.addTrail model.blobs
+        , resources = List.map (Resource.update dt) model.resources
     }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Tick dt ->
+        Tick _ ->
             ( model
                 |> forces
-                |> movement dt
+                |> movement 20
                 |> collisionInteraction
                 |> collisionResolution
-                |> stateUpdate dt
+                |> stateUpdate 20
             , Cmd.none
             )
 
-        AddResource x y radius ->
-            ( { model | resources = PhysicsObject.new x y radius 100 { hitCount = 0, home = Vector2.new x y } :: model.resources }, Cmd.none )
+        AddResource x y ->
+            ( { model | resources = Resource.new x y :: model.resources }, Cmd.none )
 
         AddBlob x y radius ->
             ( { model | blobs = Blob.new x y radius 50 :: model.blobs }, Cmd.none )
@@ -219,12 +228,13 @@ viewObject attrs children object =
         children
 
 
-viewResource : PhysicsObject { hitCount : Int, home : Vector2 } -> Svg msg
+viewResource : Resource -> Svg msg
 viewResource resource =
     viewObject
         [ svgClassList
             [ ( "entity", True )
             , ( "resource", True )
+            , ( "hit", Resource.isHit resource )
             ]
         ]
         [ Svg.circle
@@ -291,7 +301,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onAnimationFrameDelta (min 100 >> Tick)
+    Browser.Events.onAnimationFrameDelta Tick
 
 
 
