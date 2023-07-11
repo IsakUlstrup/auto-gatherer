@@ -298,6 +298,7 @@ viewResource resource =
             [ ( "entity", True )
             , ( "resource", True )
             , ( "hit", Resource.isHit resource )
+            , ( "recharging", Resource.isRecharging resource )
             ]
         ]
         [ Svg.circle
