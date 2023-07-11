@@ -332,8 +332,6 @@ viewResource resource =
             , Svg.Attributes.class "body"
             ]
             []
-
-        -- , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt resource.state.hitCount ]
         ]
         resource
 
@@ -364,13 +362,6 @@ viewBlob blob =
             [ Svg.circle
                 [ Svg.Attributes.cx "0"
                 , Svg.Attributes.cy "0"
-                , Svg.Attributes.r <| String.fromFloat <| 200
-                , Svg.Attributes.class "range-indicator"
-                ]
-                []
-            , Svg.circle
-                [ Svg.Attributes.cx "0"
-                , Svg.Attributes.cy "0"
                 , Svg.Attributes.r <| String.fromFloat <| blob.radius
                 , Svg.Attributes.class "body"
                 ]
@@ -394,8 +385,6 @@ viewPlayer player =
             , Svg.Attributes.class "body"
             ]
             []
-
-        -- , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt resource.state.hitCount ]
         ]
         player
 
@@ -425,8 +414,8 @@ view model =
                 [ Svg.Attributes.class "camera"
                 , cameraTransform model
                 ]
-                [ Svg.g [] (List.map viewResource model.resources)
-                , Svg.g [] (List.map viewBlob model.blobs)
+                [ Svg.g [] (List.map viewBlob model.blobs)
+                , Svg.g [] (List.map viewResource model.resources)
                 , viewPlayer model.player
                 ]
             ]
