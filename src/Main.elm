@@ -89,8 +89,8 @@ init _ =
         , Blob.new 0 0 20 21
         , Blob.new 0 0 10 10
         ]
-        [ Resource.new 200 0 20
-        , Resource.new 200 -200 30
+        [ Resource.new 150 0 20
+        , Resource.new 178 -183 30
         , Resource.new 0 -200 35
         , Resource.new -200 200 25
         ]
@@ -125,10 +125,15 @@ forces : Model -> Model
 forces model =
     let
         movementForce =
-            0.02
+            0.05
     in
     { model
-        | blobs = List.map (Blob.ai model.player (model.resources |> List.filter .enableCollisions) movementForce) model.blobs
+        | blobs =
+            List.map
+                (Blob.ai (model.resources |> List.filter .enableCollisions) movementForce
+                    >> (\o -> PhysicsObject.applyForce (Vector2.direction o.position model.player.position |> Vector2.scale (movementForce * 0.5)) o)
+                )
+                model.blobs
         , resources = List.map (PhysicsObject.moveToPosition 5 .home (always movementForce)) model.resources
         , player = PhysicsObject.moveToPosition 5 identity (always movementForce) model.player
     }

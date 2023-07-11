@@ -92,8 +92,8 @@ update dt blob =
 If blob is recharging or there are no resources, move home
 
 -}
-ai : PhysicsObject a -> List (PhysicsObject b) -> Float -> Blob -> Blob
-ai home resources speed blob =
+ai : List (PhysicsObject b) -> Float -> Blob -> Blob
+ai resources speed blob =
     let
         resourcesInRange =
             List.filter (\r -> Vector2.distance r.position blob.position < 200) resources
@@ -102,4 +102,4 @@ ai home resources speed blob =
         PhysicsObject.moveToNearest resourcesInRange speed blob
 
     else
-        PhysicsObject.moveToPosition 100 (always home.position) (always speed) blob
+        blob

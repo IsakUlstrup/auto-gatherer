@@ -219,7 +219,7 @@ resolveCollisions targets object =
 
 {-| Apply force towards nearest target
 
-If none are present, move home
+If none are present, do nothing
 
 -}
 moveToNearest : List (PhysicsObject b) -> Float -> PhysicsObject a -> PhysicsObject a
