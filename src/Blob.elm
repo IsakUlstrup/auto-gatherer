@@ -98,7 +98,7 @@ ai home resources speed blob =
         resourcesInRange =
             List.filter (\r -> Vector2.distance r.position blob.position < 200) resources
     in
-    if (isResting >> not) blob && (List.isEmpty >> not) resourcesInRange then
+    if (isResting >> not) blob && (List.isEmpty >> not) resourcesInRange && Vector2.distance blob.position home < 500 then
         PhysicsObject.moveToNearest resourcesInRange speed blob
 
     else
