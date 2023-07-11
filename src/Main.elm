@@ -7,9 +7,11 @@ import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
+import Json.Decode as Json
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
+import Svg.Events
 
 
 
@@ -119,6 +121,7 @@ type Msg
     | Reset
     | SetCameraZoom Float
     | ConsoleMsg (ConsoleMsg Msg)
+    | GameClick Vector2
 
 
 forces : Model -> Model
@@ -219,6 +222,13 @@ fixedUpdate f dt model =
             model
 
 
+clickDecoder : Json.Decoder Vector2
+clickDecoder =
+    Json.map2 Vector2.new
+        (Json.field "clientX" Json.float)
+        (Json.field "clientY" Json.float)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -284,6 +294,13 @@ update msg model =
 
                 Nothing ->
                     ( { model | console = newConsole }, Cmd.none )
+
+        GameClick coordinate ->
+            let
+                adjustedCoord =
+                    Vector2.subtract coordinate (Vector2.singleton 500) |> Vector2.add model.player.position
+            in
+            ( { model | player = PhysicsObject.updateState (always <| Vector2.new adjustedCoord.x adjustedCoord.y) model.player }, Cmd.none )
 
 
 
@@ -376,7 +393,7 @@ viewBlob blob =
         ]
 
 
-viewPlayer : PhysicsObject a -> Svg msg
+viewPlayer : PhysicsObject Vector2 -> Svg msg
 viewPlayer player =
     viewObject
         [ svgClassList
@@ -385,6 +402,13 @@ viewPlayer player =
             ]
         ]
         [ Svg.circle
+            [ Svg.Attributes.cx <| String.fromFloat (player.state.x - player.position.x)
+            , Svg.Attributes.cy <| String.fromFloat (player.state.y - player.position.y)
+            , Svg.Attributes.r "10"
+            , Svg.Attributes.class "player-target"
+            ]
+            []
+        , Svg.circle
             [ Svg.Attributes.cx "0"
             , Svg.Attributes.cy "0"
             , Svg.Attributes.r <| String.fromFloat <| player.radius
@@ -415,6 +439,7 @@ view model =
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
+            , Svg.Events.on "click" (Json.map GameClick clickDecoder)
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
