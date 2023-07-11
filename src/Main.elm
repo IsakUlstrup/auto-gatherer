@@ -84,10 +84,10 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Blob.new 0 0 15 55
-        , Blob.new 0 0 18 65
-        , Blob.new 0 0 20 75
-        , Blob.new 0 0 22 85
+        [ Blob.new 0 0 15 20
+        , Blob.new 0 0 18 15
+        , Blob.new 0 0 20 10
+        , Blob.new 0 0 22 5
         ]
         [ Resource.new 200 0
         , Resource.new 200 -200

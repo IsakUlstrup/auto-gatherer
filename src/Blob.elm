@@ -21,12 +21,13 @@ type alias Blob =
     PhysicsObject
         { trail : List Vector2
         , energy : EnergyState
+        , maxEnergy : Int
         }
 
 
-new : Float -> Float -> Float -> Float -> Blob
-new x y radius mass =
-    PhysicsObject.new x y radius mass { trail = [], energy = Energy 10 }
+new : Float -> Float -> Float -> Int -> Blob
+new x y size maxEnergy =
+    PhysicsObject.new x y size (size * 5) { trail = [], energy = Energy maxEnergy, maxEnergy = maxEnergy }
 
 
 reduceEnergy : Blob -> Blob
@@ -64,7 +65,7 @@ resetEnergy : Blob -> Blob
 resetEnergy blob =
     blob
         |> PhysicsObject.setcollisionState True
-        |> PhysicsObject.updateState (\s -> { s | energy = Energy 10 })
+        |> PhysicsObject.updateState (\s -> { s | energy = Energy blob.state.maxEnergy })
 
 
 isResting : Blob -> Bool
