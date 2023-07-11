@@ -58,6 +58,12 @@ initConsole =
             )
         |> Engine.Console.addMessage "Rest blobs"
             (Engine.Console.constructor RestBlobs)
+        |> Engine.Console.addMessage "Move player"
+            (Engine.Console.constructor2
+                MovePlayer
+                (Engine.Console.argFloat "x")
+                (Engine.Console.argFloat "y")
+            )
 
 
 
@@ -110,6 +116,7 @@ type Msg
     | SetResourceCollisionState Bool
     | BlobForce Float Float
     | ResourceForce Float Float
+    | MovePlayer Float Float
     | RestBlobs
     | Reset
     | SetCameraZoom Float
@@ -136,6 +143,7 @@ movement dt model =
     { model
         | blobs = List.map f model.blobs
         , resources = List.map f model.resources
+        , player = f model.player
     }
 
 
@@ -232,6 +240,9 @@ update msg model =
 
         ResourceForce x y ->
             ( { model | resources = List.map (PhysicsObject.applyForce <| Vector2.new x y) model.resources }, Cmd.none )
+
+        MovePlayer x y ->
+            ( { model | player = PhysicsObject.updateState (always <| Vector2.new x y) model.player }, Cmd.none )
 
         Reset ->
             init ()
