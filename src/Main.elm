@@ -85,11 +85,12 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         [ Blob.new 0 0 20 75
-        , Blob.new -100 -50 20 75
-        , Blob.new 100 50 20 75
-        , Blob.new 120 70 20 75
-        , Blob.new -150 -250 20 75
-        , Blob.new -150 250 20 75
+
+        -- , Blob.new -100 -50 20 75
+        -- , Blob.new 100 50 20 75
+        -- , Blob.new 120 70 20 75
+        -- , Blob.new -150 -250 20 75
+        -- , Blob.new -150 250 20 75
         ]
         [ Resource.new 200 0
         , Resource.new 200 -200
@@ -175,6 +176,14 @@ collisionInteraction model =
                     model.blobs
                 )
                 model.resources
+        , player =
+            PhysicsObject.collisionAction
+                (\target object ->
+                    object
+                        |> PhysicsObject.applyForce (Vector2.direction target.position object.position)
+                )
+                model.resources
+                model.player
     }
 
 
@@ -183,6 +192,7 @@ collisionResolution model =
     { model
         | blobs = List.map (PhysicsObject.resolveCollisions model.resources) model.blobs
         , resources = List.map (PhysicsObject.resolveCollisions model.blobs) model.resources
+        , player = PhysicsObject.resolveCollisions model.resources model.player
     }
 
 
