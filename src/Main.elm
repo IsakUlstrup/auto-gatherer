@@ -71,7 +71,7 @@ type alias Model =
     , physicsStepTime : Float
     , physicsStepAccumulator : Float
     , cameraZoom : Float
-    , player : PhysicsObject ()
+    , player : PhysicsObject Vector2
     }
 
 
@@ -94,7 +94,7 @@ init _ =
         20
         0
         1
-        (PhysicsObject.new 0 0 30 100 ())
+        (PhysicsObject.new 0 0 30 100 Vector2.zero)
     , Cmd.none
     )
 
@@ -121,6 +121,7 @@ forces model =
     { model
         | blobs = List.map (Blob.ai model.player (List.filter .enableCollisions model.resources) 0.02) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition .home (always 0.02)) model.resources
+        , player = PhysicsObject.moveToPosition identity (always 0.02) model.player
     }
 
 
@@ -351,6 +352,27 @@ viewBlob blob =
         ]
 
 
+viewPlayer : PhysicsObject a -> Svg msg
+viewPlayer player =
+    viewObject
+        [ svgClassList
+            [ ( "entity", True )
+            , ( "player", True )
+            ]
+        ]
+        [ Svg.circle
+            [ Svg.Attributes.cx "0"
+            , Svg.Attributes.cy "0"
+            , Svg.Attributes.r <| String.fromFloat <| player.radius
+            , Svg.Attributes.class "body"
+            ]
+            []
+
+        -- , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt resource.state.hitCount ]
+        ]
+        player
+
+
 cameraTransform : Float -> Svg.Attribute msg
 cameraTransform zoom =
     Svg.Attributes.style <| "transform: scale(" ++ String.fromFloat zoom ++ ")"
@@ -371,6 +393,7 @@ view model =
                 ]
                 [ Svg.g [] (List.map viewResource model.resources)
                 , Svg.g [] (List.map viewBlob model.blobs)
+                , viewPlayer model.player
                 ]
             ]
         ]

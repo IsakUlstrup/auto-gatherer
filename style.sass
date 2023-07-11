@@ -1,5 +1,6 @@
 $animal_color: rgb(243, 203, 58)
 $resource_color: rgb(233, 67, 130)
+$player_color: rgb(69, 232, 142)
 
 @keyframes pop
     75%
@@ -68,3 +69,7 @@ main
 
         &.hit
             fill: lighten($resource_color, 35)
+
+    .player
+        fill: $player_color
+        stroke: lighten($player_color, 25)
