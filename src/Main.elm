@@ -20,10 +20,11 @@ initConsole : Console Msg
 initConsole =
     Engine.Console.new
         |> Engine.Console.addMessage "Add resource"
-            (Engine.Console.constructor2
+            (Engine.Console.constructor3
                 AddResource
                 (Engine.Console.argFloat "x")
                 (Engine.Console.argFloat "y")
+                (Engine.Console.argFloat "size")
             )
         |> Engine.Console.addMessage "Apply force to blobs"
             (Engine.Console.constructor2
@@ -89,10 +90,10 @@ init _ =
         , Blob.new 0 0 20 10
         , Blob.new 0 0 22 5
         ]
-        [ Resource.new 200 0
-        , Resource.new 200 -200
-        , Resource.new 0 -200
-        , Resource.new -200 200
+        [ Resource.new 200 0 20
+        , Resource.new 200 -200 30
+        , Resource.new 0 -200 35
+        , Resource.new -200 200 25
         ]
         initConsole
         20
@@ -109,7 +110,7 @@ init _ =
 
 type Msg
     = Tick Float
-    | AddResource Float Float
+    | AddResource Float Float Float
     | AddBlob Float Float Float
     | SetResourceCollisionState Bool
     | BlobForce Float Float
@@ -240,8 +241,8 @@ update msg model =
                 , Cmd.none
                 )
 
-        AddResource x y ->
-            ( { model | resources = Resource.new x y :: model.resources }, Cmd.none )
+        AddResource x y size ->
+            ( { model | resources = Resource.new x y size :: model.resources }, Cmd.none )
 
         AddBlob x y radius ->
             ( { model | blobs = Blob.new x y radius 50 :: model.blobs }, Cmd.none )

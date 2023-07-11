@@ -17,9 +17,9 @@ type alias Resource =
         }
 
 
-new : Float -> Float -> Resource
-new x y =
-    PhysicsObject.new x y 30 100 { home = Vector2.new x y, hitCooldown = 0, health = Health 10 }
+new : Float -> Float -> Float -> Resource
+new x y size =
+    PhysicsObject.new x y size (size * 10) { home = Vector2.new x y, hitCooldown = 0, health = Health 10 }
 
 
 hit : Resource -> Resource
