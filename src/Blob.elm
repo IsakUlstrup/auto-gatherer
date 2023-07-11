@@ -9,7 +9,7 @@ module Blob exposing
     )
 
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
-import Engine.Vector2 exposing (Vector2)
+import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
 type EnergyState
@@ -94,8 +94,12 @@ If blob is recharging or there are no resources, move home
 -}
 ai : PhysicsObject a -> List (PhysicsObject b) -> Float -> Blob -> Blob
 ai home resources speed blob =
-    if (isResting >> not) blob && (List.isEmpty >> not) resources then
-        PhysicsObject.moveToNearest resources speed blob
+    let
+        resourcesInRange =
+            List.filter (\r -> Vector2.distance r.position blob.position < 200) resources
+    in
+    if (isResting >> not) blob && (List.isEmpty >> not) resourcesInRange then
+        PhysicsObject.moveToNearest resourcesInRange speed blob
 
     else
         PhysicsObject.moveToPosition 100 (always home.position) (always speed) blob

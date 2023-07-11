@@ -97,7 +97,7 @@ init _ =
         initConsole
         20
         0
-        1
+        0.7
         (PhysicsObject.new 0 0 30 100 Vector2.zero)
     , Cmd.none
     )
@@ -128,7 +128,7 @@ forces model =
             0.02
     in
     { model
-        | blobs = List.map (Blob.ai model.player (List.filter .enableCollisions model.resources) movementForce) model.blobs
+        | blobs = List.map (Blob.ai model.player (model.resources |> List.filter .enableCollisions) movementForce) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition 5 .home (always movementForce)) model.resources
         , player = PhysicsObject.moveToPosition 5 identity (always movementForce) model.player
     }
@@ -364,12 +364,17 @@ viewBlob blob =
             [ Svg.circle
                 [ Svg.Attributes.cx "0"
                 , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| 200
+                , Svg.Attributes.class "range-indicator"
+                ]
+                []
+            , Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
                 , Svg.Attributes.r <| String.fromFloat <| blob.radius
                 , Svg.Attributes.class "body"
                 ]
                 []
-
-            -- , Svg.text_ [ Svg.Attributes.class "hit-count" ] [ Svg.text <| String.fromInt blob.state.hitCount ]
             ]
         ]
 
