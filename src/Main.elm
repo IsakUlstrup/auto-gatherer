@@ -388,9 +388,16 @@ viewPlayer player =
         player
 
 
-cameraTransform : Float -> Svg.Attribute msg
-cameraTransform zoom =
-    Svg.Attributes.style <| "transform: scale(" ++ String.fromFloat zoom ++ ")"
+cameraTransform : Model -> Svg.Attribute msg
+cameraTransform model =
+    Svg.Attributes.style <|
+        "transform: scale("
+            ++ String.fromFloat model.cameraZoom
+            ++ ") translate("
+            ++ String.fromFloat -model.player.position.x
+            ++ "px, "
+            ++ String.fromFloat -model.player.position.y
+            ++ "px)"
 
 
 view : Model -> Html Msg
@@ -404,7 +411,7 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , cameraTransform model.cameraZoom
+                , cameraTransform model
                 ]
                 [ Svg.g [] (List.map viewResource model.resources)
                 , Svg.g [] (List.map viewBlob model.blobs)
