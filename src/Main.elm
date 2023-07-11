@@ -125,16 +125,17 @@ forces : Model -> Model
 forces model =
     let
         movementForce =
-            0.05
+            0.03
     in
     { model
         | blobs =
             List.map
-                (Blob.ai (model.resources |> List.filter .enableCollisions) movementForce
-                    >> (\o -> PhysicsObject.applyForce (Vector2.direction o.position model.player.position |> Vector2.scale (movementForce * 0.5)) o)
-                )
+                (Blob.ai model.player.position (model.resources |> List.filter .enableCollisions) movementForce)
                 model.blobs
-        , resources = List.map (PhysicsObject.moveToPosition 5 .home (always movementForce)) model.resources
+        , resources =
+            List.map
+                (PhysicsObject.moveToPosition 5 .home (always movementForce))
+                model.resources
         , player = PhysicsObject.moveToPosition 5 identity (always movementForce) model.player
     }
 
