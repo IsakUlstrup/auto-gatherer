@@ -146,7 +146,6 @@ collisionInteraction model =
                 (PhysicsObject.collisionAction
                     (\target object ->
                         object
-                            |> Blob.incrementHits
                             |> Blob.reduceEnergy
                             |> PhysicsObject.applyForce (Vector2.direction target.position object.position)
                     )
@@ -156,9 +155,8 @@ collisionInteraction model =
         , resources =
             List.map
                 (PhysicsObject.collisionAction
-                    (\_ o ->
-                        o
-                            |> Resource.incrementHits
+                    (\_ object ->
+                        object
                             |> Resource.hit
                     )
                     model.blobs

@@ -1,7 +1,6 @@
 module Blob exposing
     ( Blob
     , ai
-    , incrementHits
     , isResting
     , new
     , reduceEnergy
@@ -20,20 +19,14 @@ type EnergyState
 
 type alias Blob =
     PhysicsObject
-        { hitCount : Int
-        , trail : List Vector2
+        { trail : List Vector2
         , energy : EnergyState
         }
 
 
 new : Float -> Float -> Float -> Float -> Blob
 new x y radius mass =
-    PhysicsObject.new x y radius mass { hitCount = 0, trail = [], energy = Energy 10 }
-
-
-incrementHits : Blob -> Blob
-incrementHits blob =
-    PhysicsObject.updateState (\s -> { s | hitCount = blob.state.hitCount + 1 }) blob
+    PhysicsObject.new x y radius mass { trail = [], energy = Energy 10 }
 
 
 reduceEnergy : Blob -> Blob
@@ -84,6 +77,8 @@ isResting blob =
             False
 
 
+{-| Update blob state
+-}
 update : Float -> Blob -> Blob
 update dt blob =
     blob
@@ -91,6 +86,11 @@ update dt blob =
         |> tickRest dt
 
 
+{-| Move blob towards if nearest resource.
+
+If blob is recharging or there are no resources, move home
+
+-}
 ai : PhysicsObject a -> List (PhysicsObject b) -> Float -> Blob -> Blob
 ai home resources speed blob =
     if (isResting >> not) blob && (List.isEmpty >> not) resources then

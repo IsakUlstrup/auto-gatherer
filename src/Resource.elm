@@ -11,8 +11,7 @@ type HealthState
 
 type alias Resource =
     PhysicsObject
-        { hitCount : Int
-        , home : Vector2
+        { home : Vector2
         , hitCooldown : Float
         , health : HealthState
         }
@@ -20,12 +19,7 @@ type alias Resource =
 
 new : Float -> Float -> Resource
 new x y =
-    PhysicsObject.new x y 30 100 { hitCount = 0, home = Vector2.new x y, hitCooldown = 0, health = Health 10 }
-
-
-incrementHits : Resource -> Resource
-incrementHits resource =
-    PhysicsObject.updateState (\s -> { s | hitCount = resource.state.hitCount + 1 }) resource
+    PhysicsObject.new x y 30 100 { home = Vector2.new x y, hitCooldown = 0, health = Health 10 }
 
 
 hit : Resource -> Resource
