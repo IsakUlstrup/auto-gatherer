@@ -97,4 +97,4 @@ ai home resources speed blob =
         PhysicsObject.moveToNearest resources speed blob
 
     else
-        PhysicsObject.moveToPosition (always home.position) (always speed) blob
+        PhysicsObject.moveToPosition 100 (always home.position) (always speed) blob

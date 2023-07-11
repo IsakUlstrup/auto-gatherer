@@ -243,13 +243,13 @@ moveToNearest targets speed object =
             object
 
 
-{-| Apply force towards target position if object is more than 5 units away
+{-| Apply force towards target position if object is more than limitDistance units away
 -}
-moveToPosition : (a -> Vector2) -> (PhysicsObject a -> Float) -> PhysicsObject a -> PhysicsObject a
-moveToPosition position speed object =
+moveToPosition : Float -> (a -> Vector2) -> (PhysicsObject a -> Float) -> PhysicsObject a -> PhysicsObject a
+moveToPosition limitDistance position speed object =
     let
         force =
-            if Vector2.distance object.position (position object.state) < 3 then
+            if Vector2.distance object.position (position object.state) < limitDistance then
                 Vector2.zero
 
             else

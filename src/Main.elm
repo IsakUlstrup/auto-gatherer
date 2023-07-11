@@ -125,10 +125,14 @@ type Msg
 
 forces : Model -> Model
 forces model =
+    let
+        movementForce =
+            0.02
+    in
     { model
-        | blobs = List.map (Blob.ai model.player (List.filter .enableCollisions model.resources) 0.02) model.blobs
-        , resources = List.map (PhysicsObject.moveToPosition .home (always 0.02)) model.resources
-        , player = PhysicsObject.moveToPosition identity (always 0.02) model.player
+        | blobs = List.map (Blob.ai model.player (List.filter .enableCollisions model.resources) movementForce) model.blobs
+        , resources = List.map (PhysicsObject.moveToPosition 5 .home (always movementForce)) model.resources
+        , player = PhysicsObject.moveToPosition 5 identity (always movementForce) model.player
     }
 
 
