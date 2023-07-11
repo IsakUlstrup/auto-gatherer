@@ -71,6 +71,7 @@ type alias Model =
     , physicsStepTime : Float
     , physicsStepAccumulator : Float
     , cameraZoom : Float
+    , player : PhysicsObject ()
     }
 
 
@@ -93,6 +94,7 @@ init _ =
         20
         0
         1
+        (PhysicsObject.new 0 0 30 100 ())
     , Cmd.none
     )
 
@@ -117,7 +119,7 @@ type Msg
 forces : Model -> Model
 forces model =
     { model
-        | blobs = List.map (Blob.ai (List.filter .enableCollisions model.resources) 0.02) model.blobs
+        | blobs = List.map (Blob.ai model.player (List.filter .enableCollisions model.resources) 0.02) model.blobs
         , resources = List.map (PhysicsObject.moveToPosition .home (always 0.02)) model.resources
     }
 

@@ -91,10 +91,10 @@ update dt blob =
         |> tickRest dt
 
 
-ai : List (PhysicsObject b) -> Float -> Blob -> Blob
-ai resources speed blob =
-    if not <| isResting blob then
+ai : PhysicsObject a -> List (PhysicsObject b) -> Float -> Blob -> Blob
+ai home resources speed blob =
+    if (isResting >> not) blob && (List.isEmpty >> not) resources then
         PhysicsObject.moveToNearest resources speed blob
 
     else
-        blob
+        PhysicsObject.moveToPosition (always home.position) (always speed) blob
