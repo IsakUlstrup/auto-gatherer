@@ -39,11 +39,10 @@ initConsole =
                 (Engine.Console.argFloat "y")
             )
         |> Engine.Console.addMessage "Add blob"
-            (Engine.Console.constructor3
+            (Engine.Console.constructor2
                 AddBlob
-                (Engine.Console.argFloat "x")
-                (Engine.Console.argFloat "y")
-                (Engine.Console.argFloat "radius")
+                (Engine.Console.argFloat "size")
+                (Engine.Console.argInt "energy")
             )
         |> Engine.Console.addMessage "Reset state"
             (Engine.Console.constructor Reset)
@@ -111,7 +110,7 @@ init _ =
 type Msg
     = Tick Float
     | AddResource Float Float Float
-    | AddBlob Float Float Float
+    | AddBlob Float Int
     | SetResourceCollisionState Bool
     | BlobForce Float Float
     | ResourceForce Float Float
@@ -244,8 +243,8 @@ update msg model =
         AddResource x y size ->
             ( { model | resources = Resource.new x y size :: model.resources }, Cmd.none )
 
-        AddBlob x y radius ->
-            ( { model | blobs = Blob.new x y radius 50 :: model.blobs }, Cmd.none )
+        AddBlob size energy ->
+            ( { model | blobs = Blob.new 0 0 size energy :: model.blobs }, Cmd.none )
 
         BlobForce x y ->
             ( { model | blobs = List.map (PhysicsObject.applyForce <| Vector2.new x y) model.blobs }, Cmd.none )
