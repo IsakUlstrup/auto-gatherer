@@ -88,6 +88,7 @@ init _ =
         , Blob.new 0 0 18 15
         , Blob.new 0 0 20 10
         , Blob.new 0 0 22 5
+        , Blob.new 0 0 50 30
         ]
         [ Resource.new 200 0 20
         , Resource.new 200 -200 30
