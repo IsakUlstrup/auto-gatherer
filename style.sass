@@ -1,6 +1,12 @@
 $animal_color: rgb(243, 203, 58)
 $resource_color: rgb(233, 67, 130)
 
+@keyframes pop
+    75%
+        transform: scale(1.4)
+    100%
+        transform: scale(1)
+
 *
     padding: 0
     margin: 0
@@ -46,14 +52,19 @@ main
             fill: lighten($animal_color, 25)
 
         &.resting
-            fill: desaturate($animal_color, 20 )
+            fill: desaturate($animal_color, 30 )
+        &.rested .body
+            animation: pop 250ms
 
     .resource
         fill: $resource_color
         stroke: lighten($resource_color, 25)
 
         &.recharging
-            fill: desaturate($resource_color, 20 )
+            fill: desaturate($resource_color, 30 )
+
+        &.healthy .body
+            animation: pop 250ms
 
         &.hit
             fill: lighten($resource_color, 35)

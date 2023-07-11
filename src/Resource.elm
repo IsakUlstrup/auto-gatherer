@@ -36,10 +36,12 @@ hit resource =
                 resource
                     |> PhysicsObject.setcollisionState False
                     |> PhysicsObject.updateState (\s -> { s | health = Recharging 8000 })
+                    |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })
 
             else
                 resource
                     |> PhysicsObject.updateState (\s -> { s | health = Health <| max 0 (hp - 1) })
+                    |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })
 
         Recharging _ ->
             resource |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })

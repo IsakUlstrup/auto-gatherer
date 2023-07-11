@@ -299,12 +299,14 @@ viewResource resource =
             , ( "resource", True )
             , ( "hit", Resource.isHit resource )
             , ( "recharging", Resource.isRecharging resource )
+            , ( "healthy", (Resource.isRecharging >> not) resource )
             ]
         ]
         [ Svg.circle
             [ Svg.Attributes.cx "0"
             , Svg.Attributes.cy "0"
             , Svg.Attributes.r <| String.fromFloat <| resource.radius
+            , Svg.Attributes.class "body"
             ]
             []
 
@@ -331,6 +333,7 @@ viewBlob blob =
             [ ( "entity", True )
             , ( "blob", True )
             , ( "resting", Blob.isResting blob )
+            , ( "rested", (Blob.isResting >> not) blob )
             ]
         ]
         [ Svg.g [ Svg.Attributes.class "trail" ] (blob.state.trail |> List.indexedMap (viewTrail blob.radius))
@@ -339,6 +342,7 @@ viewBlob blob =
                 [ Svg.Attributes.cx "0"
                 , Svg.Attributes.cy "0"
                 , Svg.Attributes.r <| String.fromFloat <| blob.radius
+                , Svg.Attributes.class "body"
                 ]
                 []
 
