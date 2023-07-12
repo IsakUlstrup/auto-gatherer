@@ -496,7 +496,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onAnimationFrameDelta Tick
+    Browser.Events.onAnimationFrameDelta (min 1000 >> Tick)
 
 
 
