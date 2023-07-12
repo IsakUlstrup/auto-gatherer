@@ -456,11 +456,16 @@ viewBackground tileSize =
                     []
                 ]
 
-        viewRow : Int -> List Int -> Svg Msg
+        viewRow : Int -> List Int -> List (Svg Msg)
         viewRow i r =
-            Svg.g [] (List.map (viewTile (i - gridSize)) r)
+            List.map (viewTile (i - gridSize)) r
     in
-    Svg.g [ Svg.Attributes.class "background-tiles" ] (List.range -gridSize gridSize |> List.map (\_ -> List.range -gridSize gridSize) |> List.indexedMap viewRow)
+    Svg.g [ Svg.Attributes.class "background-tiles" ]
+        (List.range -gridSize gridSize
+            |> List.map (\_ -> List.range -gridSize gridSize)
+            |> List.indexedMap viewRow
+            |> List.concat
+        )
 
 
 view : Model -> Html Msg
