@@ -423,7 +423,7 @@ viewBackground tileSize =
     let
         isOdd : Int -> Bool
         isOdd n =
-            modBy 2 n |> (==) 1
+            modBy 2 n == 1
 
         gridSize : Int
         gridSize =

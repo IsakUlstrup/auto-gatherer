@@ -63,7 +63,7 @@ applyFriciton friction object =
     let
         adjustedFriction : Float
         adjustedFriction =
-            clamp 0 1 friction |> (\x -> 1 - x)
+            1 - clamp 0 1 friction
     in
     { object | velocity = Vector2.scale adjustedFriction object.velocity }
 
