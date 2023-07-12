@@ -93,8 +93,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Blob.new 0 0 50 15
-        , Blob.new 0 0 30 12
+        [ Blob.new 0 0 30 12
         , Blob.new 0 0 20 21
         , Blob.new 0 0 10 10
         ]
@@ -102,14 +101,13 @@ init _ =
         , Resource.new 178 -183 30
         , Resource.new 0 -200 35
         , Resource.new -200 200 25
-        , Resource.new -436 574 27
         ]
         initConsole
         20
         0
         0.7
         (PhysicsObject.new 0 0 30 100 Vector2.zero)
-        100
+        60
     , Cmd.none
     )
 
@@ -368,29 +366,20 @@ viewResource resource =
 
 viewBlob : Blob -> Svg msg
 viewBlob blob =
-    Svg.g
-        [ svgClassList
+    Svg.circle
+        [ Svg.Attributes.cx "0"
+        , Svg.Attributes.cy "0"
+        , Svg.Attributes.r <| String.fromFloat <| blob.radius
+        , Svg.Attributes.class "body"
+        , Svg.Attributes.transform <| transformString blob.position
+        , svgClassList
             [ ( "entity", True )
             , ( "blob", True )
             , ( "resting", Blob.isResting blob )
             , ( "rested", (Blob.isResting >> not) blob )
             ]
         ]
-        [ Svg.Lazy.lazy2
-            (\position radius ->
-                Svg.g [ Svg.Attributes.transform <| transformString position ]
-                    [ Svg.circle
-                        [ Svg.Attributes.cx "0"
-                        , Svg.Attributes.cy "0"
-                        , Svg.Attributes.r <| String.fromFloat <| radius
-                        , Svg.Attributes.class "body"
-                        ]
-                        []
-                    ]
-            )
-            blob.position
-            blob.radius
-        ]
+        []
 
 
 viewPlayer : PhysicsObject Vector2 -> Svg msg
@@ -485,8 +474,8 @@ view model =
                 , cameraTransform model.cameraZoom model.player.position
                 ]
                 [ Svg.Lazy.lazy viewBackground model.tileSize
-                , Svg.g [] (List.map viewBlob model.blobs)
-                , Svg.g [] (List.map viewResource model.resources)
+                , Svg.g [ Svg.Attributes.class "blobs" ] (List.map viewBlob model.blobs)
+                , Svg.g [ Svg.Attributes.class "resources" ] (List.map viewResource model.resources)
                 , Svg.Lazy.lazy viewPlayer model.player
                 ]
             ]
