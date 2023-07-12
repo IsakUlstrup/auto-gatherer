@@ -414,15 +414,15 @@ viewPlayer player =
         player.position
 
 
-cameraTransform : Model -> Svg.Attribute msg
-cameraTransform model =
+cameraTransform : Float -> Vector2 -> Svg.Attribute msg
+cameraTransform zoom position =
     Svg.Attributes.style <|
         "transform: scale("
-            ++ String.fromFloat model.cameraZoom
+            ++ String.fromFloat zoom
             ++ ") translate("
-            ++ String.fromFloat -model.player.position.x
+            ++ String.fromFloat -position.x
             ++ "px, "
-            ++ String.fromFloat -model.player.position.y
+            ++ String.fromFloat -position.y
             ++ "px) rotate(3deg)"
 
 
@@ -482,12 +482,12 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , cameraTransform model
+                , cameraTransform model.cameraZoom model.player.position
                 ]
                 [ Svg.Lazy.lazy viewBackground model.tileSize
                 , Svg.g [] (List.map viewBlob model.blobs)
                 , Svg.g [] (List.map viewResource model.resources)
-                , viewPlayer model.player
+                , Svg.Lazy.lazy viewPlayer model.player
                 ]
             ]
         ]
