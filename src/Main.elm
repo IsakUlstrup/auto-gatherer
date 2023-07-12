@@ -101,6 +101,7 @@ init _ =
         , Resource.new 178 -183 30
         , Resource.new 0 -200 35
         , Resource.new -200 200 25
+        , Resource.new -436 574 27
         ]
         initConsole
         20
