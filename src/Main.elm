@@ -330,10 +330,10 @@ transformString position =
         ++ ")"
 
 
-viewObject : List (Svg.Attribute msg) -> List (Svg msg) -> PhysicsObject state -> Svg msg
-viewObject attrs children object =
+viewObject : List (Svg.Attribute msg) -> List (Svg msg) -> Vector2 -> Svg msg
+viewObject attrs children position =
     Svg.g
-        ([ Svg.Attributes.transform <| transformString object.position
+        ([ Svg.Attributes.transform <| transformString position
          , Svg.Attributes.class "object"
          ]
             ++ attrs
@@ -343,24 +343,26 @@ viewObject attrs children object =
 
 viewResource : Resource -> Svg msg
 viewResource resource =
-    viewObject
-        [ svgClassList
-            [ ( "entity", True )
-            , ( "resource", True )
-            , ( "hit", Resource.isHit resource )
-            , ( "recharging", Resource.isRecharging resource )
-            , ( "healthy", (Resource.isRecharging >> not) resource )
+    Svg.Lazy.lazy
+        (viewObject
+            [ svgClassList
+                [ ( "entity", True )
+                , ( "resource", True )
+                , ( "hit", Resource.isHit resource )
+                , ( "recharging", Resource.isRecharging resource )
+                , ( "healthy", (Resource.isRecharging >> not) resource )
+                ]
             ]
-        ]
-        [ Svg.circle
-            [ Svg.Attributes.cx "0"
-            , Svg.Attributes.cy "0"
-            , Svg.Attributes.r <| String.fromFloat <| resource.radius
-            , Svg.Attributes.class "body"
+            [ Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| resource.radius
+                , Svg.Attributes.class "body"
+                ]
+                []
             ]
-            []
-        ]
-        resource
+        )
+        resource.position
 
 
 viewBlob : Blob -> Svg msg
@@ -399,21 +401,23 @@ viewBlob blob =
 
 viewPlayer : PhysicsObject Vector2 -> Svg msg
 viewPlayer player =
-    viewObject
-        [ svgClassList
-            [ ( "entity", True )
-            , ( "player", True )
+    Svg.Lazy.lazy
+        (viewObject
+            [ svgClassList
+                [ ( "entity", True )
+                , ( "player", True )
+                ]
             ]
-        ]
-        [ Svg.circle
-            [ Svg.Attributes.cx "0"
-            , Svg.Attributes.cy "0"
-            , Svg.Attributes.r <| String.fromFloat <| player.radius
-            , Svg.Attributes.class "body"
+            [ Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| player.radius
+                , Svg.Attributes.class "body"
+                ]
+                []
             ]
-            []
-        ]
-        player
+        )
+        player.position
 
 
 cameraTransform : Model -> Svg.Attribute msg
