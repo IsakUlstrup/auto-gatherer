@@ -30,11 +30,14 @@ main
 
     .background-tiles
         filter: drop-shadow(0rem 0rem 2rem rgba(0, 0, 0, 0.4))
+
         .tile
             fill: $tile_color
             transition: fill 300ms
+
             &.odd
                 fill: darken($tile_color, 3)
+
             &:hover
                 fill: lighten($tile_color, 20)
 
@@ -46,12 +49,6 @@ main
     .entity
         transition: fill 100ms
         stroke-width: 2
-        .hit-count
-            font-size: 1rem
-            font-weight: bold
-            text-anchor: middle
-            stroke: none
-            fill: rgba(255, 255, 255, 0.77)
 
     .blob
         fill: $animal_color
@@ -60,14 +57,9 @@ main
         .trail
             fill: lighten($animal_color, 25)
 
-        .range-indicator
-            fill: none
-            stroke: lighten($animal_color, 45)
-            stroke-opacity: 0.5
-            stroke-width: 0.5
-
         &.resting
             fill: desaturate($animal_color, 30 )
+
         &.rested .body
             animation: pop 250ms
 
@@ -87,7 +79,3 @@ main
     .player
         fill: $player_color
         stroke: lighten($player_color, 25)
-
-        .player-target
-            fill: none
-            stroke: white
