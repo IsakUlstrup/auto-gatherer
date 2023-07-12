@@ -425,7 +425,7 @@ cameraTransform model =
             ++ String.fromFloat -model.player.position.x
             ++ "px, "
             ++ String.fromFloat -model.player.position.y
-            ++ "px)"
+            ++ "px) rotate(3deg)"
 
 
 viewBackground : Int -> Svg Msg
