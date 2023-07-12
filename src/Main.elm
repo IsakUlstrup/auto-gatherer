@@ -325,9 +325,9 @@ svgClassList classes =
 transformString : Vector2 -> String
 transformString position =
     "translate("
-        ++ String.fromFloat position.x
+        ++ String.fromInt (round position.x)
         ++ ", "
-        ++ String.fromFloat position.y
+        ++ String.fromInt (round position.y)
         ++ ")"
 
 
@@ -420,9 +420,9 @@ cameraTransform zoom position =
         "transform: scale("
             ++ String.fromFloat zoom
             ++ ") translate("
-            ++ String.fromFloat -position.x
+            ++ String.fromInt -(round position.x)
             ++ "px, "
-            ++ String.fromFloat -position.y
+            ++ String.fromInt -(round position.y)
             ++ "px) rotate(3deg)"
 
 
