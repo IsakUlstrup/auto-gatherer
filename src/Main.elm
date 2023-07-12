@@ -403,13 +403,6 @@ viewPlayer player =
             ]
         ]
         [ Svg.circle
-            [ Svg.Attributes.cx <| String.fromFloat (player.state.x - player.position.x)
-            , Svg.Attributes.cy <| String.fromFloat (player.state.y - player.position.y)
-            , Svg.Attributes.r "10"
-            , Svg.Attributes.class "player-target"
-            ]
-            []
-        , Svg.circle
             [ Svg.Attributes.cx "0"
             , Svg.Attributes.cy "0"
             , Svg.Attributes.r <| String.fromFloat <| player.radius
