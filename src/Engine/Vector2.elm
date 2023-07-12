@@ -6,7 +6,6 @@ module Engine.Vector2 exposing
     , divide
     , magnitude
     , multiply
-    , negate
     , new
     , scale
     , singleton
@@ -52,11 +51,6 @@ multiply v1 v2 =
         | x = v1.x * v2.x
         , y = v1.y * v2.y
     }
-
-
-negate : Vector2 -> Vector2
-negate vector =
-    scale -1 vector
 
 
 add : Vector2 -> Vector2 -> Vector2

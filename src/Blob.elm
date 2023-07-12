@@ -1,5 +1,6 @@
 module Blob exposing
     ( Blob
+    , EnergyState
     , ai
     , isResting
     , new
@@ -95,6 +96,7 @@ If blob is recharging or there are no resources, move home
 ai : Vector2 -> List (PhysicsObject b) -> Float -> Blob -> Blob
 ai home resources speed blob =
     let
+        resourcesInRange : List (PhysicsObject b)
         resourcesInRange =
             List.filter (\r -> Vector2.distance r.position blob.position < 200) resources
     in

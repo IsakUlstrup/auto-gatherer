@@ -136,6 +136,7 @@ type Msg
 forces : Model -> Model
 forces model =
     let
+        movementForce : Float
         movementForce =
             0.03
     in
@@ -155,6 +156,7 @@ forces model =
 movement : Float -> Model -> Model
 movement dt model =
     let
+        f : PhysicsObject a -> PhysicsObject a
         f =
             PhysicsObject.applyFriciton 0.05
                 >> PhysicsObject.move dt
@@ -236,6 +238,7 @@ update msg model =
     case msg of
         Tick dt ->
             let
+                deltaSum : Float
                 deltaSum =
                     model.physicsStepAccumulator + dt
             in
@@ -428,9 +431,11 @@ cameraTransform model =
 viewBackground : Int -> Svg Msg
 viewBackground tileSize =
     let
+        isOdd : Int -> Bool
         isOdd n =
             modBy 2 n |> (==) 1
 
+        gridSize : Int
         gridSize =
             10
 

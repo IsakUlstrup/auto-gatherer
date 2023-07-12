@@ -61,8 +61,9 @@ applyForce force object =
 applyFriciton : Float -> PhysicsObject a -> PhysicsObject a
 applyFriciton friction object =
     let
+        adjustedFriction : Float
         adjustedFriction =
-            clamp 0 1 friction |> (-) 1
+            clamp 0 1 friction |> (\x -> x - 1)
     in
     { object | velocity = Vector2.scale adjustedFriction object.velocity }
 
@@ -125,15 +126,15 @@ A collision occurs when the distance between to objects with collisions enabled 
 -}
 isColliding : PhysicsObject a -> PhysicsObject b -> Bool
 isColliding object target =
-    let
-        dist : Vector2
-        dist =
-            Vector2.subtract object.position target.position
-    in
     if not target.enableCollisions || not object.enableCollisions then
         False
 
     else
+        let
+            dist : Vector2
+            dist =
+                Vector2.subtract object.position target.position
+        in
         (dist |> Vector2.multiply dist |> Vector2.sum) <= (object.radius + target.radius) ^ 2
 
 
@@ -158,9 +159,11 @@ collisionAction f targets object =
 resolveCollision : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
 resolveCollision target object =
     let
+        totalMass : Float
         totalMass =
             target.mass + object.mass
 
+        newVx : Float
         newVx =
             (object.mass - target.mass)
                 / totalMass
@@ -169,6 +172,7 @@ resolveCollision target object =
                 / totalMass
                 * target.velocity.x
 
+        newVy : Float
         newVy =
             (object.mass - target.mass)
                 / totalMass
@@ -205,6 +209,7 @@ resolveCollision target object =
 resolveCollisions : List (PhysicsObject b) -> PhysicsObject a -> PhysicsObject a
 resolveCollisions targets object =
     let
+        resolve : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
         resolve res e =
             resolveCollision res e
     in
@@ -232,6 +237,7 @@ moveToNearest targets speed object =
                 |> List.sortBy (Vector2.distance object.position)
                 |> List.head
 
+        force : Vector2 -> Vector2
         force target =
             Vector2.direction object.position target |> Vector2.scale speed
     in
@@ -248,6 +254,7 @@ moveToNearest targets speed object =
 moveToPosition : Float -> (a -> Vector2) -> (PhysicsObject a -> Float) -> PhysicsObject a -> PhysicsObject a
 moveToPosition limitDistance position speed object =
     let
+        force : Vector2
         force =
             if Vector2.distance object.position (position object.state) < limitDistance then
                 Vector2.zero
