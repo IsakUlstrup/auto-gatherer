@@ -149,7 +149,7 @@ forces model =
             List.map
                 (PhysicsObject.moveToPosition 5 .home (always movementForce))
                 model.resources
-        , player = PhysicsObject.moveToPosition 5 identity (always movementForce) model.player
+        , player = PhysicsObject.moveToPosition 20 identity (always movementForce) model.player
     }
 
 
