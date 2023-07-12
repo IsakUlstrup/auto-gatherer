@@ -103,7 +103,7 @@ init _ =
         , Resource.new -200 200 25
         ]
         initConsole
-        20
+        30
         0
         0.7
         (PhysicsObject.new 0 0 30 100 Vector2.zero)
@@ -220,7 +220,7 @@ stateUpdate dt model =
     }
 
 
-fixedUpdate : (Model -> Model) -> Float -> Model -> Model
+fixedUpdate : (Model -> Model) -> Float -> Model -> ( Model, Float )
 fixedUpdate f dt model =
     if dt >= model.physicsStepTime then
         { model | physicsStepAccumulator = dt - model.physicsStepTime }
@@ -228,8 +228,7 @@ fixedUpdate f dt model =
             |> fixedUpdate f (dt - model.physicsStepTime)
 
     else
-        f
-            model
+        ( f model, dt )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -242,15 +241,19 @@ update msg model =
                     model.physicsStepAccumulator + dt
             in
             if deltaSum >= model.physicsStepTime then
-                ( model
+                let
+                    ( m, d ) =
+                        fixedUpdate
+                            (forces
+                                >> movement model.physicsStepTime
+                                >> collisionInteraction
+                                >> collisionResolution
+                            )
+                            deltaSum
+                            model
+                in
+                ( { m | physicsStepAccumulator = d }
                     |> stateUpdate dt
-                    |> fixedUpdate
-                        (forces
-                            >> movement model.physicsStepTime
-                            >> collisionInteraction
-                            >> collisionResolution
-                        )
-                        deltaSum
                 , Cmd.none
                 )
 
