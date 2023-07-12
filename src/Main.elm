@@ -436,18 +436,25 @@ viewBackground tileSize =
 
         viewTile : Int -> Int -> Svg Msg
         viewTile x y =
-            Svg.rect
-                [ Svg.Attributes.x <| String.fromInt <| x * tileSize
-                , Svg.Attributes.y <| String.fromInt <| y * tileSize
-                , Svg.Attributes.width <| String.fromInt tileSize
-                , Svg.Attributes.height <| String.fromInt tileSize
-                , Svg.Events.onClick <| GameClick <| Vector2.new (toFloat <| x * tileSize + (tileSize // 2)) (toFloat <| y * tileSize + (tileSize // 2))
-                , svgClassList
-                    [ ( "tile", True )
-                    , ( "odd", isOdd (x + y) )
-                    ]
+            Svg.g
+                [ Svg.Attributes.style <|
+                    "transform: translate("
+                        ++ (String.fromInt <| x * tileSize)
+                        ++ "px, "
+                        ++ (String.fromInt <| y * tileSize)
+                        ++ "px)"
                 ]
-                []
+                [ Svg.rect
+                    [ Svg.Attributes.width <| String.fromInt tileSize
+                    , Svg.Attributes.height <| String.fromInt tileSize
+                    , Svg.Events.onClick <| GameClick <| Vector2.new (toFloat <| x * tileSize + (tileSize // 2)) (toFloat <| y * tileSize + (tileSize // 2))
+                    , svgClassList
+                        [ ( "tile", True )
+                        , ( "odd", isOdd (x + y) )
+                        ]
+                    ]
+                    []
+                ]
 
         viewRow : Int -> List Int -> Svg Msg
         viewRow i r =
