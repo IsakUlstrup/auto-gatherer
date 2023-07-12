@@ -7,6 +7,7 @@ import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
+import Html.Lazy
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -480,7 +481,7 @@ viewBackground tileSize =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        [ Html.map ConsoleMsg (Html.Lazy.lazy Engine.Console.viewConsole model.console)
         , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
