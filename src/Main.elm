@@ -108,7 +108,7 @@ init _ =
         0
         0.7
         (PhysicsObject.new 0 0 30 100 Vector2.zero)
-        70
+        100
     , Cmd.none
     )
 
@@ -441,7 +441,7 @@ viewBackground tileSize =
 
         gridSize : Int
         gridSize =
-            10
+            6
 
         viewTile : Int -> Int -> Svg Msg
         viewTile x y =
