@@ -7,11 +7,11 @@ import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
-import Json.Decode as Json
 import Resource exposing (Resource)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
+import Svg.Lazy
 
 
 
@@ -53,6 +53,11 @@ initConsole =
                 SetResourceCollisionState
                 (Engine.Console.argBool "Enabled")
             )
+        |> Engine.Console.addMessage "Set tile size"
+            (Engine.Console.constructor1
+                SetTileSize
+                (Engine.Console.argInt "Size")
+            )
         |> Engine.Console.addMessage "Set camera zoom"
             (Engine.Console.constructor1
                 SetCameraZoom
@@ -80,6 +85,7 @@ type alias Model =
     , physicsStepAccumulator : Float
     , cameraZoom : Float
     , player : PhysicsObject Vector2
+    , tileSize : Int
     }
 
 
@@ -101,6 +107,7 @@ init _ =
         0
         0.7
         (PhysicsObject.new 0 0 30 100 Vector2.zero)
+        70
     , Cmd.none
     )
 
@@ -122,6 +129,7 @@ type Msg
     | SetCameraZoom Float
     | ConsoleMsg (ConsoleMsg Msg)
     | GameClick Vector2
+    | SetTileSize Int
 
 
 forces : Model -> Model
@@ -222,13 +230,6 @@ fixedUpdate f dt model =
             model
 
 
-clickDecoder : Json.Decoder Vector2
-clickDecoder =
-    Json.map2 Vector2.new
-        (Json.field "clientX" Json.float)
-        (Json.field "clientY" Json.float)
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -296,11 +297,10 @@ update msg model =
                     ( { model | console = newConsole }, Cmd.none )
 
         GameClick coordinate ->
-            let
-                adjustedCoord =
-                    Vector2.subtract coordinate (Vector2.singleton 500) |> Vector2.add model.player.position
-            in
-            ( { model | player = PhysicsObject.updateState (always <| Vector2.new adjustedCoord.x adjustedCoord.y) model.player }, Cmd.none )
+            ( { model | player = PhysicsObject.updateState (always <| coordinate) model.player }, Cmd.none )
+
+        SetTileSize size ->
+            ( { model | tileSize = size }, Cmd.none )
 
 
 
@@ -431,6 +431,37 @@ cameraTransform model =
             ++ "px)"
 
 
+viewBackground : Int -> Svg Msg
+viewBackground tileSize =
+    let
+        isOdd n =
+            modBy 2 n |> (==) 1
+
+        gridSize =
+            10
+
+        viewTile : Int -> Int -> Svg Msg
+        viewTile x y =
+            Svg.rect
+                [ Svg.Attributes.x <| String.fromInt <| x * tileSize
+                , Svg.Attributes.y <| String.fromInt <| y * tileSize
+                , Svg.Attributes.width <| String.fromInt tileSize
+                , Svg.Attributes.height <| String.fromInt tileSize
+                , Svg.Events.onClick <| GameClick <| Vector2.new (toFloat <| x * tileSize + (tileSize // 2)) (toFloat <| y * tileSize + (tileSize // 2))
+                , svgClassList
+                    [ ( "tile", True )
+                    , ( "odd", isOdd (x + y) )
+                    ]
+                ]
+                []
+
+        viewRow : Int -> List Int -> Svg Msg
+        viewRow i r =
+            Svg.g [] (List.map (viewTile (i - gridSize)) r)
+    in
+    Svg.g [ Svg.Attributes.class "background-tiles" ] (List.range -gridSize gridSize |> List.map (\_ -> List.range -gridSize gridSize) |> List.indexedMap viewRow)
+
+
 view : Model -> Html Msg
 view model =
     main_ []
@@ -439,13 +470,13 @@ view model =
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
-            , Svg.Events.on "click" (Json.map GameClick clickDecoder)
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
                 , cameraTransform model
                 ]
-                [ Svg.g [] (List.map viewBlob model.blobs)
+                [ Svg.Lazy.lazy viewBackground model.tileSize
+                , Svg.g [] (List.map viewBlob model.blobs)
                 , Svg.g [] (List.map viewResource model.resources)
                 , viewPlayer model.player
                 ]
