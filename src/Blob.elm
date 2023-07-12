@@ -20,15 +20,14 @@ type EnergyState
 
 type alias Blob =
     PhysicsObject
-        { trail : List Vector2
-        , energy : EnergyState
+        { energy : EnergyState
         , maxEnergy : Int
         }
 
 
 new : Float -> Float -> Float -> Int -> Blob
 new x y size maxEnergy =
-    PhysicsObject.new x y size (size * 5) { trail = [], energy = Energy maxEnergy, maxEnergy = maxEnergy }
+    PhysicsObject.new x y size (size * 5) { energy = Energy maxEnergy, maxEnergy = maxEnergy }
 
 
 reduceEnergy : Blob -> Blob
@@ -84,7 +83,6 @@ isResting blob =
 update : Float -> Blob -> Blob
 update dt blob =
     blob
-        |> PhysicsObject.updateState (\s -> { s | trail = blob.position :: blob.state.trail |> List.take 20 })
         |> tickRest dt
 
 

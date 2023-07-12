@@ -368,17 +368,6 @@ viewResource resource =
 
 viewBlob : Blob -> Svg msg
 viewBlob blob =
-    let
-        viewTrail : Float -> Int -> Vector2 -> Svg msg
-        viewTrail r i p =
-            Svg.circle
-                [ Svg.Attributes.cx <| String.fromFloat p.x
-                , Svg.Attributes.cy <| String.fromFloat p.y
-                , Svg.Attributes.r <| String.fromFloat <| r - toFloat i
-                , Svg.Attributes.fillOpacity <| String.fromInt <| 100 - (i * 3)
-                ]
-                []
-    in
     Svg.g
         [ svgClassList
             [ ( "entity", True )
@@ -387,16 +376,20 @@ viewBlob blob =
             , ( "rested", (Blob.isResting >> not) blob )
             ]
         ]
-        [ Svg.g [ Svg.Attributes.class "trail" ] (blob.state.trail |> List.indexedMap (viewTrail blob.radius))
-        , Svg.g [ Svg.Attributes.transform <| transformString blob.position ]
-            [ Svg.circle
-                [ Svg.Attributes.cx "0"
-                , Svg.Attributes.cy "0"
-                , Svg.Attributes.r <| String.fromFloat <| blob.radius
-                , Svg.Attributes.class "body"
-                ]
-                []
-            ]
+        [ Svg.Lazy.lazy2
+            (\position radius ->
+                Svg.g [ Svg.Attributes.transform <| transformString position ]
+                    [ Svg.circle
+                        [ Svg.Attributes.cx "0"
+                        , Svg.Attributes.cy "0"
+                        , Svg.Attributes.r <| String.fromFloat <| radius
+                        , Svg.Attributes.class "body"
+                        ]
+                        []
+                    ]
+            )
+            blob.position
+            blob.radius
         ]
 
 
