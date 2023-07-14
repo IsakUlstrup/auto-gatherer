@@ -103,7 +103,7 @@ init _ =
         , Resource.new -200 200 25
         ]
         initConsole
-        30
+        20
         0
         0.7
         (PhysicsObject.new 0 0 30 100 Vector2.zero)
