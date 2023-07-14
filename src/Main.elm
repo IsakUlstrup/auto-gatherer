@@ -236,32 +236,18 @@ update msg model =
     case msg of
         Tick dt ->
             let
-                deltaSum : Float
-                deltaSum =
-                    model.physicsStepAccumulator + dt
+                ( newModel, dtRemainder ) =
+                    fixedUpdate
+                        (forces
+                            >> movement model.physicsStepTime
+                            >> collisionInteraction
+                            >> collisionResolution
+                            >> stateUpdate model.physicsStepTime
+                        )
+                        (model.physicsStepAccumulator + dt)
+                        model
             in
-            if deltaSum >= model.physicsStepTime then
-                let
-                    ( m, d ) =
-                        fixedUpdate
-                            (forces
-                                >> movement model.physicsStepTime
-                                >> collisionInteraction
-                                >> collisionResolution
-                            )
-                            deltaSum
-                            model
-                in
-                ( { m | physicsStepAccumulator = d }
-                    |> stateUpdate dt
-                , Cmd.none
-                )
-
-            else
-                ( { model | physicsStepAccumulator = deltaSum }
-                    |> stateUpdate dt
-                , Cmd.none
-                )
+            ( { newModel | physicsStepAccumulator = dtRemainder }, Cmd.none )
 
         AddResource x y size ->
             ( { model | resources = Resource.new x y size :: model.resources }, Cmd.none )
