@@ -66,6 +66,13 @@ main
         fill: $resource_color
         stroke: lighten($resource_color, 25)
 
+        .health
+            opacity: 0
+            text-anchor: middle
+            stroke: none
+            fill: white
+            transition: opacity 300ms ease-out
+
         &.recharging
             fill: desaturate($resource_color, 30 )
 
@@ -74,6 +81,8 @@ main
 
         &.hit
             fill: lighten($resource_color, 35)
+        &.player-close .health
+            opacity: 1
 
     .player
         fill: $player_color

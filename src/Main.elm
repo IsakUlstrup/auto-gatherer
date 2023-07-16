@@ -329,8 +329,17 @@ viewObject attrs children position =
         children
 
 
-viewResource : Resource -> Svg msg
-viewResource resource =
+viewResource : Vector2 -> Resource -> Svg msg
+viewResource playerPosition resource =
+    let
+        viewHealth r =
+            case Resource.getHealth r of
+                Just hp ->
+                    [ Svg.text_ [ Svg.Attributes.class "health" ] [ Svg.text <| String.fromInt hp ] ]
+
+                Nothing ->
+                    []
+    in
     Svg.Lazy.lazy
         (viewObject
             [ svgClassList
@@ -339,16 +348,18 @@ viewResource resource =
                 , ( "hit", Resource.isHit resource )
                 , ( "recharging", Resource.isRecharging resource )
                 , ( "healthy", (Resource.isRecharging >> not) resource )
+                , ( "player-close", Vector2.distance playerPosition resource.position < 200 )
                 ]
             ]
-            [ Svg.circle
+            (Svg.circle
                 [ Svg.Attributes.cx "0"
                 , Svg.Attributes.cy "0"
                 , Svg.Attributes.r <| String.fromFloat <| resource.radius
                 , Svg.Attributes.class "body"
                 ]
                 []
-            ]
+                :: viewHealth resource
+            )
         )
         resource.position
 
@@ -464,7 +475,7 @@ view model =
                 ]
                 [ Svg.Lazy.lazy viewBackground model.tileSize
                 , Svg.g [ Svg.Attributes.class "blobs" ] (List.map viewBlob model.blobs)
-                , Svg.g [ Svg.Attributes.class "resources" ] (List.map viewResource model.resources)
+                , Svg.g [ Svg.Attributes.class "resources" ] (List.map (viewResource model.player.position) model.resources)
                 , Svg.Lazy.lazy viewPlayer model.player
                 ]
             ]

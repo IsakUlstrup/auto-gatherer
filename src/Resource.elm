@@ -1,6 +1,7 @@
 module Resource exposing
     ( HealthState
     , Resource
+    , getHealth
     , hit
     , isHit
     , isRecharging
@@ -66,6 +67,16 @@ recharge amount resource =
 isHit : Resource -> Bool
 isHit resource =
     resource.state.hitCooldown > 0
+
+
+getHealth : Resource -> Maybe Int
+getHealth resource =
+    case resource.state.health of
+        Health hp ->
+            Just hp
+
+        Recharging _ ->
+            Nothing
 
 
 isRecharging : Resource -> Bool
