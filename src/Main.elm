@@ -334,8 +334,14 @@ viewResource playerPosition resource =
     let
         viewHealth r =
             case Resource.getHealth r of
-                Just hp ->
-                    [ Svg.text_ [ Svg.Attributes.class "health" ] [ Svg.text <| String.fromInt hp ] ]
+                Just ( hp, maxHp ) ->
+                    [ Svg.text_ [ Svg.Attributes.class "health" ]
+                        [ Svg.text <|
+                            String.fromInt hp
+                                ++ "/"
+                                ++ String.fromInt maxHp
+                        ]
+                    ]
 
                 Nothing ->
                     []

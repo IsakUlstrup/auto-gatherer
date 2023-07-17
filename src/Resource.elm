@@ -14,8 +14,8 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
 type HealthState
-    = Health Int
-    | Recharging Float
+    = Health ( Int, Int )
+    | Recharging Float Int
 
 
 type alias Resource =
@@ -28,25 +28,25 @@ type alias Resource =
 
 new : Float -> Float -> Float -> Resource
 new x y size =
-    PhysicsObject.new x y size (size * 10) { home = Vector2.new x y, hitCooldown = 0, health = Health 10 }
+    PhysicsObject.new x y size (size * 10) { home = Vector2.new x y, hitCooldown = 0, health = Health ( 10, 10 ) }
 
 
 hit : Resource -> Resource
 hit resource =
     case resource.state.health of
-        Health hp ->
+        Health ( hp, maxHp ) ->
             if hp - 1 <= 0 then
                 resource
                     |> PhysicsObject.setcollisionState False
-                    |> PhysicsObject.updateState (\s -> { s | health = Recharging 8000 })
+                    |> PhysicsObject.updateState (\s -> { s | health = Recharging 8000 maxHp })
                     |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })
 
             else
                 resource
-                    |> PhysicsObject.updateState (\s -> { s | health = Health <| max 0 (hp - 1) })
+                    |> PhysicsObject.updateState (\s -> { s | health = Health <| ( max 0 (hp - 1), maxHp ) })
                     |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })
 
-        Recharging _ ->
+        Recharging _ _ ->
             resource |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })
 
 
@@ -56,12 +56,12 @@ recharge amount resource =
         Health _ ->
             resource
 
-        Recharging r ->
+        Recharging r maxHp ->
             if r - amount <= 0 then
-                resource |> PhysicsObject.updateState (\s -> { s | health = Health 10 }) |> PhysicsObject.setcollisionState True
+                resource |> PhysicsObject.updateState (\s -> { s | health = Health ( maxHp, maxHp ) }) |> PhysicsObject.setcollisionState True
 
             else
-                resource |> PhysicsObject.updateState (\s -> { s | health = Recharging <| max 0 (r - amount) })
+                resource |> PhysicsObject.updateState (\s -> { s | health = Recharging (max 0 (r - amount)) maxHp })
 
 
 isHit : Resource -> Bool
@@ -69,13 +69,13 @@ isHit resource =
     resource.state.hitCooldown > 0
 
 
-getHealth : Resource -> Maybe Int
+getHealth : Resource -> Maybe ( Int, Int )
 getHealth resource =
     case resource.state.health of
-        Health hp ->
-            Just hp
+        Health ( hp, maxHp ) ->
+            Just ( hp, maxHp )
 
-        Recharging _ ->
+        Recharging _ _ ->
             Nothing
 
 
@@ -85,7 +85,7 @@ isRecharging resource =
         Health _ ->
             False
 
-        Recharging _ ->
+        Recharging _ _ ->
             True
 
 
