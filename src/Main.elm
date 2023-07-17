@@ -7,6 +7,7 @@ import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
+import Html.Attributes
 import Html.Lazy
 import Resource exposing (Resource)
 import Svg exposing (Svg)
@@ -332,14 +333,32 @@ viewObject attrs children position =
 viewResource : Vector2 -> Resource -> Svg msg
 viewResource playerPosition resource =
     let
+        viewHealthMeter hp maxHp =
+            Html.meter
+                [ Html.Attributes.min "0"
+                , Html.Attributes.max <| String.fromInt maxHp
+                , Html.Attributes.value <| String.fromInt hp
+                , Html.Attributes.attribute "low" (String.fromFloat (toFloat maxHp * 0.3))
+                , Html.Attributes.attribute "high" (String.fromFloat (toFloat maxHp * 0.6))
+                , Html.Attributes.attribute "optimum" (String.fromFloat (toFloat maxHp * 0.9))
+                ]
+                []
+
         viewHealth r =
             case Resource.getHealth r of
                 Just ( hp, maxHp ) ->
-                    [ Svg.text_ [ Svg.Attributes.class "health" ]
-                        [ Svg.text <|
-                            String.fromInt hp
-                                ++ "/"
-                                ++ String.fromInt maxHp
+                    [ Svg.foreignObject
+                        [ Svg.Attributes.x "-50"
+                        , Svg.Attributes.y <| String.fromFloat (-resource.radius * 2.5)
+                        , Svg.Attributes.width "100"
+                        , Svg.Attributes.height "40"
+                        ]
+                        [ Html.div
+                            [ Html.Attributes.attribute "xmlns" "http://www.w3.org/1999/xhtml"
+                            , Html.Attributes.class "health"
+                            ]
+                            [ viewHealthMeter hp maxHp
+                            ]
                         ]
                     ]
 

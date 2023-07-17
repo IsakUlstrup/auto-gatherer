@@ -8,6 +8,14 @@ $tile_color: rgb(152, 83, 163)
         transform: scale(1.4)
     100%
         transform: scale(1)
+@keyframes slide-down
+    0%
+        opacity: 0
+        transform: translateY(-1rem)
+
+    100%
+        opacity: 1
+        transform: translateY(0rem)
 
 *
     padding: 0
@@ -67,11 +75,20 @@ main
         stroke: lighten($resource_color, 25)
 
         .health
+            color: #262626
+            width: 100%
+            height: 100%
+            padding: 0.5rem
+            border-radius: 0.3rem
+            pointer-events: none
             opacity: 0
-            text-anchor: middle
-            stroke: none
-            fill: white
-            transition: opacity 300ms ease-out
+            display: flex
+            flex-direction: column
+            // background-color: white
+            // transition: opacity 300ms ease-out
+            meter
+                width: 100%
+                height: 100%
 
         &.recharging
             fill: desaturate($resource_color, 30 )
@@ -82,7 +99,7 @@ main
         &.hit
             fill: lighten($resource_color, 35)
         &.player-close .health
-            opacity: 1
+            animation: slide-down 200ms ease-out forwards
 
     .player
         fill: $player_color
