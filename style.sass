@@ -35,7 +35,7 @@ main
     display: block
     width: 100%
     height: 100%
-    shape-rendering: optimizeSpeed
+    // shape-rendering: optimizeSpeed
 
     .background-tiles
         filter: drop-shadow(0rem 0rem 2rem rgba(0, 0, 0, 0.4))
@@ -49,11 +49,6 @@ main
 
             &:hover
                 fill: lighten($tile_color, 20)
-
-    .home
-        fill: rgb(98, 237, 163)
-        stroke: lighten(rgb(98, 237, 163), 25)
-        stroke-width: 2
 
     .entity
         transition: fill 100ms
@@ -72,38 +67,23 @@ main
 
     .resource
         fill: $resource_color
-        stroke: lighten($resource_color, 35)
+        stroke: lighten($resource_color, 25)
         stroke-linecap: round
 
-        .body
-            transition: stroke-dasharray 200ms
-
-        .health
-            color: #262626
-            width: 100%
-            height: 100%
-            padding: 0.5rem
-            border-radius: 0.3rem
-            pointer-events: none
-            opacity: 0
-            display: flex
-            flex-direction: column
-            // background-color: white
-            // transition: opacity 300ms ease-out
-            meter
-                width: 100%
-                height: 100%
+        .progress
+            transition: stroke-dasharray 300ms
+            stroke: lighten($resource_color, 65)
 
         &.recharging
-            fill: desaturate($resource_color, 30 )
+            fill: desaturate($resource_color, 10 )
 
         &.healthy .body
+            animation: pop 250ms
+        &.healthy .progress
             animation: pop 250ms
 
         &.hit
             fill: lighten($resource_color, 35)
-        &.player-close .health
-            animation: slide-down 200ms ease-out forwards
 
     .player
         fill: $player_color

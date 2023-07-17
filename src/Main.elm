@@ -7,7 +7,6 @@ import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
-import Html.Attributes
 import Html.Lazy
 import Resource exposing (Resource)
 import Svg exposing (Svg)
@@ -360,7 +359,15 @@ viewResource playerPosition resource =
                 , Svg.Attributes.cy "0"
                 , Svg.Attributes.r <| String.fromFloat <| resource.radius
                 , Svg.Attributes.class "body"
+                ]
+                []
+            , Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| resource.radius
+                , Svg.Attributes.class "progress"
                 , Svg.Attributes.strokeDasharray <| (String.fromFloat <| (circumference * x)) ++ " " ++ (String.fromFloat <| circumference - (circumference * x))
+                , Svg.Attributes.fill "none"
                 ]
                 []
             ]
