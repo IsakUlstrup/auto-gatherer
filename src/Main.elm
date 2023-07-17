@@ -333,37 +333,16 @@ viewObject attrs children position =
 viewResource : Vector2 -> Resource -> Svg msg
 viewResource playerPosition resource =
     let
-        viewHealthMeter hp maxHp =
-            Html.meter
-                [ Html.Attributes.min "0"
-                , Html.Attributes.max <| String.fromInt maxHp
-                , Html.Attributes.value <| String.fromInt hp
-                , Html.Attributes.attribute "low" (String.fromFloat (toFloat maxHp * 0.3))
-                , Html.Attributes.attribute "high" (String.fromFloat (toFloat maxHp * 0.6))
-                , Html.Attributes.attribute "optimum" (String.fromFloat (toFloat maxHp * 0.9))
-                ]
-                []
+        circumference =
+            resource.radius * pi * 2
 
-        viewHealth r =
-            case Resource.getHealth r of
+        x =
+            case Resource.getHealth resource of
                 Just ( hp, maxHp ) ->
-                    [ Svg.foreignObject
-                        [ Svg.Attributes.x "-50"
-                        , Svg.Attributes.y <| String.fromFloat (-resource.radius * 2.5)
-                        , Svg.Attributes.width "100"
-                        , Svg.Attributes.height "40"
-                        ]
-                        [ Html.div
-                            [ Html.Attributes.attribute "xmlns" "http://www.w3.org/1999/xhtml"
-                            , Html.Attributes.class "health"
-                            ]
-                            [ viewHealthMeter hp maxHp
-                            ]
-                        ]
-                    ]
+                    toFloat hp / toFloat maxHp
 
                 Nothing ->
-                    []
+                    0
     in
     Svg.Lazy.lazy
         (viewObject
@@ -376,15 +355,15 @@ viewResource playerPosition resource =
                 , ( "player-close", Vector2.distance playerPosition resource.position < 200 )
                 ]
             ]
-            (Svg.circle
+            [ Svg.circle
                 [ Svg.Attributes.cx "0"
                 , Svg.Attributes.cy "0"
                 , Svg.Attributes.r <| String.fromFloat <| resource.radius
                 , Svg.Attributes.class "body"
+                , Svg.Attributes.strokeDasharray <| (String.fromFloat <| (circumference * x)) ++ " " ++ (String.fromFloat <| circumference - (circumference * x))
                 ]
                 []
-                :: viewHealth resource
-            )
+            ]
         )
         resource.position
 

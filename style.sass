@@ -57,12 +57,12 @@ main
 
     .entity
         transition: fill 100ms
-        stroke-width: 2
+        stroke-width: 4
         transition: transform 30ms
 
     .blob
         fill: $animal_color
-        stroke: lighten($animal_color, 25)
+        stroke: lighten($animal_color, 35)
 
         &.resting
             fill: desaturate($animal_color, 30 )
@@ -72,7 +72,11 @@ main
 
     .resource
         fill: $resource_color
-        stroke: lighten($resource_color, 25)
+        stroke: lighten($resource_color, 35)
+        stroke-linecap: round
+
+        .body
+            transition: stroke-dasharray 200ms
 
         .health
             color: #262626
@@ -103,4 +107,4 @@ main
 
     .player
         fill: $player_color
-        stroke: lighten($player_color, 25)
+        stroke: lighten($player_color, 35)
