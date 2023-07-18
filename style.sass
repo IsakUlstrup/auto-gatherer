@@ -57,22 +57,29 @@ main
 
     .blob
         fill: $animal_color
-        stroke: lighten($animal_color, 35)
+        stroke: lighten($animal_color, 25)
+
+        .progress
+            transition: stroke-dasharray 300ms
+            stroke: lighten($animal_color, 65)
+            stroke-linecap: round
 
         &.resting
             fill: desaturate($animal_color, 30 )
 
         &.rested .body
             animation: pop 250ms
+        &.rested .progress
+            animation: pop 250ms
 
     .resource
         fill: $resource_color
         stroke: lighten($resource_color, 25)
-        stroke-linecap: round
 
         .progress
             transition: stroke-dasharray 300ms
             stroke: lighten($resource_color, 65)
+            stroke-linecap: round
 
         &.recharging
             fill: desaturate($resource_color, 10 )

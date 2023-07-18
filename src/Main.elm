@@ -377,20 +377,46 @@ viewResource playerPosition resource =
 
 viewBlob : Blob -> Svg msg
 viewBlob blob =
-    Svg.circle
-        [ Svg.Attributes.cx "0"
-        , Svg.Attributes.cy "0"
-        , Svg.Attributes.r <| String.fromFloat <| blob.radius
-        , Svg.Attributes.class "body"
-        , Svg.Attributes.transform <| transformString blob.position
-        , svgClassList
-            [ ( "entity", True )
-            , ( "blob", True )
-            , ( "resting", Blob.isResting blob )
-            , ( "rested", (Blob.isResting >> not) blob )
+    let
+        circumference =
+            blob.radius * pi * 2
+
+        x =
+            case Blob.getEnergy blob of
+                Just ( energy, maxEnergy ) ->
+                    toFloat energy / toFloat maxEnergy
+
+                Nothing ->
+                    0
+    in
+    Svg.Lazy.lazy
+        (viewObject
+            [ svgClassList
+                [ ( "entity", True )
+                , ( "blob", True )
+                , ( "resting", Blob.isResting blob )
+                , ( "rested", (Blob.isResting >> not) blob )
+                ]
             ]
-        ]
-        []
+            [ Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| blob.radius
+                , Svg.Attributes.class "body"
+                ]
+                []
+            , Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| blob.radius
+                , Svg.Attributes.class "progress"
+                , Svg.Attributes.strokeDasharray <| (String.fromFloat <| (circumference * x)) ++ " " ++ (String.fromFloat <| circumference - (circumference * x))
+                , Svg.Attributes.fill "none"
+                ]
+                []
+            ]
+        )
+        blob.position
 
 
 viewPlayer : PhysicsObject Vector2 -> Svg msg
