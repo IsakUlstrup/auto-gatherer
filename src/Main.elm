@@ -144,7 +144,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            ( { model | world = World.fixedUpdate worldUpdate dt model.world }
+            ( { model | world = World.fixedUpdate worldUpdate (model.world.physicsStepAccumulator + dt) model.world }
             , Cmd.none
             )
 

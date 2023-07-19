@@ -142,14 +142,10 @@ stateUpdate world =
 
 fixedUpdate : (World -> World) -> Float -> World -> World
 fixedUpdate f dt world =
-    let
-        accDt =
-            dt + world.physicsStepAccumulator
-    in
-    if accDt >= world.physicsStepTime then
-        { world | physicsStepAccumulator = accDt - world.physicsStepTime }
+    if dt >= world.physicsStepTime then
+        { world | physicsStepAccumulator = dt - world.physicsStepTime }
             |> f
-            |> fixedUpdate f (accDt - world.physicsStepTime)
+            |> fixedUpdate f (dt - world.physicsStepTime)
 
     else
-        { world | physicsStepAccumulator = accDt }
+        { world | physicsStepAccumulator = dt }
