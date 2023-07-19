@@ -2,10 +2,12 @@ module Resource exposing
     ( HealthState
     , Resource
     , getHealth
+    , healthZero
     , hit
     , isHit
     , isRecharging
     , new
+    , setRecharging
     , update
     )
 
@@ -38,7 +40,6 @@ hit resource =
             if hp == 0 then
                 resource
                     |> PhysicsObject.setcollisionState False
-                    |> PhysicsObject.updateState (\s -> { s | health = Recharging 8000 maxHp })
                     |> PhysicsObject.updateState (\s -> { s | hitCooldown = 100 })
 
             else
@@ -87,6 +88,28 @@ isRecharging resource =
 
         Recharging _ _ ->
             True
+
+
+healthZero : Resource -> Bool
+healthZero resource =
+    case resource.state.health of
+        Health ( 0, _ ) ->
+            True
+
+        _ ->
+            False
+
+
+setRecharging : Resource -> Resource
+setRecharging resource =
+    case resource.state.health of
+        Health ( 0, maxHp ) ->
+            resource
+                |> PhysicsObject.setcollisionState False
+                |> PhysicsObject.updateState (\s -> { s | health = Recharging 8000 maxHp })
+
+        _ ->
+            resource
 
 
 update : Float -> Resource -> Resource

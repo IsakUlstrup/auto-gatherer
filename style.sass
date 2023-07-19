@@ -2,6 +2,7 @@ $animal_color: rgb(243, 203, 58)
 $resource_color: rgb(233, 67, 130)
 $player_color: rgb(69, 232, 142)
 $tile_color: rgb(152, 83, 163)
+$item_color: rgb(243, 101, 101)
 
 @keyframes pop
     75%
@@ -52,7 +53,7 @@ main
 
     .entity
         transition: fill 100ms
-        stroke-width: 4
+        stroke-width: 3
         transition: transform 30ms
 
     .blob
@@ -95,3 +96,15 @@ main
     .player
         fill: $player_color
         stroke: lighten($player_color, 35)
+
+    .item
+        cursor: pointer
+        &:hover .body
+            fill: lighten($item_color, 15)
+
+        .body
+            fill: $item_color
+            stroke: lighten($item_color, 35)
+        .label
+            fill: lighten($item_color, 35)
+            text-anchor: middle

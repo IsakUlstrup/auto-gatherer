@@ -6,6 +6,7 @@ module World exposing
     , collisionResolution
     , fixedUpdate
     , forces
+    , itemSpawn
     , movement
     , stateUpdate
     , updateBlobs
@@ -22,6 +23,7 @@ import Resource exposing (Resource)
 type alias World =
     { blobs : List Blob
     , resources : List Resource
+    , items : List (PhysicsObject Char)
     , player : PhysicsObject Vector2
     , physicsStepTime : Float
     , physicsStepAccumulator : Float
@@ -85,6 +87,7 @@ movement world =
     { world
         | blobs = List.map f world.blobs
         , resources = List.map f world.resources
+        , items = List.map f world.items
         , player = f world.player
     }
 
@@ -138,6 +141,28 @@ stateUpdate world =
         | blobs = List.map (Blob.update world.physicsStepTime) world.blobs
         , resources = List.map (Resource.update world.physicsStepTime) world.resources
     }
+
+
+itemSpawn : World -> World
+itemSpawn world =
+    let
+        exhaustedResources rs =
+            List.filter Resource.healthZero rs
+
+        newItems rs =
+            List.map
+                (\r ->
+                    PhysicsObject.new
+                        (r.position.x + r.velocity.x)
+                        (r.position.y + r.velocity.y)
+                        20
+                        100
+                        'x'
+                        |> PhysicsObject.applyForce (Vector2.direction r.position (Vector2.new (r.position.x + r.velocity.x) (r.position.y + r.velocity.y)))
+                )
+                rs
+    in
+    { world | resources = List.map Resource.setRecharging world.resources, items = (world.resources |> exhaustedResources |> newItems) ++ world.items }
 
 
 fixedUpdate : (World -> World) -> Float -> World -> World

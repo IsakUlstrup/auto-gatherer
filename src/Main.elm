@@ -100,6 +100,7 @@ init _ =
             , Resource.new 0 -200 35
             , Resource.new -200 200 25
             ]
+            []
             (PhysicsObject.new 0 0 30 100 Vector2.zero)
             20
             0
@@ -132,12 +133,14 @@ type Msg
 
 
 worldUpdate : World -> World
-worldUpdate =
-    World.forces
-        >> World.movement
-        >> World.collisionInteraction
-        >> World.collisionResolution
-        >> World.stateUpdate
+worldUpdate world =
+    world
+        |> World.itemSpawn
+        |> World.forces
+        |> World.movement
+        |> World.collisionInteraction
+        |> World.collisionResolution
+        |> World.stateUpdate
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -416,6 +419,28 @@ viewBackground tileSize =
         )
 
 
+viewItem : PhysicsObject Char -> Svg msg
+viewItem item =
+    Svg.Lazy.lazy
+        (viewObject
+            [ svgClassList
+                [ ( "entity", True )
+                , ( "item", True )
+                ]
+            ]
+            [ Svg.circle
+                [ Svg.Attributes.cx "0"
+                , Svg.Attributes.cy "0"
+                , Svg.Attributes.r <| String.fromFloat <| item.radius
+                , Svg.Attributes.class "body"
+                ]
+                []
+            , Svg.text_ [ Svg.Attributes.class "label", Svg.Attributes.y "5" ] [ Svg.text <| String.fromChar item.state ]
+            ]
+        )
+        item.position
+
+
 view : Model -> Html Msg
 view model =
     main_ []
@@ -431,6 +456,7 @@ view model =
                 ]
                 [ Svg.Lazy.lazy viewBackground model.tileSize
                 , Svg.g [ Svg.Attributes.class "blobs" ] (List.map viewBlob model.world.blobs)
+                , Svg.g [] (List.map viewItem model.world.items)
                 , Svg.g [ Svg.Attributes.class "resources" ] (List.map (viewResource model.world.player.position) model.world.resources)
                 , Svg.Lazy.lazy viewPlayer model.world.player
                 ]
