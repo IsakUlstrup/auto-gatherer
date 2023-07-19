@@ -130,6 +130,7 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | GameClick Vector2
     | SetTileSize Int
+    | PickupItem Int
 
 
 worldUpdate : World -> World
@@ -215,6 +216,9 @@ update msg model =
             ( { model | tileSize = size }
             , Cmd.none
             )
+
+        PickupItem index ->
+            ( { model | world = World.pickupItem index model.world }, Cmd.none )
 
 
 
@@ -419,14 +423,15 @@ viewBackground tileSize =
         )
 
 
-viewItem : PhysicsObject Char -> Svg msg
-viewItem item =
+viewItem : Int -> PhysicsObject Char -> Svg Msg
+viewItem index item =
     Svg.Lazy.lazy
         (viewObject
             [ svgClassList
                 [ ( "entity", True )
                 , ( "item", True )
                 ]
+            , Svg.Events.onClick <| PickupItem index
             ]
             [ Svg.circle
                 [ Svg.Attributes.cx "0"
@@ -456,7 +461,7 @@ view model =
                 ]
                 [ Svg.Lazy.lazy viewBackground model.tileSize
                 , Svg.g [ Svg.Attributes.class "blobs" ] (List.map viewBlob model.world.blobs)
-                , Svg.g [] (List.map viewItem model.world.items)
+                , Svg.g [] (List.indexedMap viewItem model.world.items)
                 , Svg.g [ Svg.Attributes.class "resources" ] (List.map (viewResource model.world.player.position) model.world.resources)
                 , Svg.Lazy.lazy viewPlayer model.world.player
                 ]

@@ -8,6 +8,7 @@ module World exposing
     , forces
     , itemSpawn
     , movement
+    , pickupItem
     , stateUpdate
     , updateBlobs
     , updatePlayer
@@ -174,3 +175,16 @@ fixedUpdate f dt world =
 
     else
         { world | physicsStepAccumulator = dt }
+
+
+pickupItem : Int -> World -> World
+pickupItem index world =
+    let
+        filter ( inx, itm ) =
+            if inx == index |> not then
+                Just itm
+
+            else
+                Nothing
+    in
+    { world | items = world.items |> List.indexedMap (\i x -> Tuple.pair i x) |> List.filterMap filter }
