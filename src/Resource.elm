@@ -35,7 +35,7 @@ hit : Resource -> Resource
 hit resource =
     case resource.state.health of
         Health ( hp, maxHp ) ->
-            if hp - 1 <= 0 then
+            if hp == 0 then
                 resource
                     |> PhysicsObject.setcollisionState False
                     |> PhysicsObject.updateState (\s -> { s | health = Recharging 8000 maxHp })
@@ -57,7 +57,7 @@ recharge amount resource =
             resource
 
         Recharging r maxHp ->
-            if r - amount <= 0 then
+            if r == 0 then
                 resource |> PhysicsObject.updateState (\s -> { s | health = Health ( maxHp, maxHp ) }) |> PhysicsObject.setcollisionState True
 
             else
