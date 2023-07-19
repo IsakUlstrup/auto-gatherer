@@ -58,7 +58,7 @@ forces world =
     let
         movementForce : Float
         movementForce =
-            0.03
+            0.05
     in
     { world
         | blobs =
