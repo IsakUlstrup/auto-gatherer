@@ -1,4 +1,17 @@
-module World exposing (World, collisionInteraction, collisionResolution, movement, stateUpdate)
+module World exposing
+    ( World
+    , addBlob
+    , addResource
+    , collisionInteraction
+    , collisionResolution
+    , fixedUpdate
+    , forces
+    , movement
+    , stateUpdate
+    , updateBlobs
+    , updatePlayer
+    , updateResources
+    )
 
 import Blob exposing (Blob)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
@@ -10,16 +23,63 @@ type alias World =
     { blobs : List Blob
     , resources : List Resource
     , player : PhysicsObject Vector2
+    , physicsStepTime : Float
+    , physicsStepAccumulator : Float
     }
 
 
-movement : Float -> World -> World
-movement dt world =
+addResource : Resource -> World -> World
+addResource resource world =
+    { world | resources = resource :: world.resources }
+
+
+updateResources : (Resource -> Resource) -> World -> World
+updateResources f world =
+    { world | resources = List.map f world.resources }
+
+
+addBlob : Blob -> World -> World
+addBlob blob world =
+    { world | blobs = blob :: world.blobs }
+
+
+updateBlobs : (Blob -> Blob) -> World -> World
+updateBlobs f world =
+    { world | blobs = List.map f world.blobs }
+
+
+updatePlayer : (PhysicsObject Vector2 -> PhysicsObject Vector2) -> World -> World
+updatePlayer f world =
+    { world | player = f world.player }
+
+
+forces : World -> World
+forces world =
+    let
+        movementForce : Float
+        movementForce =
+            0.03
+    in
+    { world
+        | blobs =
+            List.map
+                (Blob.ai world.player.position (world.resources |> List.filter .enableCollisions) movementForce)
+                world.blobs
+        , resources =
+            List.map
+                (PhysicsObject.moveToPosition 5 .home (always movementForce))
+                world.resources
+        , player = PhysicsObject.moveToPosition 20 identity (always movementForce) world.player
+    }
+
+
+movement : World -> World
+movement world =
     let
         f : PhysicsObject a -> PhysicsObject a
         f =
             PhysicsObject.applyFriciton 0.05
-                >> PhysicsObject.move dt
+                >> PhysicsObject.move world.physicsStepTime
                 >> PhysicsObject.stopIfSlow 0.0001
     in
     { world
@@ -72,9 +132,24 @@ collisionResolution world =
     }
 
 
-stateUpdate : Float -> World -> World
-stateUpdate dt world =
+stateUpdate : World -> World
+stateUpdate world =
     { world
-        | blobs = List.map (Blob.update dt) world.blobs
-        , resources = List.map (Resource.update dt) world.resources
+        | blobs = List.map (Blob.update world.physicsStepTime) world.blobs
+        , resources = List.map (Resource.update world.physicsStepTime) world.resources
     }
+
+
+fixedUpdate : (World -> World) -> Float -> World -> World
+fixedUpdate f dt world =
+    let
+        accDt =
+            dt + world.physicsStepAccumulator
+    in
+    if accDt >= world.physicsStepTime then
+        { world | physicsStepAccumulator = accDt - world.physicsStepTime }
+            |> f
+            |> fixedUpdate f (accDt - world.physicsStepTime)
+
+    else
+        { world | physicsStepAccumulator = accDt }

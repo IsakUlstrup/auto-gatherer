@@ -13,6 +13,7 @@ import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
 import Svg.Lazy
+import World exposing (World)
 
 
 
@@ -79,13 +80,9 @@ initConsole =
 
 
 type alias Model =
-    { blobs : List Blob
-    , resources : List Resource
+    { world : World
     , console : Console Msg
-    , physicsStepTime : Float
-    , physicsStepAccumulator : Float
     , cameraZoom : Float
-    , player : PhysicsObject Vector2
     , tileSize : Int
     }
 
@@ -93,20 +90,22 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Blob.new 0 0 30 12
-        , Blob.new 0 0 20 21
-        , Blob.new 0 0 10 10
-        ]
-        [ Resource.new 150 0 20
-        , Resource.new 178 -183 30
-        , Resource.new 0 -200 35
-        , Resource.new -200 200 25
-        ]
+        (World
+            [ Blob.new 0 0 30 12
+            , Blob.new 0 0 20 21
+            , Blob.new 0 0 10 10
+            ]
+            [ Resource.new 150 0 20
+            , Resource.new 178 -183 30
+            , Resource.new 0 -200 35
+            , Resource.new -200 200 25
+            ]
+            (PhysicsObject.new 0 0 30 100 Vector2.zero)
+            20
+            0
+        )
         initConsole
-        20
-        0
         0.7
-        (PhysicsObject.new 0 0 30 100 Vector2.zero)
         60
     , Cmd.none
     )
@@ -132,149 +131,65 @@ type Msg
     | SetTileSize Int
 
 
-forces : Model -> Model
-forces model =
-    let
-        movementForce : Float
-        movementForce =
-            0.03
-    in
-    { model
-        | blobs =
-            List.map
-                (Blob.ai model.player.position (model.resources |> List.filter .enableCollisions) movementForce)
-                model.blobs
-        , resources =
-            List.map
-                (PhysicsObject.moveToPosition 5 .home (always movementForce))
-                model.resources
-        , player = PhysicsObject.moveToPosition 20 identity (always movementForce) model.player
-    }
-
-
-movement : Float -> Model -> Model
-movement dt model =
-    let
-        f : PhysicsObject a -> PhysicsObject a
-        f =
-            PhysicsObject.applyFriciton 0.05
-                >> PhysicsObject.move dt
-                >> PhysicsObject.stopIfSlow 0.0001
-    in
-    { model
-        | blobs = List.map f model.blobs
-        , resources = List.map f model.resources
-        , player = f model.player
-    }
-
-
-collisionInteraction : Model -> Model
-collisionInteraction model =
-    { model
-        | blobs =
-            List.map
-                (PhysicsObject.collisionAction
-                    (\target object ->
-                        object
-                            |> Blob.reduceEnergy
-                            |> PhysicsObject.applyForce (Vector2.direction target.position object.position)
-                    )
-                    model.resources
-                )
-                model.blobs
-        , resources =
-            List.map
-                (PhysicsObject.collisionAction
-                    (\_ object ->
-                        object
-                            |> Resource.hit
-                    )
-                    model.blobs
-                )
-                model.resources
-        , player =
-            PhysicsObject.collisionAction
-                (\target object ->
-                    object
-                        |> PhysicsObject.applyForce (Vector2.direction target.position object.position)
-                )
-                model.resources
-                model.player
-    }
-
-
-collisionResolution : Model -> Model
-collisionResolution model =
-    { model
-        | blobs = List.map (PhysicsObject.resolveCollisions model.resources) model.blobs
-        , resources = List.map (PhysicsObject.resolveCollisions model.blobs) model.resources
-        , player = PhysicsObject.resolveCollisions model.resources model.player
-    }
-
-
-stateUpdate : Float -> Model -> Model
-stateUpdate dt model =
-    { model
-        | blobs = List.map (Blob.update dt) model.blobs
-        , resources = List.map (Resource.update dt) model.resources
-    }
-
-
-fixedUpdate : (Model -> Model) -> Float -> Model -> ( Model, Float )
-fixedUpdate f dt model =
-    if dt >= model.physicsStepTime then
-        { model | physicsStepAccumulator = dt - model.physicsStepTime }
-            |> f
-            |> fixedUpdate f (dt - model.physicsStepTime)
-
-    else
-        ( f model, dt )
+worldUpdate : World -> World
+worldUpdate =
+    World.forces
+        >> World.movement
+        >> World.collisionInteraction
+        >> World.collisionResolution
+        >> World.stateUpdate
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            let
-                ( newModel, dtRemainder ) =
-                    fixedUpdate
-                        (forces
-                            >> movement model.physicsStepTime
-                            >> collisionInteraction
-                            >> collisionResolution
-                            >> stateUpdate model.physicsStepTime
-                        )
-                        (model.physicsStepAccumulator + dt)
-                        model
-            in
-            ( { newModel | physicsStepAccumulator = dtRemainder }, Cmd.none )
+            ( { model | world = World.fixedUpdate worldUpdate dt model.world }
+            , Cmd.none
+            )
 
         AddResource x y size ->
-            ( { model | resources = Resource.new x y size :: model.resources }, Cmd.none )
+            ( { model | world = World.addResource (Resource.new x y size) model.world }
+            , Cmd.none
+            )
 
         AddBlob size energy ->
-            ( { model | blobs = Blob.new 0 0 size energy :: model.blobs }, Cmd.none )
+            ( { model | world = World.addBlob (Blob.new 0 0 size energy) model.world }
+            , Cmd.none
+            )
 
         BlobForce x y ->
-            ( { model | blobs = List.map (PhysicsObject.applyForce <| Vector2.new x y) model.blobs }, Cmd.none )
+            ( { model | world = World.updateBlobs (PhysicsObject.applyForce <| Vector2.new x y) model.world }
+            , Cmd.none
+            )
 
         ResourceForce x y ->
-            ( { model | resources = List.map (PhysicsObject.applyForce <| Vector2.new x y) model.resources }, Cmd.none )
+            ( { model | world = World.updateResources (PhysicsObject.applyForce <| Vector2.new x y) model.world }
+            , Cmd.none
+            )
 
         MovePlayer x y ->
-            ( { model | player = PhysicsObject.updateState (always <| Vector2.new x y) model.player }, Cmd.none )
+            ( { model | world = World.updatePlayer (PhysicsObject.updateState (always <| Vector2.new x y)) model.world }
+            , Cmd.none
+            )
 
         Reset ->
             init ()
 
         RestBlobs ->
-            ( { model | blobs = List.map Blob.resetEnergy model.blobs }, Cmd.none )
+            ( { model | world = World.updateBlobs Blob.resetEnergy model.world }
+            , Cmd.none
+            )
 
         SetResourceCollisionState flag ->
-            ( { model | resources = List.map (PhysicsObject.setcollisionState flag) model.resources }, Cmd.none )
+            ( { model | world = World.updateResources (PhysicsObject.setcollisionState flag) model.world }
+            , Cmd.none
+            )
 
         SetCameraZoom zoom ->
-            ( { model | cameraZoom = zoom }, Cmd.none )
+            ( { model | cameraZoom = zoom }
+            , Cmd.none
+            )
 
         ConsoleMsg cmsg ->
             let
@@ -289,10 +204,14 @@ update msg model =
                     ( { model | console = newConsole }, Cmd.none )
 
         GameClick coordinate ->
-            ( { model | player = PhysicsObject.updateState (always <| coordinate) model.player }, Cmd.none )
+            ( { model | world = World.updatePlayer (PhysicsObject.updateState (always <| coordinate)) model.world }
+            , Cmd.none
+            )
 
         SetTileSize size ->
-            ( { model | tileSize = size }, Cmd.none )
+            ( { model | tileSize = size }
+            , Cmd.none
+            )
 
 
 
@@ -508,12 +427,12 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , cameraTransform model.cameraZoom model.player.position
+                , cameraTransform model.cameraZoom model.world.player.position
                 ]
                 [ Svg.Lazy.lazy viewBackground model.tileSize
-                , Svg.g [ Svg.Attributes.class "blobs" ] (List.map viewBlob model.blobs)
-                , Svg.g [ Svg.Attributes.class "resources" ] (List.map (viewResource model.player.position) model.resources)
-                , Svg.Lazy.lazy viewPlayer model.player
+                , Svg.g [ Svg.Attributes.class "blobs" ] (List.map viewBlob model.world.blobs)
+                , Svg.g [ Svg.Attributes.class "resources" ] (List.map (viewResource model.world.player.position) model.world.resources)
+                , Svg.Lazy.lazy viewPlayer model.world.player
                 ]
             ]
         ]
