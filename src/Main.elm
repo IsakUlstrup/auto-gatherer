@@ -367,7 +367,10 @@ view model =
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
-            [ Svg.g [ Svg.Attributes.transform <| "translate(" ++ String.fromFloat -model.renderConfig.position.x ++ ", " ++ String.fromFloat -model.renderConfig.position.y ++ ")" ]
+            [ Svg.g
+                [ Svg.Attributes.class "camera"
+                , Svg.Attributes.style <| "transform: translate(" ++ String.fromFloat -model.renderConfig.position.x ++ "px, " ++ String.fromFloat -model.renderConfig.position.y ++ "px)"
+                ]
                 [ Svg.defs [] [ gooFilter ]
                 , Svg.Lazy.lazy (Engine.Render.viewMap viewTile) model.map
                 , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
