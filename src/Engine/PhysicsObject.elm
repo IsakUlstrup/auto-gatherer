@@ -181,33 +181,26 @@ resolveCollision target object =
         normal =
             Vector2.direction object.position target.position
 
-        tangent : Vector2
-        tangent =
-            Vector2.tangent normal
-
-        tangentDot : Float
-        tangentDot =
-            Vector2.dot object.velocity tangent
-
-        normalDot1 : Float
-        normalDot1 =
-            Vector2.dot object.velocity normal
-
-        normalDot2 : Float
-        normalDot2 =
-            Vector2.dot target.velocity normal
-
-        momentum : Float
-        momentum =
-            (normalDot1 * (target.mass - object.mass) + 2 * target.mass * normalDot2) / (object.mass + target.mass)
-
         pos : Vector2
         pos =
             Vector2.add object.position (Vector2.direction object.position target.position |> Vector2.scale overlap)
+
+        k : Vector2
+        k =
+            Vector2.subtract object.velocity target.velocity
+
+        p : Float
+        p =
+            2 * (normal.x * k.x + normal.y * k.y) / (object.mass + target.mass)
+
+        v : Vector2
+        v =
+            Vector2.new (object.velocity.x - p * target.mass * normal.x)
+                (object.velocity.y - p * target.mass * normal.y)
     in
     object
         |> setPosition pos
-        |> setVelocity (tangent |> Vector2.scale tangentDot |> Vector2.add (normal |> Vector2.scale momentum))
+        |> setVelocity v
 
 
 

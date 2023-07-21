@@ -99,19 +99,19 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ PhysicsObject.new 200 20 40 200 0 MoveToCenter
+        [ PhysicsObject.new 200 20 40 (40 * 10) 0 MoveToCenter
             |> PhysicsObject.applyForce (Vector2.new -6 0.7)
-        , PhysicsObject.new -300 200 30 1000 1 Idle
+        , PhysicsObject.new -300 200 70 (70 * 10) 1 Idle
             |> PhysicsObject.applyForce (Vector2.new 0.3 -0.5)
-        , PhysicsObject.new 0 0 30 300 2 (MoveToPosition <| Vector2.new 200 -175)
+        , PhysicsObject.new 0 0 30 (30 * 10) 2 (MoveToPosition <| Vector2.new 200 -175)
             |> PhysicsObject.applyForce (Vector2.new -2 -3)
-        , PhysicsObject.new -100 20 30 100 3 MoveToClosest
+        , PhysicsObject.new -100 20 20 (20 * 10) 3 MoveToClosest
             |> PhysicsObject.applyForce (Vector2.new 2 -3)
         ]
         initConsole
         20
         0
-        True
+        False
     , Cmd.none
     )
 
