@@ -36,75 +36,13 @@ main
     display: block
     width: 100%
     height: 100%
-    // shape-rendering: optimizeSpeed
 
-    .background-tiles
-        filter: drop-shadow(0rem 0rem 2rem rgba(0, 0, 0, 0.4))
-
-        .tile
-            fill: $tile_color
-            transition: fill 300ms
-
-            &.odd
-                fill: darken($tile_color, 3)
-
-            &:hover
-                fill: lighten($tile_color, 20)
-
-    .entity
-        transition: fill 100ms
-        stroke-width: 3
-        transition: transform 30ms
-
-    .blob
-        fill: $animal_color
-        stroke: lighten($animal_color, 25)
-
-        .progress
-            transition: stroke-dasharray 300ms
-            stroke: lighten($animal_color, 65)
-            stroke-linecap: round
-
-        &.resting
-            fill: desaturate($animal_color, 30 )
-
-        &.rested .body
-            animation: pop 250ms
-        &.rested .progress
-            animation: pop 250ms
-
-    .resource
-        fill: $resource_color
-        stroke: lighten($resource_color, 25)
-
-        .progress
-            transition: stroke-dasharray 300ms
-            stroke: lighten($resource_color, 65)
-            stroke-linecap: round
-
-        &.recharging
-            fill: desaturate($resource_color, 10 )
-
-        &.healthy .body
-            animation: pop 250ms
-        &.healthy .progress
-            animation: pop 250ms
-
-        &.hit
-            fill: lighten($resource_color, 35)
-
-    .player
-        fill: $player_color
-        stroke: lighten($player_color, 35)
-
-    .item
-        cursor: pointer
-        &:hover .body
-            fill: lighten($item_color, 15)
-
+    .particle
         .body
-            fill: $item_color
-            stroke: lighten($item_color, 35)
-        .label
-            fill: lighten($item_color, 35)
-            text-anchor: middle
+            fill: $resource_color
+            stroke: lighten($resource_color, 25)
+            stroke-width: 3
+        .velocity
+            stroke: lighten($player_color, 25)
+            stroke-width: 5
+            stroke-linecap: round

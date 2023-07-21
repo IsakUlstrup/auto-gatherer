@@ -8,7 +8,6 @@ module Engine.PhysicsObject exposing
     , moveToPosition
     , new
     , resolveCollisions
-    , setcollisionState
     , stopIfSlow
     , updateState
     )
@@ -17,26 +16,27 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
 type alias PhysicsObject a =
-    { position : Vector2
+    { id : Int
+    , position : Vector2
     , velocity : Vector2
     , acceleration : Vector2
     , radius : Float
     , mass : Float
-    , enableCollisions : Bool
     , state : a
     }
 
 
 {-| Physics object constructor
 -}
-new : Float -> Float -> Float -> Float -> a -> PhysicsObject a
-new x y radius mass state =
-    PhysicsObject (Vector2.new x y)
-        (Vector2.new 0 0)
-        (Vector2.new 0 0)
-        radius
+new : Float -> Float -> Float -> Float -> Int -> a -> PhysicsObject a
+new x y size mass id state =
+    PhysicsObject
+        id
+        (Vector2.new x y)
+        Vector2.zero
+        Vector2.zero
+        size
         mass
-        True
         state
 
 
@@ -105,6 +105,11 @@ setPosition pos object =
     { object | position = pos }
 
 
+setVelocity : Vector2 -> PhysicsObject a -> PhysicsObject a
+setVelocity vel object =
+    { object | velocity = vel }
+
+
 stop : PhysicsObject a -> PhysicsObject a
 stop object =
     { object | velocity = Vector2.zero }
@@ -114,11 +119,6 @@ stop object =
 -- ---- COLLISION ----
 
 
-setcollisionState : Bool -> PhysicsObject a -> PhysicsObject a
-setcollisionState flag object =
-    { object | enableCollisions = flag }
-
-
 {-| Check if two objects are colliding
 
 A collision occurs when the distance between to objects with collisions enabled is less than their combine radii
@@ -126,16 +126,16 @@ A collision occurs when the distance between to objects with collisions enabled 
 -}
 isColliding : PhysicsObject a -> PhysicsObject b -> Bool
 isColliding object target =
-    if not target.enableCollisions || not object.enableCollisions then
-        False
-
-    else
+    if object.id /= target.id then
         let
             dist : Vector2
             dist =
                 Vector2.subtract object.position target.position
         in
         (dist |> Vector2.multiply dist |> Vector2.sum) <= (object.radius + target.radius) ^ 2
+
+    else
+        False
 
 
 {-| if object is colliding with target, run function f on object and return
@@ -154,47 +154,64 @@ collisionAction f targets object =
     List.foldl helper object collisions
 
 
+{-| calculate how much each object should move based on the diference in mass
+
+        When resolving collision between a light and a heavy object, the light one moves more
+
+-}
+overlapModifier : PhysicsObject b -> PhysicsObject a -> Float
+overlapModifier target object =
+    (((target.mass - object.mass) / (target.mass + object.mass)) + 1) * 0.5
+
+
 {-| Resolve collision between two objects
 -}
 resolveCollision : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
 resolveCollision target object =
     let
-        totalMass : Float
-        totalMass =
-            target.mass + object.mass
+        dist : Float
+        dist =
+            Vector2.distance object.position target.position
 
-        newVx : Float
-        newVx =
-            (object.mass - target.mass)
-                / totalMass
-                * object.velocity.x
-                + (2 * target.mass)
-                / totalMass
-                * target.velocity.x
+        overlap : Float
+        overlap =
+            (dist - object.radius - target.radius) * overlapModifier target object
 
-        newVy : Float
-        newVy =
-            (object.mass - target.mass)
-                / totalMass
-                * object.velocity.y
-                + (2 * target.mass)
-                / totalMass
-                * target.velocity.y
+        normal : Vector2
+        normal =
+            Vector2.direction object.position target.position
+
+        tangent : Vector2
+        tangent =
+            Vector2.tangent normal
+
+        tangentDot : Float
+        tangentDot =
+            Vector2.dot object.velocity tangent
+
+        normalDot1 : Float
+        normalDot1 =
+            Vector2.dot object.velocity normal
+
+        normalDot2 : Float
+        normalDot2 =
+            Vector2.dot target.velocity normal
+
+        momentum : Float
+        momentum =
+            (normalDot1 * (target.mass - object.mass) + 2 * target.mass * normalDot2) / (object.mass + target.mass)
 
         pos : Vector2
         pos =
-            Vector2.add
-                (Vector2.singleton (object.radius + target.radius)
-                    |> Vector2.multiply (Vector2.direction target.position object.position)
-                )
-                target.position
+            Vector2.add object.position (Vector2.direction object.position target.position |> Vector2.scale overlap)
     in
     object
         |> setPosition pos
-        |> (\o -> { o | velocity = Vector2.new newVx newVy })
+        |> setVelocity (tangent |> Vector2.scale tangentDot |> Vector2.add (normal |> Vector2.scale momentum))
 
 
 
+-- |> (\o -> { o | velocity = Vector2.new newVx newVy })
 -- |> stop
 -- |> applyForce
 --     (Vector2.direction target.position object.position
