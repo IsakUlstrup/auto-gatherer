@@ -161,6 +161,12 @@ init _ =
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
             |> Grid.insertTile ( -1, 0, 1 ) ()
+            |> Grid.insertTile ( 1, 1, -2 ) ()
+            |> Grid.insertTile ( 1, 1, -3 ) ()
+            |> Grid.insertTile ( 1, 2, -4 ) ()
+            |> Grid.insertTile ( 2, 2, -4 ) ()
+            |> Grid.insertTile ( 3, 2, -5 ) ()
+            |> Grid.insertTile ( 0, 2, -2 ) ()
             |> Grid.insertTile ( -1, 2, -1 ) ()
             |> Grid.insertTile ( -2, 2, 0 ) ()
             |> Grid.insertTile ( -2, 0, 2 ) ()
@@ -335,11 +341,11 @@ gooFilter =
         , Svg.feColorMatrix
             [ Svg.Attributes.in_ "blur"
             , Svg.Attributes.type_ "matrix"
-            , Svg.Attributes.values "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -5"
+            , Svg.Attributes.values "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
             , Svg.Attributes.result "goo"
             ]
             []
-        , Svg.feBlend
+        , Svg.feComposite
             [ Svg.Attributes.in_ "SourceGraphic"
             , Svg.Attributes.in2 "goo"
             , Svg.Attributes.operator "atop"
