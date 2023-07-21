@@ -76,10 +76,10 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ PhysicsObject.new 200 20 40 1000 0 Idle
+        [ PhysicsObject.new 200 20 40 1000 0 MoveToCenter
             |> PhysicsObject.applyForce (Vector2.new -10 0)
         , PhysicsObject.new 0 0 30 100 1 Idle
-        , PhysicsObject.new -100 20 30 10 2 Idle
+        , PhysicsObject.new -100 20 30 10 2 MoveToClosest
         ]
         initConsole
         20
