@@ -146,10 +146,10 @@ init _ =
         , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
         , PhysicsObject.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
         , PhysicsObject.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
-        , PhysicsObject.new 140 100 15 (15 * 10) 19 FollowMoveToPosition
-        , PhysicsObject.new 100 -107 18 (18 * 10) 20 FollowMoveToPosition
-        , PhysicsObject.new 200 -107 18 (18 * 10) 21 FollowMoveToPosition
-        , PhysicsObject.new -240 -107 18 (18 * 10) 22 FollowMoveToPosition
+        , PhysicsObject.new 140 100 10 (10 * 10) 19 FollowMoveToPosition
+        , PhysicsObject.new 100 -107 8 (8 * 10) 20 FollowMoveToPosition
+        , PhysicsObject.new 200 -107 12 (12 * 10) 21 FollowMoveToPosition
+        , PhysicsObject.new -240 -107 7 (7 * 10) 22 FollowMoveToPosition
         ]
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
