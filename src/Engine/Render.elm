@@ -210,6 +210,7 @@ viewMap : (( Point, tileData ) -> Svg msg) -> RenderConfig -> HexGrid tileData -
 viewMap renderFunc renderConfig grid =
     Svg.Keyed.node "g"
         [ Svg.Attributes.class "map"
+        , Svg.Attributes.filter "url(#goo-filter)"
         ]
         (grid
             |> Engine.HexGrid.toList

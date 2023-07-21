@@ -345,12 +345,13 @@ gooFilter =
             , Svg.Attributes.result "goo"
             ]
             []
-        , Svg.feComposite
-            [ Svg.Attributes.in_ "SourceGraphic"
-            , Svg.Attributes.in2 "goo"
-            , Svg.Attributes.operator "atop"
-            ]
-            []
+
+        -- , Svg.feComposite
+        --     [ Svg.Attributes.in_ "SourceGraphic"
+        --     , Svg.Attributes.in2 "goo"
+        --     , Svg.Attributes.operator "atop"
+        --     ]
+        --     []
         ]
 
 
