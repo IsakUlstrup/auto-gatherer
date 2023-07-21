@@ -3,7 +3,10 @@ module Main exposing (Model, Msg, main)
 import Browser
 import Browser.Events
 import Engine.Console exposing (Console, ConsoleMsg)
+import Engine.HexGrid as Grid exposing (HexGrid)
 import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
+import Engine.Point exposing (Point)
+import Engine.Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
 import Html.Lazy
@@ -81,6 +84,11 @@ initConsole =
                 SetRenderDebug
                 (Engine.Console.argBool "Debug enabled")
             )
+        |> Engine.Console.addMessage "Set render distance"
+            (Engine.Console.constructor1
+                SetDrawDistance
+                (Engine.Console.argFloat "Distance")
+            )
 
 
 
@@ -89,6 +97,8 @@ initConsole =
 
 type alias Model =
     { particles : List (PhysicsObject ParticleState)
+    , map : HexGrid ()
+    , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
     , timeAccum : Float
@@ -121,6 +131,24 @@ init _ =
         , PhysicsObject.new 150 20 20 (20 * 10) 15 MoveToClosest
         , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
         ]
+        (Grid.empty
+            |> Grid.insertTile ( 0, 0, 0 ) ()
+            |> Grid.insertTile ( -1, 0, 1 ) ()
+            |> Grid.insertTile ( -1, 2, -1 ) ()
+            |> Grid.insertTile ( -2, 2, 0 ) ()
+            |> Grid.insertTile ( -2, 0, 2 ) ()
+            |> Grid.insertTile ( -3, 1, 2 ) ()
+            |> Grid.insertTile ( -4, 2, 2 ) ()
+            |> Grid.insertTile ( 3, -2, -1 ) ()
+            |> Grid.insertTile ( 3, 1, -4 ) ()
+            |> Grid.insertTile ( -2, -2, 4 ) ()
+            |> Grid.insertTile ( 0, 2, -2 ) ()
+            |> Grid.insertTile ( 0, 3, -3 ) ()
+            |> Grid.insertTile ( 0, 4, -4 ) ()
+            |> Grid.insertTile ( 0, 5, -5 ) ()
+            |> Grid.insertTile ( 2, 3, -5 ) ()
+        )
+        (Engine.Render.initRenderConfig |> Engine.Render.withRenderDistance 300)
         initConsole
         20
         0
@@ -137,6 +165,7 @@ type Msg
     = Tick Float
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
+    | SetDrawDistance Float
 
 
 fixedUpdate : (Model -> Model) -> Float -> Model -> Model
@@ -170,6 +199,9 @@ update msg model =
 
         SetRenderDebug flag ->
             { model | renderDebug = flag }
+
+        SetDrawDistance dist ->
+            { model | renderConfig = Engine.Render.withRenderDistance dist model.renderConfig }
 
 
 
@@ -229,6 +261,15 @@ viewParticle showVectors particle =
         )
 
 
+viewTile : ( Point, () ) -> Svg msg
+viewTile _ =
+    Svg.polygon
+        [ Engine.Render.generateHexCorners |> Engine.Render.cornersToPoints
+        , Svg.Attributes.class "tile"
+        ]
+        []
+
+
 view : Model -> Html Msg
 view model =
     main_ []
@@ -238,7 +279,9 @@ view model =
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
-            (List.map (viewParticle model.renderDebug) model.particles)
+            [ Engine.Render.viewMap model.renderConfig viewTile model.map
+            , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
+            ]
         ]
 
 
