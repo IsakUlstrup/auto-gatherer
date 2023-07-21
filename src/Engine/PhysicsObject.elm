@@ -27,6 +27,9 @@ type alias PhysicsObject a =
 
 
 {-| Physics object constructor
+
+Mass will be clamped between 1 and 562949953421311
+
 -}
 new : Float -> Float -> Float -> Float -> Int -> a -> PhysicsObject a
 new x y size mass id state =
@@ -36,7 +39,7 @@ new x y size mass id state =
         Vector2.zero
         Vector2.zero
         size
-        mass
+        (clamp 1 562949953421311 mass)
         state
 
 
