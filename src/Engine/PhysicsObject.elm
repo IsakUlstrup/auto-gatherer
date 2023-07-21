@@ -4,6 +4,7 @@ module Engine.PhysicsObject exposing
     , applyFriciton
     , collisionAction
     , move
+    , moveAwayRange
     , moveToNearest
     , moveToPosition
     , new
@@ -254,6 +255,35 @@ moveToNearest targets speed object =
         force : Vector2 -> Vector2
         force target =
             Vector2.direction object.position target |> Vector2.scale speed
+    in
+    case nearest of
+        Just target ->
+            applyForce (force target) object
+
+        Nothing ->
+            object
+
+
+{-| Apply force away from nearest target in range
+
+If none are present, do nothing
+
+-}
+moveAwayRange : Float -> List (PhysicsObject b) -> Float -> PhysicsObject a -> PhysicsObject a
+moveAwayRange range targets speed object =
+    let
+        nearest : Maybe Vector2
+        nearest =
+            targets
+                |> List.filter (\t -> t.id /= object.id)
+                |> List.map .position
+                |> List.sortBy (Vector2.distance object.position)
+                |> List.filter (\t -> Vector2.distance t object.position < range)
+                |> List.head
+
+        force : Vector2 -> Vector2
+        force target =
+            Vector2.direction object.position target |> Vector2.scale speed |> Vector2.scale -1
     in
     case nearest of
         Just target ->

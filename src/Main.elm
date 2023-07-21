@@ -25,6 +25,7 @@ type ParticleState
     | FollowMoveToPosition
     | MoveToClosest
     | Idle
+    | Avoid
 
 
 
@@ -62,6 +63,9 @@ forces model =
 
                 Idle ->
                     o
+
+                Avoid ->
+                    PhysicsObject.moveAwayRange 100 model.particles moveSpeed o
     in
     { model | particles = List.map forceHelper model.particles }
 
@@ -150,6 +154,8 @@ init _ =
         , PhysicsObject.new 100 -107 8 (8 * 10) 20 FollowMoveToPosition
         , PhysicsObject.new 200 -107 12 (12 * 10) 21 FollowMoveToPosition
         , PhysicsObject.new -240 -107 7 (7 * 10) 22 FollowMoveToPosition
+        , PhysicsObject.new -340 -107 23 (23 * 10) 23 Avoid
+        , PhysicsObject.new 240 -207 18 (18 * 10) 24 Avoid
         ]
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
@@ -269,6 +275,9 @@ viewParticle showVectors particle =
 
                 Idle ->
                     "idle"
+
+                Avoid ->
+                    "avoid"
     in
     Svg.g
         [ Svg.Attributes.transform <| transformString particle.position
