@@ -247,7 +247,10 @@ update msg model =
                         _ ->
                             p
             in
-            { model | particles = List.map helper model.particles }
+            { model
+                | particles = List.map helper model.particles
+                , renderConfig = Engine.Render.withPosition target model.renderConfig
+            }
 
 
 
@@ -364,9 +367,11 @@ view model =
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
-            [ Svg.defs [] [ gooFilter ]
-            , Svg.Lazy.lazy2 (Engine.Render.viewMap viewTile) model.renderConfig model.map
-            , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
+            [ Svg.g [ Svg.Attributes.transform <| "translate(" ++ String.fromFloat -model.renderConfig.position.x ++ ", " ++ String.fromFloat -model.renderConfig.position.y ++ ")" ]
+                [ Svg.defs [] [ gooFilter ]
+                , Svg.Lazy.lazy (Engine.Render.viewMap viewTile) model.map
+                , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
+                ]
             ]
         ]
 

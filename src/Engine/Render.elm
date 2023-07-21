@@ -9,6 +9,7 @@ module Engine.Render exposing
     , pointToPixel
     , viewMap
     , withHexFocus
+    , withPosition
     , withRenderDistance
     , withZoom
     )
@@ -28,7 +29,7 @@ import Svg.Keyed
 {-| Holds renderer config values
 -}
 type alias RenderConfig =
-    { position : Point
+    { position : Vector2
     , zoom : Float
     , renderDistance : Float
     }
@@ -38,7 +39,7 @@ type alias RenderConfig =
 -}
 initRenderConfig : RenderConfig
 initRenderConfig =
-    RenderConfig ( 0, 0, 0 ) 1 100
+    RenderConfig Vector2.zero 1 100
 
 
 withRenderDistance : Float -> RenderConfig -> RenderConfig
@@ -46,11 +47,16 @@ withRenderDistance distance config =
     { config | renderDistance = distance }
 
 
+withPosition : Vector2 -> RenderConfig -> RenderConfig
+withPosition position config =
+    { config | position = position }
+
+
 {-| move camera to focus on point
 -}
 withHexFocus : Point -> RenderConfig -> RenderConfig
 withHexFocus point config =
-    { config | position = point }
+    { config | position = pointToPixel point }
 
 
 {-| Set camera zoom
@@ -206,15 +212,15 @@ viewKeyedTile renderFunc entity =
     )
 
 
-viewMap : (( Point, tileData ) -> Svg msg) -> RenderConfig -> HexGrid tileData -> Svg msg
-viewMap renderFunc renderConfig grid =
+viewMap : (( Point, tileData ) -> Svg msg) -> HexGrid tileData -> Svg msg
+viewMap renderFunc grid =
     Svg.Keyed.node "g"
         [ Svg.Attributes.class "map"
         , Svg.Attributes.filter "url(#goo-filter)"
         ]
         (grid
             |> Engine.HexGrid.toList
-            |> List.filter (\( p, _ ) -> Vector2.distance (pointToPixel renderConfig.position) (pointToPixel p) < renderConfig.renderDistance)
+            -- |> List.filter (\( p, _ ) -> Vector2.distance renderConfig.position (pointToPixel p) < renderConfig.renderDistance)
             |> List.sortBy (Tuple.first >> yPixelPosition)
             |> List.map (viewKeyedTile renderFunc)
         )
