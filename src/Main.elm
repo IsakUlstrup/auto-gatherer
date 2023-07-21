@@ -148,7 +148,7 @@ init _ =
             |> Grid.insertTile ( 0, 5, -5 ) ()
             |> Grid.insertTile ( 2, 3, -5 ) ()
         )
-        (Engine.Render.initRenderConfig |> Engine.Render.withRenderDistance 300)
+        (Engine.Render.initRenderConfig |> Engine.Render.withRenderDistance 1000)
         initConsole
         20
         0
@@ -279,8 +279,8 @@ view model =
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
-            [ Engine.Render.viewMap model.renderConfig viewTile model.map
-            , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
+            [ -- Engine.Render.viewMap model.renderConfig viewTile model.map
+              Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
             ]
         ]
 
