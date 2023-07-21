@@ -12,10 +12,21 @@ import Svg.Attributes
 
 
 
+-- PARTICLE
+
+
+type ParticleState
+    = MoveToCenter
+    | MoveToPosition Vector2
+    | MoveToClosest
+    | Idle
+
+
+
 -- SYSTEM
 
 
-movement : Float -> { a | particles : List (PhysicsObject ()) } -> { a | particles : List (PhysicsObject ()) }
+movement : Float -> { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
 movement dt model =
     { model
         | particles =
@@ -26,7 +37,7 @@ movement dt model =
     }
 
 
-resolveCollisions : { a | particles : List (PhysicsObject ()) } -> { a | particles : List (PhysicsObject ()) }
+resolveCollisions : { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
 resolveCollisions model =
     { model
         | particles =
@@ -54,7 +65,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : List (PhysicsObject ())
+    { particles : List (PhysicsObject ParticleState)
     , console : Console Msg
     , stepTime : Float
     , timeAccum : Float
@@ -65,10 +76,10 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ PhysicsObject.new 200 20 40 1000 0 ()
+        [ PhysicsObject.new 200 20 40 1000 0 Idle
             |> PhysicsObject.applyForce (Vector2.new -10 0)
-        , PhysicsObject.new 0 0 30 100 1 ()
-        , PhysicsObject.new -100 20 30 10 2 ()
+        , PhysicsObject.new 0 0 30 100 1 Idle
+        , PhysicsObject.new -100 20 30 10 2 Idle
         ]
         initConsole
         20
@@ -134,11 +145,27 @@ transformString position =
         ++ ")"
 
 
-viewParticle : Bool -> PhysicsObject () -> Svg msg
+viewParticle : Bool -> PhysicsObject ParticleState -> Svg msg
 viewParticle showVectors particle =
+    let
+        typeString =
+            case particle.state of
+                MoveToCenter ->
+                    "move-center"
+
+                MoveToPosition _ ->
+                    "move-to"
+
+                MoveToClosest ->
+                    "move-closest"
+
+                Idle ->
+                    "idle"
+    in
     Svg.g
         [ Svg.Attributes.transform <| transformString particle.position
         , Svg.Attributes.class "particle"
+        , Svg.Attributes.class typeString
         ]
         (Svg.circle
             [ Svg.Attributes.r <| String.fromFloat particle.radius
