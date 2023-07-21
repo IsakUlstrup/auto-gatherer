@@ -107,6 +107,19 @@ init _ =
             |> PhysicsObject.applyForce (Vector2.new -2 -3)
         , PhysicsObject.new -100 20 20 (20 * 10) 3 MoveToClosest
             |> PhysicsObject.applyForce (Vector2.new 2 -3)
+        , PhysicsObject.new -100 20 20 (20 * 10) 4 MoveToCenter
+        , PhysicsObject.new -101 20 20 (20 * 10) 5 MoveToCenter
+        , PhysicsObject.new -102 20 20 (20 * 10) 6 MoveToCenter
+        , PhysicsObject.new -103 20 20 (20 * 10) 7 MoveToCenter
+        , PhysicsObject.new -104 20 20 (20 * 10) 8 MoveToCenter
+        , PhysicsObject.new -105 20 20 (20 * 10) 9 MoveToCenter
+        , PhysicsObject.new -106 20 20 (20 * 10) 10 MoveToCenter
+        , PhysicsObject.new -107 20 20 (20 * 10) 11 MoveToCenter
+        , PhysicsObject.new -108 20 20 (20 * 10) 12 MoveToCenter
+        , PhysicsObject.new -150 20 20 (20 * 10) 13 MoveToClosest
+        , PhysicsObject.new -150 50 20 (20 * 10) 14 MoveToClosest
+        , PhysicsObject.new 150 20 20 (20 * 10) 15 MoveToClosest
+        , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
         ]
         initConsole
         20
