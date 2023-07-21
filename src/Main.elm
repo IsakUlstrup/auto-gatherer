@@ -26,6 +26,29 @@ type ParticleState
 -- SYSTEM
 
 
+forces : { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+forces model =
+    let
+        moveSpeed =
+            0.05
+
+        forceHelper o =
+            case o.state of
+                MoveToCenter ->
+                    PhysicsObject.moveToPosition 0 (Vector2.new 200 -48) moveSpeed o
+
+                MoveToPosition p ->
+                    PhysicsObject.moveToPosition 0 p moveSpeed o
+
+                MoveToClosest ->
+                    PhysicsObject.moveToNearest model.particles moveSpeed o
+
+                Idle ->
+                    o
+    in
+    { model | particles = List.map forceHelper model.particles }
+
+
 movement : Float -> { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
 movement dt model =
     { model
@@ -78,13 +101,14 @@ init _ =
     ( Model
         [ PhysicsObject.new 200 20 40 1000 0 MoveToCenter
             |> PhysicsObject.applyForce (Vector2.new -10 0)
-        , PhysicsObject.new 0 0 30 100 1 Idle
-        , PhysicsObject.new -100 20 30 10 2 MoveToClosest
+        , PhysicsObject.new -300 200 30 100 500 Idle
+        , PhysicsObject.new 0 0 30 100 700 (MoveToPosition <| Vector2.new 200 -175)
+        , PhysicsObject.new -100 20 30 100 2 MoveToClosest
         ]
         initConsole
         20
         0
-        True
+        False
     , Cmd.none
     )
 
@@ -114,7 +138,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick dt ->
-            fixedUpdate (movement model.stepTime >> resolveCollisions) (model.timeAccum + dt) model
+            fixedUpdate (forces >> movement model.stepTime >> resolveCollisions) (model.timeAccum + dt) model
 
         ConsoleMsg cmsg ->
             let

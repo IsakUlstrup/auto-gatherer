@@ -250,6 +250,7 @@ moveToNearest targets speed object =
         nearest : Maybe Vector2
         nearest =
             targets
+                |> List.filter (\t -> t.id /= object.id)
                 |> List.map .position
                 |> List.sortBy (Vector2.distance object.position)
                 |> List.head
@@ -268,16 +269,16 @@ moveToNearest targets speed object =
 
 {-| Apply force towards target position if object is more than limitDistance units away
 -}
-moveToPosition : Float -> (a -> Vector2) -> (PhysicsObject a -> Float) -> PhysicsObject a -> PhysicsObject a
+moveToPosition : Float -> Vector2 -> Float -> PhysicsObject a -> PhysicsObject a
 moveToPosition limitDistance position speed object =
     let
         force : Vector2
         force =
-            if Vector2.distance object.position (position object.state) < limitDistance then
+            if Vector2.distance object.position position < limitDistance then
                 Vector2.zero
 
             else
-                Vector2.direction object.position (position object.state) |> Vector2.scale (speed object)
+                Vector2.direction object.position position |> Vector2.scale speed
     in
     applyForce force object
 
