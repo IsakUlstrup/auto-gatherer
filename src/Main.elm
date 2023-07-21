@@ -22,6 +22,7 @@ import Svg.Events
 type ParticleState
     = MoveToCenter
     | MoveToPosition Vector2
+    | FollowMoveToPosition
     | MoveToClosest
     | Idle
 
@@ -43,6 +44,18 @@ forces model =
 
                 MoveToPosition p ->
                     PhysicsObject.moveToPosition 50 p moveSpeed o
+
+                FollowMoveToPosition ->
+                    let
+                        followTarget t =
+                            case t.state of
+                                MoveToPosition _ ->
+                                    True
+
+                                _ ->
+                                    False
+                    in
+                    PhysicsObject.moveToNearest (List.filter followTarget model.particles) moveSpeed o
 
                 MoveToClosest ->
                     PhysicsObject.moveToNearest model.particles moveSpeed o
@@ -133,6 +146,8 @@ init _ =
         , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
         , PhysicsObject.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
         , PhysicsObject.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
+        , PhysicsObject.new 140 100 15 (15 * 10) 19 FollowMoveToPosition
+        , PhysicsObject.new 100 -107 18 (18 * 10) 20 FollowMoveToPosition
         ]
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
@@ -243,6 +258,9 @@ viewParticle showVectors particle =
 
                 MoveToPosition _ ->
                     "move-to"
+
+                FollowMoveToPosition ->
+                    "follow-move-to"
 
                 MoveToClosest ->
                     "move-closest"
