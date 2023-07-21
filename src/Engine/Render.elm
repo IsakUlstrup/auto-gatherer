@@ -6,6 +6,7 @@ module Engine.Render exposing
     , generateHexCorners
     , initRenderConfig
     , pointAdd
+    , pointToPixel
     , viewMap
     , withHexFocus
     , withRenderDistance

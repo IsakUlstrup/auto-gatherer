@@ -12,6 +12,7 @@ import Html exposing (Html, main_)
 import Html.Lazy
 import Svg exposing (Svg)
 import Svg.Attributes
+import Svg.Events
 
 
 
@@ -130,6 +131,8 @@ init _ =
         , PhysicsObject.new -150 50 20 (20 * 10) 14 MoveToClosest
         , PhysicsObject.new 150 20 20 (20 * 10) 15 MoveToClosest
         , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
+        , PhysicsObject.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
+        , PhysicsObject.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
         ]
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
@@ -166,6 +169,7 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
+    | SetMoveTarget Vector2
 
 
 fixedUpdate : (Model -> Model) -> Float -> Model -> Model
@@ -202,6 +206,18 @@ update msg model =
 
         SetDrawDistance dist ->
             { model | renderConfig = Engine.Render.withRenderDistance dist model.renderConfig }
+
+        SetMoveTarget target ->
+            let
+                helper p =
+                    case p.state of
+                        MoveToPosition _ ->
+                            { p | state = MoveToPosition target }
+
+                        _ ->
+                            p
+            in
+            { model | particles = List.map helper model.particles }
 
 
 
@@ -261,11 +277,12 @@ viewParticle showVectors particle =
         )
 
 
-viewTile : ( Point, () ) -> Svg msg
-viewTile _ =
+viewTile : ( Point, () ) -> Svg Msg
+viewTile ( p, _ ) =
     Svg.polygon
         [ Engine.Render.generateHexCorners |> Engine.Render.cornersToPoints
         , Svg.Attributes.class "tile"
+        , Svg.Events.onClick <| SetMoveTarget (Engine.Render.pointToPixel p)
         ]
         []
 
