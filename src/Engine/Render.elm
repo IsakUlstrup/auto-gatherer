@@ -186,9 +186,9 @@ translatePoint position =
     in
     Svg.Attributes.style <|
         "transform: translate("
-            ++ String.fromFloat pos.x
+            ++ String.fromInt (round pos.x)
             ++ "px, "
-            ++ String.fromFloat pos.y
+            ++ String.fromInt (round pos.y)
             ++ "px);"
 
 

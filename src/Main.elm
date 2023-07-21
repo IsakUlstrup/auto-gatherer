@@ -361,8 +361,8 @@ gooFilter =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.map ConsoleMsg (Html.Lazy.lazy Engine.Console.viewConsole model.console)
-        , Svg.svg
+        [ -- Html.map ConsoleMsg (Html.Lazy.lazy Engine.Console.viewConsole model.console)
+          Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
