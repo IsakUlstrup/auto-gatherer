@@ -1,19 +1,94 @@
 module Main exposing (Model, Msg, main)
 
-import Blob
 import Browser
 import Browser.Events
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.PhysicsObject as PhysicsObject
+import Engine.HexGrid as Grid exposing (HexGrid)
+import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
+import Engine.Point exposing (Point)
+import Engine.Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
 import Html.Lazy
-import Resource
-import Svg
+import Svg exposing (Svg)
 import Svg.Attributes
+import Svg.Events
 import Svg.Lazy
-import View
-import World exposing (World)
+
+
+
+-- PARTICLE
+
+
+type ParticleState
+    = MoveToCenter
+    | MoveToPosition Vector2
+    | FollowMoveToPosition
+    | MoveToClosest
+    | Idle
+    | Avoid
+
+
+
+-- SYSTEM
+
+
+forces : { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+forces model =
+    let
+        moveSpeed =
+            0.05
+
+        forceHelper o =
+            case o.state of
+                MoveToCenter ->
+                    PhysicsObject.moveToPosition 50 Vector2.zero moveSpeed o
+
+                MoveToPosition p ->
+                    PhysicsObject.moveToPosition 50 p moveSpeed o
+
+                FollowMoveToPosition ->
+                    let
+                        followTarget t =
+                            case t.state of
+                                MoveToPosition _ ->
+                                    True
+
+                                _ ->
+                                    False
+                    in
+                    PhysicsObject.moveToNearest (List.filter followTarget model.particles) moveSpeed o
+
+                MoveToClosest ->
+                    PhysicsObject.moveToNearest model.particles moveSpeed o
+
+                Idle ->
+                    o
+
+                Avoid ->
+                    PhysicsObject.moveAwayRange 100 model.particles moveSpeed o
+    in
+    { model | particles = List.map forceHelper model.particles }
+
+
+movement : Float -> { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+movement dt model =
+    { model
+        | particles =
+            model.particles
+                |> List.map (PhysicsObject.move dt)
+                |> List.map (PhysicsObject.applyFriciton 0.02)
+                |> List.map (PhysicsObject.stopIfSlow 0.0001)
+    }
+
+
+resolveCollisions : { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+resolveCollisions model =
+    { model
+        | particles =
+            model.particles
+                |> List.map (PhysicsObject.resolveCollisions model.particles)
+    }
 
 
 
@@ -23,55 +98,15 @@ import World exposing (World)
 initConsole : Console Msg
 initConsole =
     Engine.Console.new
-        |> Engine.Console.addMessage "Add resource"
-            (Engine.Console.constructor3
-                AddResource
-                (Engine.Console.argFloat "x")
-                (Engine.Console.argFloat "y")
-                (Engine.Console.argFloat "size")
-            )
-        |> Engine.Console.addMessage "Apply force to blobs"
-            (Engine.Console.constructor2
-                BlobForce
-                (Engine.Console.argFloat "x")
-                (Engine.Console.argFloat "y")
-            )
-        |> Engine.Console.addMessage "Apply force to resources"
-            (Engine.Console.constructor2
-                ResourceForce
-                (Engine.Console.argFloat "x")
-                (Engine.Console.argFloat "y")
-            )
-        |> Engine.Console.addMessage "Add blob"
-            (Engine.Console.constructor2
-                AddBlob
-                (Engine.Console.argFloat "size")
-                (Engine.Console.argInt "energy")
-            )
-        |> Engine.Console.addMessage "Reset state"
-            (Engine.Console.constructor Reset)
-        |> Engine.Console.addMessage "Set resource collision enabled"
+        |> Engine.Console.addMessage "Set render debug mode"
             (Engine.Console.constructor1
-                SetResourceCollisionState
-                (Engine.Console.argBool "Enabled")
+                SetRenderDebug
+                (Engine.Console.argBool "Debug enabled")
             )
-        |> Engine.Console.addMessage "Set tile size"
+        |> Engine.Console.addMessage "Set render distance"
             (Engine.Console.constructor1
-                SetTileSize
-                (Engine.Console.argInt "Size")
-            )
-        |> Engine.Console.addMessage "Set camera zoom"
-            (Engine.Console.constructor1
-                SetCameraZoom
-                (Engine.Console.argFloat "Zoom")
-            )
-        |> Engine.Console.addMessage "Rest blobs"
-            (Engine.Console.constructor RestBlobs)
-        |> Engine.Console.addMessage "Move player"
-            (Engine.Console.constructor2
-                MovePlayer
-                (Engine.Console.argFloat "x")
-                (Engine.Console.argFloat "y")
+                SetDrawDistance
+                (Engine.Console.argFloat "Distance")
             )
 
 
@@ -80,34 +115,77 @@ initConsole =
 
 
 type alias Model =
-    { world : World
+    { particles : List (PhysicsObject ParticleState)
+    , map : HexGrid ()
+    , renderConfig : RenderConfig
     , console : Console Msg
-    , cameraZoom : Float
-    , tileSize : Int
+    , stepTime : Float
+    , timeAccum : Float
+    , renderDebug : Bool
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        (World
-            [ Blob.new 0 0 30 12
-            , Blob.new 0 0 20 21
-            , Blob.new 0 0 10 10
-            ]
-            [ Resource.new 150 0 20
-            , Resource.new 178 -183 30
-            , Resource.new 0 -200 35
-            , Resource.new -200 200 25
-            ]
-            []
-            (PhysicsObject.new 0 0 30 100 Vector2.zero)
-            20
-            0
+        [ PhysicsObject.new 200 20 40 (40 * 10) 0 MoveToCenter
+            |> PhysicsObject.applyForce (Vector2.new -6 0.7)
+        , PhysicsObject.new -300 200 70 (70 * 10) 1 Idle
+            |> PhysicsObject.applyForce (Vector2.new 0.3 -0.5)
+        , PhysicsObject.new 0 0 30 (30 * 10) 2 (MoveToPosition <| Vector2.new 200 -175)
+            |> PhysicsObject.applyForce (Vector2.new -2 -3)
+        , PhysicsObject.new -100 20 20 (20 * 10) 3 MoveToClosest
+            |> PhysicsObject.applyForce (Vector2.new 2 -3)
+        , PhysicsObject.new -100 20 20 (20 * 10) 4 MoveToCenter
+        , PhysicsObject.new -101 20 20 (20 * 10) 5 MoveToCenter
+        , PhysicsObject.new -102 20 20 (20 * 10) 6 MoveToCenter
+        , PhysicsObject.new -103 20 20 (20 * 10) 7 MoveToCenter
+        , PhysicsObject.new -104 20 20 (20 * 10) 8 MoveToCenter
+        , PhysicsObject.new -105 20 20 (20 * 10) 9 MoveToCenter
+        , PhysicsObject.new -106 20 20 (20 * 10) 10 MoveToCenter
+        , PhysicsObject.new -107 20 20 (20 * 10) 11 MoveToCenter
+        , PhysicsObject.new -108 20 20 (20 * 10) 12 MoveToCenter
+        , PhysicsObject.new -150 20 20 (20 * 10) 13 MoveToClosest
+        , PhysicsObject.new -150 50 20 (20 * 10) 14 MoveToClosest
+        , PhysicsObject.new 150 20 20 (20 * 10) 15 MoveToClosest
+        , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
+        , PhysicsObject.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
+        , PhysicsObject.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
+        , PhysicsObject.new 140 100 10 (10 * 10) 19 FollowMoveToPosition
+        , PhysicsObject.new 100 -107 8 (8 * 10) 20 FollowMoveToPosition
+        , PhysicsObject.new 200 -107 12 (12 * 10) 21 FollowMoveToPosition
+        , PhysicsObject.new -240 -107 7 (7 * 10) 22 FollowMoveToPosition
+        , PhysicsObject.new -340 -107 23 (23 * 10) 23 Avoid
+        , PhysicsObject.new 240 -207 18 (18 * 10) 24 Avoid
+        ]
+        (Grid.empty
+            |> Grid.insertTile ( 0, 0, 0 ) ()
+            |> Grid.insertTile ( -1, 0, 1 ) ()
+            |> Grid.insertTile ( 1, 1, -2 ) ()
+            |> Grid.insertTile ( 1, 1, -3 ) ()
+            |> Grid.insertTile ( 1, 2, -4 ) ()
+            |> Grid.insertTile ( 2, 2, -4 ) ()
+            |> Grid.insertTile ( 3, 2, -5 ) ()
+            |> Grid.insertTile ( 0, 2, -2 ) ()
+            |> Grid.insertTile ( -1, 2, -1 ) ()
+            |> Grid.insertTile ( -2, 2, 0 ) ()
+            |> Grid.insertTile ( -2, 0, 2 ) ()
+            |> Grid.insertTile ( -3, 1, 2 ) ()
+            |> Grid.insertTile ( -4, 2, 2 ) ()
+            |> Grid.insertTile ( 3, -2, -1 ) ()
+            |> Grid.insertTile ( 3, 1, -4 ) ()
+            |> Grid.insertTile ( -2, -2, 4 ) ()
+            |> Grid.insertTile ( 0, 2, -2 ) ()
+            |> Grid.insertTile ( 0, 3, -3 ) ()
+            |> Grid.insertTile ( 0, 4, -4 ) ()
+            |> Grid.insertTile ( 0, 5, -5 ) ()
+            |> Grid.insertTile ( 2, 3, -5 ) ()
         )
+        (Engine.Render.initRenderConfig |> Engine.Render.withRenderDistance 1000)
         initConsole
-        0.7
-        60
+        20
+        0
+        False
     , Cmd.none
     )
 
@@ -118,82 +196,28 @@ init _ =
 
 type Msg
     = Tick Float
-    | AddResource Float Float Float
-    | AddBlob Float Int
-    | SetResourceCollisionState Bool
-    | BlobForce Float Float
-    | ResourceForce Float Float
-    | MovePlayer Float Float
-    | RestBlobs
-    | Reset
-    | SetCameraZoom Float
     | ConsoleMsg (ConsoleMsg Msg)
-    | GameClick Vector2
-    | SetTileSize Int
-    | PickupItem Int
+    | SetRenderDebug Bool
+    | SetDrawDistance Float
+    | SetMoveTarget Vector2
 
 
-worldUpdate : World -> World
-worldUpdate world =
-    world
-        |> World.itemSpawn
-        |> World.forces
-        |> World.movement
-        |> World.collisionInteraction
-        |> World.collisionResolution
-        |> World.stateUpdate
+fixedUpdate : (Model -> Model) -> Float -> Model -> Model
+fixedUpdate f dt world =
+    if dt >= world.stepTime then
+        { world | timeAccum = dt - world.stepTime }
+            |> f
+            |> fixedUpdate f (dt - world.stepTime)
+
+    else
+        { world | timeAccum = dt }
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick dt ->
-            ( { model | world = World.fixedUpdate worldUpdate (model.world.physicsStepAccumulator + dt) model.world }
-            , Cmd.none
-            )
-
-        AddResource x y size ->
-            ( { model | world = World.addResource (Resource.new x y size) model.world }
-            , Cmd.none
-            )
-
-        AddBlob size energy ->
-            ( { model | world = World.addBlob (Blob.new 0 0 size energy) model.world }
-            , Cmd.none
-            )
-
-        BlobForce x y ->
-            ( { model | world = World.updateBlobs (PhysicsObject.applyForce <| Vector2.new x y) model.world }
-            , Cmd.none
-            )
-
-        ResourceForce x y ->
-            ( { model | world = World.updateResources (PhysicsObject.applyForce <| Vector2.new x y) model.world }
-            , Cmd.none
-            )
-
-        MovePlayer x y ->
-            ( { model | world = World.updatePlayer (PhysicsObject.updateState (always <| Vector2.new x y)) model.world }
-            , Cmd.none
-            )
-
-        Reset ->
-            init ()
-
-        RestBlobs ->
-            ( { model | world = World.updateBlobs Blob.resetEnergy model.world }
-            , Cmd.none
-            )
-
-        SetResourceCollisionState flag ->
-            ( { model | world = World.updateResources (PhysicsObject.setcollisionState flag) model.world }
-            , Cmd.none
-            )
-
-        SetCameraZoom zoom ->
-            ( { model | cameraZoom = zoom }
-            , Cmd.none
-            )
+            fixedUpdate (forces >> movement model.stepTime >> resolveCollisions) (model.timeAccum + dt) model
 
         ConsoleMsg cmsg ->
             let
@@ -205,44 +229,151 @@ update msg model =
                     { model | console = newConsole } |> update m
 
                 Nothing ->
-                    ( { model | console = newConsole }, Cmd.none )
+                    { model | console = newConsole }
 
-        GameClick coordinate ->
-            ( { model | world = World.updatePlayer (PhysicsObject.updateState (always <| coordinate)) model.world }
-            , Cmd.none
-            )
+        SetRenderDebug flag ->
+            { model | renderDebug = flag }
 
-        SetTileSize size ->
-            ( { model | tileSize = size }
-            , Cmd.none
-            )
+        SetDrawDistance dist ->
+            { model | renderConfig = Engine.Render.withRenderDistance dist model.renderConfig }
 
-        PickupItem index ->
-            ( { model | world = World.pickupItem index model.world }, Cmd.none )
+        SetMoveTarget target ->
+            let
+                helper p =
+                    case p.state of
+                        MoveToPosition _ ->
+                            { p | state = MoveToPosition target }
+
+                        _ ->
+                            p
+            in
+            { model
+                | particles = List.map helper model.particles
+                , renderConfig = Engine.Render.withPosition target model.renderConfig
+            }
 
 
 
 -- VIEW
 
 
+transformString : Vector2 -> String
+transformString position =
+    "translate("
+        ++ String.fromInt (round position.x)
+        ++ ", "
+        ++ String.fromInt (round position.y)
+        ++ ")"
+
+
+viewParticle : Bool -> PhysicsObject ParticleState -> Svg msg
+viewParticle showVectors particle =
+    let
+        typeString =
+            case particle.state of
+                MoveToCenter ->
+                    "move-center"
+
+                MoveToPosition _ ->
+                    "move-to"
+
+                FollowMoveToPosition ->
+                    "follow-move-to"
+
+                MoveToClosest ->
+                    "move-closest"
+
+                Idle ->
+                    "idle"
+
+                Avoid ->
+                    "avoid"
+    in
+    Svg.g
+        [ Svg.Attributes.transform <| transformString particle.position
+        , Svg.Attributes.class "particle"
+        , Svg.Attributes.class typeString
+        ]
+        (Svg.circle
+            [ Svg.Attributes.r <| String.fromInt (round particle.radius)
+            , Svg.Attributes.class "body"
+            ]
+            []
+            :: (if showVectors then
+                    [ Svg.line
+                        [ Svg.Attributes.x1 "0"
+                        , Svg.Attributes.y1 "0"
+                        , Svg.Attributes.x2 <| String.fromInt (round (particle.velocity.x * 300))
+                        , Svg.Attributes.y2 <| String.fromInt (round (particle.velocity.y * 300))
+                        , Svg.Attributes.class "velocity"
+                        ]
+                        []
+                    ]
+
+                else
+                    []
+               )
+        )
+
+
+viewTile : ( Point, () ) -> Svg Msg
+viewTile ( p, _ ) =
+    Svg.polygon
+        [ Engine.Render.generateHexCorners |> Engine.Render.cornersToPoints
+        , Svg.Attributes.class "tile"
+        , Svg.Events.onClick <| SetMoveTarget (Engine.Render.pointToPixel p)
+        ]
+        []
+
+
+gooFilter : Svg msg
+gooFilter =
+    -- <filter id="drop-shadow">
+    --     <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="shadow" />
+    --     <feOffset in="shadow" dx="3" dy="4" result="shadow" />
+    --     <feColorMatrix in="shadow" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="shadow" />
+    --     <feBlend in="SourceGraphic" in2="shadow" />
+    -- </filter>
+    Svg.filter [ Svg.Attributes.id "goo-filter" ]
+        [ Svg.feGaussianBlur
+            [ Svg.Attributes.in_ "SourceGraphic"
+            , Svg.Attributes.stdDeviation "5"
+            , Svg.Attributes.result "blur"
+            ]
+            []
+        , Svg.feColorMatrix
+            [ Svg.Attributes.in_ "blur"
+            , Svg.Attributes.type_ "matrix"
+            , Svg.Attributes.values "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+            , Svg.Attributes.result "goo"
+            ]
+            []
+
+        -- , Svg.feComposite
+        --     [ Svg.Attributes.in_ "SourceGraphic"
+        --     , Svg.Attributes.in2 "goo"
+        --     , Svg.Attributes.operator "atop"
+        --     ]
+        --     []
+        ]
+
+
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.map ConsoleMsg (Html.Lazy.lazy Engine.Console.viewConsole model.console)
-        , Svg.svg
+        [ -- Html.map ConsoleMsg (Html.Lazy.lazy Engine.Console.viewConsole model.console)
+          Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , View.cameraTransform model.cameraZoom model.world.player.position
+                , Svg.Attributes.style <| "transform: translate(" ++ String.fromFloat -model.renderConfig.position.x ++ "px, " ++ String.fromFloat -model.renderConfig.position.y ++ "px)"
                 ]
-                [ Svg.Lazy.lazy (View.viewBackground GameClick) model.tileSize
-                , Svg.g [ Svg.Attributes.class "blobs" ] (List.map View.viewBlob model.world.blobs)
-                , Svg.g [] (List.indexedMap (View.viewItem PickupItem) model.world.items)
-                , Svg.g [ Svg.Attributes.class "resources" ] (List.map (View.viewResource model.world.player.position) model.world.resources)
-                , Svg.Lazy.lazy View.viewPlayer model.world.player
+                [ Svg.defs [] [ gooFilter ]
+                , Svg.Lazy.lazy (Engine.Render.viewMap viewTile) model.map
+                , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
                 ]
             ]
         ]
@@ -254,7 +385,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onAnimationFrameDelta (min 1000 >> Tick)
+    Browser.Events.onAnimationFrameDelta (min 10000 >> Tick)
 
 
 
@@ -266,6 +397,6 @@ main =
     Browser.element
         { init = init
         , view = view
-        , update = update
+        , update = \msg model -> ( update msg model, Cmd.none )
         , subscriptions = subscriptions
         }

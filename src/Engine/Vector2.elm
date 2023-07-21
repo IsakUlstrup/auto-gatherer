@@ -4,13 +4,16 @@ module Engine.Vector2 exposing
     , direction
     , distance
     , divide
+    , dot
     , magnitude
     , multiply
     , new
+    , normalize
     , scale
     , singleton
     , subtract
     , sum
+    , tangent
     , zero
     )
 
@@ -115,3 +118,13 @@ distance v1 v2 =
 direction : Vector2 -> Vector2 -> Vector2
 direction origin target =
     Vector2 (target.x - origin.x) (target.y - origin.y) |> normalize
+
+
+tangent : Vector2 -> Vector2
+tangent vector =
+    Vector2 -vector.y vector.x
+
+
+dot : Vector2 -> Vector2 -> Float
+dot v1 v2 =
+    (v2.x * v1.x) + (v2.y * v1.y)
