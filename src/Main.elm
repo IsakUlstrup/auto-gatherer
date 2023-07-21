@@ -72,7 +72,7 @@ movement dt model =
         | particles =
             model.particles
                 |> List.map (PhysicsObject.move dt)
-                |> List.map (PhysicsObject.applyFriciton 0.01)
+                |> List.map (PhysicsObject.applyFriciton 0.02)
                 |> List.map (PhysicsObject.stopIfSlow 0.0001)
     }
 
