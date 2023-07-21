@@ -195,7 +195,7 @@ viewParticle showVectors particle =
         , Svg.Attributes.class typeString
         ]
         (Svg.circle
-            [ Svg.Attributes.r <| String.fromFloat particle.radius
+            [ Svg.Attributes.r <| String.fromInt (round particle.radius)
             , Svg.Attributes.class "body"
             ]
             []
@@ -203,8 +203,8 @@ viewParticle showVectors particle =
                     [ Svg.line
                         [ Svg.Attributes.x1 "0"
                         , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromFloat (particle.velocity.x * 300)
-                        , Svg.Attributes.y2 <| String.fromFloat (particle.velocity.y * 300)
+                        , Svg.Attributes.x2 <| String.fromInt (round particle.velocity.x * 300)
+                        , Svg.Attributes.y2 <| String.fromInt (round particle.velocity.y * 300)
                         , Svg.Attributes.class "velocity"
                         ]
                         []
