@@ -13,6 +13,7 @@ import Html.Lazy
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
+import Svg.Lazy
 
 
 
@@ -316,6 +317,37 @@ viewTile ( p, _ ) =
         []
 
 
+gooFilter : Svg msg
+gooFilter =
+    -- <filter id="drop-shadow">
+    --     <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="shadow" />
+    --     <feOffset in="shadow" dx="3" dy="4" result="shadow" />
+    --     <feColorMatrix in="shadow" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="shadow" />
+    --     <feBlend in="SourceGraphic" in2="shadow" />
+    -- </filter>
+    Svg.filter [ Svg.Attributes.id "goo-filter" ]
+        [ Svg.feGaussianBlur
+            [ Svg.Attributes.in_ "SourceGraphic"
+            , Svg.Attributes.stdDeviation "5"
+            , Svg.Attributes.result "blur"
+            ]
+            []
+        , Svg.feColorMatrix
+            [ Svg.Attributes.in_ "blur"
+            , Svg.Attributes.type_ "matrix"
+            , Svg.Attributes.values "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -5"
+            , Svg.Attributes.result "goo"
+            ]
+            []
+        , Svg.feBlend
+            [ Svg.Attributes.in_ "SourceGraphic"
+            , Svg.Attributes.in2 "goo"
+            , Svg.Attributes.operator "atop"
+            ]
+            []
+        ]
+
+
 view : Model -> Html Msg
 view model =
     main_ []
@@ -325,7 +357,8 @@ view model =
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
-            [ Engine.Render.viewMap model.renderConfig viewTile model.map
+            [ Svg.defs [] [ gooFilter ]
+            , Svg.Lazy.lazy2 (Engine.Render.viewMap viewTile) model.renderConfig model.map
             , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
             ]
         ]

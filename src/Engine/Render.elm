@@ -206,8 +206,8 @@ viewKeyedTile renderFunc entity =
     )
 
 
-viewMap : RenderConfig -> (( Point, tileData ) -> Svg msg) -> HexGrid tileData -> Svg msg
-viewMap renderConfig renderFunc grid =
+viewMap : (( Point, tileData ) -> Svg msg) -> RenderConfig -> HexGrid tileData -> Svg msg
+viewMap renderFunc renderConfig grid =
     Svg.Keyed.node "g"
         [ Svg.Attributes.class "map"
         ]
