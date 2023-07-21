@@ -38,10 +38,22 @@ main
     height: 100%
 
     .particle
-        .body
+        &.move-center .body
             fill: $resource_color
             stroke: lighten($resource_color, 25)
+        &.move-to .body
+            fill: $player_color
+            stroke: lighten($player_color, 25)
+        &.move-closest .body
+            fill: $item_color
+            stroke: lighten($item_color, 25)
+        &.idle .body
+            fill: $tile_color
+            stroke: lighten($tile_color, 25)
+
+        .body
             stroke-width: 3
+
         .velocity
             stroke: lighten($player_color, 25)
             stroke-width: 5
