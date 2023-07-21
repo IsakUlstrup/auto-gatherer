@@ -35,10 +35,10 @@ forces model =
         forceHelper o =
             case o.state of
                 MoveToCenter ->
-                    PhysicsObject.moveToPosition 0 (Vector2.new 200 -48) moveSpeed o
+                    PhysicsObject.moveToPosition 50 Vector2.zero moveSpeed o
 
                 MoveToPosition p ->
-                    PhysicsObject.moveToPosition 0 p moveSpeed o
+                    PhysicsObject.moveToPosition 50 p moveSpeed o
 
                 MoveToClosest ->
                     PhysicsObject.moveToNearest model.particles moveSpeed o
@@ -99,16 +99,19 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ PhysicsObject.new 200 20 40 1000 0 MoveToCenter
-            |> PhysicsObject.applyForce (Vector2.new -10 0)
-        , PhysicsObject.new -300 200 30 100 500 Idle
-        , PhysicsObject.new 0 0 30 100 700 (MoveToPosition <| Vector2.new 200 -175)
-        , PhysicsObject.new -100 20 30 100 2 MoveToClosest
+        [ PhysicsObject.new 200 20 40 200 0 MoveToCenter
+            |> PhysicsObject.applyForce (Vector2.new -6 0.7)
+        , PhysicsObject.new -300 200 30 1000 1 Idle
+            |> PhysicsObject.applyForce (Vector2.new 0.3 -0.5)
+        , PhysicsObject.new 0 0 30 300 2 (MoveToPosition <| Vector2.new 200 -175)
+            |> PhysicsObject.applyForce (Vector2.new -2 -3)
+        , PhysicsObject.new -100 20 30 100 3 MoveToClosest
+            |> PhysicsObject.applyForce (Vector2.new 2 -3)
         ]
         initConsole
         20
         0
-        False
+        True
     , Cmd.none
     )
 
