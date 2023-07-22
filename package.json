@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "elm-optimize-level-2": "0.3.5",
     "sass": "1.63.5",
     "vite": "4.3.9",
     "vite-plugin-elm": "2.9.0-beta.1"
