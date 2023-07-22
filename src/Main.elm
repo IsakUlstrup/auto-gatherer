@@ -256,7 +256,7 @@ viewParticle showVectors particle =
 viewTile : ( Point, () ) -> Svg Msg
 viewTile ( p, _ ) =
     Svg.polygon
-        [ Render.generateHexCorners |> Render.cornersToPoints
+        [ Svg.Attributes.points "40,0 20,35 -20,35 -40,0 -20,-35 20,-35"
         , Svg.Attributes.class "tile"
         , Svg.Events.onClick <| SetMoveTarget (Render.pointToPixel p)
         ]
