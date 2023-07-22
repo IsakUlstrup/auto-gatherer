@@ -23,9 +23,9 @@ particleSystem1 =
         |> ParticleSystem.addParticle 0 0 70 Idle
         -- |> ParticleSystem.addParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
         -- |> ParticleSystem.addParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
-        |> ParticleSystem.addParticle 140 100 10 FollowMoveToPosition
-        |> ParticleSystem.addParticle 100 -107 8 FollowMoveToPosition
-        |> ParticleSystem.addParticle -107 12 9 FollowMoveToPosition
-        |> ParticleSystem.addParticle -240 -107 7 FollowMoveToPosition
+        |> ParticleSystem.addParticle 140 100 5 FollowMoveToPosition
+        |> ParticleSystem.addParticle 100 -107 4 FollowMoveToPosition
+        |> ParticleSystem.addParticle -107 12 3 FollowMoveToPosition
+        |> ParticleSystem.addParticle -240 -107 2 FollowMoveToPosition
         |> ParticleSystem.addParticle -340 -107 23 Avoid
         |> ParticleSystem.addParticle 240 -17 18 Avoid

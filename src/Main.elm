@@ -289,7 +289,12 @@ gooFilter =
 
 transformStyle : Vector2 -> Svg.Attribute msg
 transformStyle position =
-    Svg.Attributes.style <| "transform: translate(" ++ String.fromInt (round -position.x) ++ "px, " ++ String.fromInt (round -position.y) ++ "px)"
+    Svg.Attributes.style <|
+        "transform: translate("
+            ++ String.fromInt (round -position.x)
+            ++ "px, "
+            ++ String.fromInt (round -position.y)
+            ++ "px) scale(0.7)"
 
 
 view : Model -> Html Msg
