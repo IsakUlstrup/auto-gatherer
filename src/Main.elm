@@ -5,6 +5,7 @@ import Browser.Events
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.HexGrid as Grid exposing (HexGrid)
 import Engine.Particle as Particle exposing (Particle)
+import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
 import Engine.Point exposing (Point)
 import Engine.Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -32,8 +33,8 @@ type ParticleState
 -- SYSTEM
 
 
-forces : { a | particles : List (Particle ParticleState) } -> { a | particles : List (Particle ParticleState) }
-forces model =
+forces : ParticleSystem ParticleState -> ParticleSystem ParticleState
+forces system =
     let
         moveSpeed =
             0.05
@@ -56,38 +57,28 @@ forces model =
                                 _ ->
                                     False
                     in
-                    Particle.moveToNearest (List.filter followTarget model.particles) moveSpeed o
+                    Particle.moveToNearest (system |> ParticleSystem.getParticles |> List.filter followTarget) moveSpeed o
 
                 MoveToClosest ->
-                    Particle.moveToNearest model.particles moveSpeed o
+                    Particle.moveToNearest (system |> ParticleSystem.getParticles) moveSpeed o
 
                 Idle ->
                     o
 
                 Avoid ->
-                    Particle.moveAwayRange 100 model.particles moveSpeed o
+                    Particle.moveAwayRange 100 (system |> ParticleSystem.getParticles) moveSpeed o
     in
-    { model | particles = List.map forceHelper model.particles }
+    ParticleSystem.updateParticles forceHelper system
 
 
-movement : Float -> { a | particles : List (Particle ParticleState) } -> { a | particles : List (Particle ParticleState) }
-movement dt model =
-    { model
-        | particles =
-            model.particles
-                |> List.map (Particle.move dt)
-                |> List.map (Particle.applyFriciton 0.02)
-                |> List.map (Particle.stopIfSlow 0.0001)
-    }
+movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
+movement dt system =
+    ParticleSystem.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : { a | particles : List (Particle ParticleState) } -> { a | particles : List (Particle ParticleState) }
-resolveCollisions model =
-    { model
-        | particles =
-            model.particles
-                |> List.map (Particle.resolveCollisions model.particles)
-    }
+resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
+resolveCollisions system =
+    ParticleSystem.updateParticles (Particle.resolveCollisions (system |> ParticleSystem.getParticles)) system
 
 
 
@@ -114,7 +105,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : List (Particle ParticleState)
+    { particles : ParticleSystem ParticleState
     , map : HexGrid ()
     , renderConfig : RenderConfig
     , console : Console Msg
@@ -127,36 +118,29 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ Particle.new 200 20 40 (40 * 10) 0 MoveToCenter
-            |> Particle.applyForce (Vector2.new -6 0.7)
-        , Particle.new -300 200 70 (70 * 10) 1 Idle
-            |> Particle.applyForce (Vector2.new 0.3 -0.5)
-        , Particle.new 0 0 30 (30 * 10) 2 (MoveToPosition <| Vector2.new 200 -175)
-            |> Particle.applyForce (Vector2.new -2 -3)
-        , Particle.new -100 20 20 (20 * 10) 3 MoveToClosest
-            |> Particle.applyForce (Vector2.new 2 -3)
-        , Particle.new -100 20 20 (20 * 10) 4 MoveToCenter
-        , Particle.new -101 20 20 (20 * 10) 5 MoveToCenter
-        , Particle.new -102 20 20 (20 * 10) 6 MoveToCenter
-        , Particle.new -103 20 20 (20 * 10) 7 MoveToCenter
-        , Particle.new -104 20 20 (20 * 10) 8 MoveToCenter
-        , Particle.new -105 20 20 (20 * 10) 9 MoveToCenter
-        , Particle.new -106 20 20 (20 * 10) 10 MoveToCenter
-        , Particle.new -107 20 20 (20 * 10) 11 MoveToCenter
-        , Particle.new -108 20 20 (20 * 10) 12 MoveToCenter
-        , Particle.new -150 20 20 (20 * 10) 13 MoveToClosest
-        , Particle.new -150 50 20 (20 * 10) 14 MoveToClosest
-        , Particle.new 150 20 20 (20 * 10) 15 MoveToClosest
-        , Particle.new 0 0 70 (70 * 10) 16 Idle
-        , Particle.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
-        , Particle.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
-        , Particle.new 140 100 10 (10 * 10) 19 FollowMoveToPosition
-        , Particle.new 100 -107 8 (8 * 10) 20 FollowMoveToPosition
-        , Particle.new 200 -107 12 (12 * 10) 21 FollowMoveToPosition
-        , Particle.new -240 -107 7 (7 * 10) 22 FollowMoveToPosition
-        , Particle.new -340 -107 23 (23 * 10) 23 Avoid
-        , Particle.new 240 -207 18 (18 * 10) 24 Avoid
-        ]
+        (ParticleSystem.empty
+            |> ParticleSystem.addParticle 200 20 40 MoveToCenter
+            |> ParticleSystem.addParticle -300 200 70 Idle
+            |> ParticleSystem.addParticle 0 0 30 (MoveToPosition <| Vector2.new 200 -175)
+            |> ParticleSystem.addParticle -97 20 20 MoveToClosest
+            |> ParticleSystem.addParticle -100 20 20 MoveToCenter
+            |> ParticleSystem.addParticle -101 20 20 MoveToCenter
+            |> ParticleSystem.addParticle -102 20 20 MoveToCenter
+            |> ParticleSystem.addParticle -103 20 20 MoveToCenter
+            |> ParticleSystem.addParticle -104 20 20 MoveToCenter
+            |> ParticleSystem.addParticle -150 20 20 MoveToClosest
+            |> ParticleSystem.addParticle -150 50 20 MoveToClosest
+            |> ParticleSystem.addParticle 150 20 20 MoveToClosest
+            |> ParticleSystem.addParticle 0 0 70 Idle
+            |> ParticleSystem.addParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
+            |> ParticleSystem.addParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
+            |> ParticleSystem.addParticle 140 100 10 FollowMoveToPosition
+            |> ParticleSystem.addParticle 100 -107 8 FollowMoveToPosition
+            |> ParticleSystem.addParticle -107 12 9 FollowMoveToPosition
+            |> ParticleSystem.addParticle -240 -107 7 FollowMoveToPosition
+            |> ParticleSystem.addParticle -340 -107 23 Avoid
+            |> ParticleSystem.addParticle 240 -17 18 Avoid
+        )
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
             |> Grid.insertTile ( -1, 0, 1 ) ()
@@ -216,7 +200,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick dt ->
-            fixedUpdate (forces >> movement model.stepTime >> resolveCollisions) (model.timeAccum + dt) model
+            fixedUpdate (\m -> { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }) (model.timeAccum + dt) model
 
         ConsoleMsg cmsg ->
             let
@@ -247,7 +231,7 @@ update msg model =
                             p
             in
             { model
-                | particles = List.map helper model.particles
+                | particles = ParticleSystem.updateParticles helper model.particles
                 , renderConfig = Engine.Render.withPosition target model.renderConfig
             }
 
@@ -372,7 +356,7 @@ view model =
                 ]
                 [ Svg.defs [] [ gooFilter ]
                 , Svg.Lazy.lazy (Engine.Render.viewMap viewTile) model.map
-                , Svg.g [] (model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
+                , Svg.g [] (ParticleSystem.getParticles model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
                 ]
             ]
         ]

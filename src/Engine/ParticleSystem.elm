@@ -2,31 +2,39 @@ module Engine.ParticleSystem exposing
     ( ParticleSystem
     , addParticle
     , empty
+    , getParticles
     , updateParticles
     )
 
 import Engine.Particle as Particle exposing (Particle)
 
 
-type alias ParticleSystem a =
-    { particles : List (Particle a)
-    , idCounter : Int
-    }
+type ParticleSystem a
+    = ParticleSystem
+        { particles : List (Particle a)
+        , idCounter : Int
+        }
 
 
 empty : ParticleSystem a
 empty =
-    ParticleSystem [] 0
+    ParticleSystem { particles = [], idCounter = 0 }
 
 
 addParticle : Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
-addParticle x y size state system =
-    { system
-        | particles = Particle.new x y size (size * 10) system.idCounter state :: system.particles
-        , idCounter = system.idCounter + 1
-    }
+addParticle x y size state (ParticleSystem system) =
+    ParticleSystem
+        { system
+            | particles = Particle.new x y size (size * 10) system.idCounter state :: system.particles
+            , idCounter = system.idCounter + 1
+        }
 
 
 updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
-updateParticles f system =
-    { system | particles = List.map f system.particles }
+updateParticles f (ParticleSystem system) =
+    ParticleSystem { system | particles = List.map f system.particles }
+
+
+getParticles : ParticleSystem a -> List (Particle a)
+getParticles (ParticleSystem system) =
+    system.particles
