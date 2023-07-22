@@ -10,23 +10,11 @@ import Engine.Point exposing (Point)
 import Engine.Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
+import ParticleState exposing (ParticleState(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
 import Svg.Lazy
-
-
-
--- PARTICLE
-
-
-type ParticleState
-    = MoveToCenter
-    | MoveToPosition Vector2
-    | FollowMoveToPosition
-    | MoveToClosest
-    | Idle
-    | Avoid
 
 
 
