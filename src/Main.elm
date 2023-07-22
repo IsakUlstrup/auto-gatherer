@@ -287,22 +287,31 @@ gooFilter =
         ]
 
 
+transformStyle : Vector2 -> Svg.Attribute msg
+transformStyle position =
+    Svg.Attributes.style <| "transform: translate(" ++ String.fromInt (round -position.x) ++ "px, " ++ String.fromInt (round -position.y) ++ "px)"
+
+
 view : Model -> Html Msg
 view model =
     main_ []
-        [ -- Html.map ConsoleMsg (Html.Lazy.lazy Engine.Console.viewConsole model.console)
-          Svg.svg
+        [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
             , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , Svg.Attributes.style <| "transform: translate(" ++ String.fromFloat -model.renderConfig.position.x ++ "px, " ++ String.fromFloat -model.renderConfig.position.y ++ "px)"
+                , transformStyle <| .position <| ParticleSystem.getPlayer model.particles
                 ]
                 [ Svg.defs [] [ gooFilter ]
                 , Svg.Lazy.lazy (Engine.Render.viewMap viewTile) model.map
-                , Svg.g [] (ParticleSystem.getParticles model.particles |> List.filter (\o -> Vector2.distance Vector2.zero o.position < model.renderConfig.renderDistance) |> List.map (viewParticle model.renderDebug))
+                , Svg.g []
+                    (ParticleSystem.getParticles model.particles
+                        |> List.filter (\o -> Vector2.distance (.position <| ParticleSystem.getPlayer model.particles) o.position < model.renderConfig.renderDistance)
+                        |> List.map (viewParticle model.renderDebug)
+                    )
                 ]
             ]
         ]

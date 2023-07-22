@@ -3,6 +3,7 @@ module Engine.ParticleSystem exposing
     , addParticle
     , empty
     , getParticles
+    , getPlayer
     , updateParticles
     )
 
@@ -39,3 +40,8 @@ updateParticles f (ParticleSystem system) =
 getParticles : ParticleSystem a -> List (Particle a)
 getParticles (ParticleSystem system) =
     system.player :: system.particles
+
+
+getPlayer : ParticleSystem a -> Particle a
+getPlayer (ParticleSystem system) =
+    system.player
