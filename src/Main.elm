@@ -4,12 +4,11 @@ import Browser
 import Browser.Events
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.HexGrid as Grid exposing (HexGrid)
-import Engine.PhysicsObject as PhysicsObject exposing (PhysicsObject)
+import Engine.Particle as Particle exposing (Particle)
 import Engine.Point exposing (Point)
 import Engine.Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
-import Html.Lazy
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -33,7 +32,7 @@ type ParticleState
 -- SYSTEM
 
 
-forces : { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+forces : { a | particles : List (Particle ParticleState) } -> { a | particles : List (Particle ParticleState) }
 forces model =
     let
         moveSpeed =
@@ -42,10 +41,10 @@ forces model =
         forceHelper o =
             case o.state of
                 MoveToCenter ->
-                    PhysicsObject.moveToPosition 50 Vector2.zero moveSpeed o
+                    Particle.moveToPosition 50 Vector2.zero moveSpeed o
 
                 MoveToPosition p ->
-                    PhysicsObject.moveToPosition 50 p moveSpeed o
+                    Particle.moveToPosition 50 p moveSpeed o
 
                 FollowMoveToPosition ->
                     let
@@ -57,37 +56,37 @@ forces model =
                                 _ ->
                                     False
                     in
-                    PhysicsObject.moveToNearest (List.filter followTarget model.particles) moveSpeed o
+                    Particle.moveToNearest (List.filter followTarget model.particles) moveSpeed o
 
                 MoveToClosest ->
-                    PhysicsObject.moveToNearest model.particles moveSpeed o
+                    Particle.moveToNearest model.particles moveSpeed o
 
                 Idle ->
                     o
 
                 Avoid ->
-                    PhysicsObject.moveAwayRange 100 model.particles moveSpeed o
+                    Particle.moveAwayRange 100 model.particles moveSpeed o
     in
     { model | particles = List.map forceHelper model.particles }
 
 
-movement : Float -> { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+movement : Float -> { a | particles : List (Particle ParticleState) } -> { a | particles : List (Particle ParticleState) }
 movement dt model =
     { model
         | particles =
             model.particles
-                |> List.map (PhysicsObject.move dt)
-                |> List.map (PhysicsObject.applyFriciton 0.02)
-                |> List.map (PhysicsObject.stopIfSlow 0.0001)
+                |> List.map (Particle.move dt)
+                |> List.map (Particle.applyFriciton 0.02)
+                |> List.map (Particle.stopIfSlow 0.0001)
     }
 
 
-resolveCollisions : { a | particles : List (PhysicsObject ParticleState) } -> { a | particles : List (PhysicsObject ParticleState) }
+resolveCollisions : { a | particles : List (Particle ParticleState) } -> { a | particles : List (Particle ParticleState) }
 resolveCollisions model =
     { model
         | particles =
             model.particles
-                |> List.map (PhysicsObject.resolveCollisions model.particles)
+                |> List.map (Particle.resolveCollisions model.particles)
     }
 
 
@@ -115,7 +114,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : List (PhysicsObject ParticleState)
+    { particles : List (Particle ParticleState)
     , map : HexGrid ()
     , renderConfig : RenderConfig
     , console : Console Msg
@@ -128,35 +127,35 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        [ PhysicsObject.new 200 20 40 (40 * 10) 0 MoveToCenter
-            |> PhysicsObject.applyForce (Vector2.new -6 0.7)
-        , PhysicsObject.new -300 200 70 (70 * 10) 1 Idle
-            |> PhysicsObject.applyForce (Vector2.new 0.3 -0.5)
-        , PhysicsObject.new 0 0 30 (30 * 10) 2 (MoveToPosition <| Vector2.new 200 -175)
-            |> PhysicsObject.applyForce (Vector2.new -2 -3)
-        , PhysicsObject.new -100 20 20 (20 * 10) 3 MoveToClosest
-            |> PhysicsObject.applyForce (Vector2.new 2 -3)
-        , PhysicsObject.new -100 20 20 (20 * 10) 4 MoveToCenter
-        , PhysicsObject.new -101 20 20 (20 * 10) 5 MoveToCenter
-        , PhysicsObject.new -102 20 20 (20 * 10) 6 MoveToCenter
-        , PhysicsObject.new -103 20 20 (20 * 10) 7 MoveToCenter
-        , PhysicsObject.new -104 20 20 (20 * 10) 8 MoveToCenter
-        , PhysicsObject.new -105 20 20 (20 * 10) 9 MoveToCenter
-        , PhysicsObject.new -106 20 20 (20 * 10) 10 MoveToCenter
-        , PhysicsObject.new -107 20 20 (20 * 10) 11 MoveToCenter
-        , PhysicsObject.new -108 20 20 (20 * 10) 12 MoveToCenter
-        , PhysicsObject.new -150 20 20 (20 * 10) 13 MoveToClosest
-        , PhysicsObject.new -150 50 20 (20 * 10) 14 MoveToClosest
-        , PhysicsObject.new 150 20 20 (20 * 10) 15 MoveToClosest
-        , PhysicsObject.new 0 0 70 (70 * 10) 16 Idle
-        , PhysicsObject.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
-        , PhysicsObject.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
-        , PhysicsObject.new 140 100 10 (10 * 10) 19 FollowMoveToPosition
-        , PhysicsObject.new 100 -107 8 (8 * 10) 20 FollowMoveToPosition
-        , PhysicsObject.new 200 -107 12 (12 * 10) 21 FollowMoveToPosition
-        , PhysicsObject.new -240 -107 7 (7 * 10) 22 FollowMoveToPosition
-        , PhysicsObject.new -340 -107 23 (23 * 10) 23 Avoid
-        , PhysicsObject.new 240 -207 18 (18 * 10) 24 Avoid
+        [ Particle.new 200 20 40 (40 * 10) 0 MoveToCenter
+            |> Particle.applyForce (Vector2.new -6 0.7)
+        , Particle.new -300 200 70 (70 * 10) 1 Idle
+            |> Particle.applyForce (Vector2.new 0.3 -0.5)
+        , Particle.new 0 0 30 (30 * 10) 2 (MoveToPosition <| Vector2.new 200 -175)
+            |> Particle.applyForce (Vector2.new -2 -3)
+        , Particle.new -100 20 20 (20 * 10) 3 MoveToClosest
+            |> Particle.applyForce (Vector2.new 2 -3)
+        , Particle.new -100 20 20 (20 * 10) 4 MoveToCenter
+        , Particle.new -101 20 20 (20 * 10) 5 MoveToCenter
+        , Particle.new -102 20 20 (20 * 10) 6 MoveToCenter
+        , Particle.new -103 20 20 (20 * 10) 7 MoveToCenter
+        , Particle.new -104 20 20 (20 * 10) 8 MoveToCenter
+        , Particle.new -105 20 20 (20 * 10) 9 MoveToCenter
+        , Particle.new -106 20 20 (20 * 10) 10 MoveToCenter
+        , Particle.new -107 20 20 (20 * 10) 11 MoveToCenter
+        , Particle.new -108 20 20 (20 * 10) 12 MoveToCenter
+        , Particle.new -150 20 20 (20 * 10) 13 MoveToClosest
+        , Particle.new -150 50 20 (20 * 10) 14 MoveToClosest
+        , Particle.new 150 20 20 (20 * 10) 15 MoveToClosest
+        , Particle.new 0 0 70 (70 * 10) 16 Idle
+        , Particle.new -100 -100 30 (30 * 10) 17 (MoveToPosition <| Vector2.new 50 -75)
+        , Particle.new 100 100 30 (30 * 10) 18 (MoveToPosition <| Vector2.new 150 -75)
+        , Particle.new 140 100 10 (10 * 10) 19 FollowMoveToPosition
+        , Particle.new 100 -107 8 (8 * 10) 20 FollowMoveToPosition
+        , Particle.new 200 -107 12 (12 * 10) 21 FollowMoveToPosition
+        , Particle.new -240 -107 7 (7 * 10) 22 FollowMoveToPosition
+        , Particle.new -340 -107 23 (23 * 10) 23 Avoid
+        , Particle.new 240 -207 18 (18 * 10) 24 Avoid
         ]
         (Grid.empty
             |> Grid.insertTile ( 0, 0, 0 ) ()
@@ -266,7 +265,7 @@ transformString position =
         ++ ")"
 
 
-viewParticle : Bool -> PhysicsObject ParticleState -> Svg msg
+viewParticle : Bool -> Particle ParticleState -> Svg msg
 viewParticle showVectors particle =
     let
         typeString =

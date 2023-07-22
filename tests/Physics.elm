@@ -1,19 +1,19 @@
 module Physics exposing (..)
 
-import Engine.PhysicsObject exposing (PhysicsObject)
+import Engine.Particle exposing (Particle)
 import Expect
 import Fuzz exposing (float)
 import Test exposing (Test, describe, fuzz2)
 
 
-overlapModifier : PhysicsObject b -> PhysicsObject a -> Float
+overlapModifier : Particle b -> Particle a -> Float
 overlapModifier target object =
     (((target.mass - object.mass) / (target.mass + object.mass)) + 1) * 0.5
 
 
-testObject : Float -> PhysicsObject ()
+testObject : Float -> Particle ()
 testObject mass =
-    Engine.PhysicsObject.new 0 0 0 mass 0 ()
+    Engine.Particle.new 0 0 0 mass 0 ()
 
 
 collision : Test

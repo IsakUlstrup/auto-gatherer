@@ -1,5 +1,5 @@
-module Engine.PhysicsObject exposing
-    ( PhysicsObject
+module Engine.Particle exposing
+    ( Particle
     , applyForce
     , applyFriciton
     , collisionAction
@@ -16,7 +16,7 @@ module Engine.PhysicsObject exposing
 import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
-type alias PhysicsObject a =
+type alias Particle a =
     { id : Int
     , position : Vector2
     , velocity : Vector2
@@ -32,9 +32,9 @@ type alias PhysicsObject a =
 Mass and size will be clamped between 1 and 562949953421311
 
 -}
-new : Float -> Float -> Float -> Float -> Int -> a -> PhysicsObject a
+new : Float -> Float -> Float -> Float -> Int -> a -> Particle a
 new x y size mass id state =
-    PhysicsObject
+    Particle
         id
         (Vector2.new x y)
         Vector2.zero
@@ -50,7 +50,7 @@ new x y size mass id state =
 
 {-| Apply force to object
 -}
-applyForce : Vector2 -> PhysicsObject a -> PhysicsObject a
+applyForce : Vector2 -> Particle a -> Particle a
 applyForce force object =
     { object
         | acceleration =
@@ -62,7 +62,7 @@ applyForce force object =
 
 {-| Janky friction for now
 -}
-applyFriciton : Float -> PhysicsObject a -> PhysicsObject a
+applyFriciton : Float -> Particle a -> Particle a
 applyFriciton friction object =
     let
         adjustedFriction : Float
@@ -78,7 +78,7 @@ applyFriciton friction object =
 
 {-| Set velocity to zero if velocity magnitude is below limit
 -}
-stopIfSlow : Float -> PhysicsObject a -> PhysicsObject a
+stopIfSlow : Float -> Particle a -> Particle a
 stopIfSlow limit object =
     if Vector2.magnitude object.velocity < limit then
         stop object
@@ -89,7 +89,7 @@ stopIfSlow limit object =
 
 {-| Move physics object
 -}
-move : Float -> PhysicsObject a -> PhysicsObject a
+move : Float -> Particle a -> Particle a
 move dt object =
     object
         |> (\obj -> { obj | velocity = Vector2.add obj.velocity (Vector2.scale dt obj.acceleration) })
@@ -99,22 +99,22 @@ move dt object =
 
 {-| Reset object acceleration
 -}
-resetAcceleration : PhysicsObject a -> PhysicsObject a
+resetAcceleration : Particle a -> Particle a
 resetAcceleration object =
     { object | acceleration = Vector2.zero }
 
 
-setPosition : Vector2 -> PhysicsObject a -> PhysicsObject a
+setPosition : Vector2 -> Particle a -> Particle a
 setPosition pos object =
     { object | position = pos }
 
 
-setVelocity : Vector2 -> PhysicsObject a -> PhysicsObject a
+setVelocity : Vector2 -> Particle a -> Particle a
 setVelocity vel object =
     { object | velocity = vel }
 
 
-stop : PhysicsObject a -> PhysicsObject a
+stop : Particle a -> Particle a
 stop object =
     { object | velocity = Vector2.zero }
 
@@ -128,7 +128,7 @@ stop object =
 A collision occurs when the distance between to objects with collisions enabled is less than their combine radii
 
 -}
-isColliding : PhysicsObject a -> PhysicsObject b -> Bool
+isColliding : Particle a -> Particle b -> Bool
 isColliding object target =
     if object.id /= target.id then
         let
@@ -144,14 +144,14 @@ isColliding object target =
 
 {-| if object is colliding with target, run function f on object and return
 -}
-collisionAction : (PhysicsObject b -> PhysicsObject a -> PhysicsObject a) -> List (PhysicsObject b) -> PhysicsObject a -> PhysicsObject a
+collisionAction : (Particle b -> Particle a -> Particle a) -> List (Particle b) -> Particle a -> Particle a
 collisionAction f targets object =
     let
-        collisions : List (PhysicsObject b)
+        collisions : List (Particle b)
         collisions =
             List.filter (isColliding object) targets
 
-        helper : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
+        helper : Particle b -> Particle a -> Particle a
         helper target obj =
             f target obj
     in
@@ -163,14 +163,14 @@ collisionAction f targets object =
         When resolving collision between a light and a heavy object, the light one moves more
 
 -}
-overlapModifier : PhysicsObject b -> PhysicsObject a -> Float
+overlapModifier : Particle b -> Particle a -> Float
 overlapModifier target object =
     (((target.mass - object.mass) / (target.mass + object.mass)) + 1) * 0.5
 
 
 {-| Resolve collision between two objects
 -}
-resolveCollision : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
+resolveCollision : Particle b -> Particle a -> Particle a
 resolveCollision target object =
     let
         dist : Float
@@ -220,10 +220,10 @@ resolveCollision target object =
 
 {-| Detect and react to collisions
 -}
-resolveCollisions : List (PhysicsObject b) -> PhysicsObject a -> PhysicsObject a
+resolveCollisions : List (Particle b) -> Particle a -> Particle a
 resolveCollisions targets object =
     let
-        resolve : PhysicsObject b -> PhysicsObject a -> PhysicsObject a
+        resolve : Particle b -> Particle a -> Particle a
         resolve res e =
             resolveCollision res e
     in
@@ -241,7 +241,7 @@ resolveCollisions targets object =
 If none are present, do nothing
 
 -}
-moveToNearest : List (PhysicsObject b) -> Float -> PhysicsObject a -> PhysicsObject a
+moveToNearest : List (Particle b) -> Float -> Particle a -> Particle a
 moveToNearest targets speed object =
     let
         nearest : Maybe Vector2
@@ -269,7 +269,7 @@ moveToNearest targets speed object =
 If none are present, do nothing
 
 -}
-moveAwayRange : Float -> List (PhysicsObject b) -> Float -> PhysicsObject a -> PhysicsObject a
+moveAwayRange : Float -> List (Particle b) -> Float -> Particle a -> Particle a
 moveAwayRange range targets speed object =
     let
         nearest : Maybe Vector2
@@ -295,7 +295,7 @@ moveAwayRange range targets speed object =
 
 {-| Apply force towards target position if object is more than limitDistance units away
 -}
-moveToPosition : Float -> Vector2 -> Float -> PhysicsObject a -> PhysicsObject a
+moveToPosition : Float -> Vector2 -> Float -> Particle a -> Particle a
 moveToPosition limitDistance position speed object =
     let
         force : Vector2
@@ -313,6 +313,6 @@ moveToPosition limitDistance position speed object =
 -- STATE
 
 
-updateState : (a -> a) -> PhysicsObject a -> PhysicsObject a
+updateState : (a -> a) -> Particle a -> Particle a
 updateState f object =
     { object | state = f object.state }
