@@ -51,25 +51,25 @@ new x y size mass id state =
 {-| Apply force to object
 -}
 applyForce : Vector2 -> Particle a -> Particle a
-applyForce force object =
-    { object
+applyForce force particle =
+    { particle
         | acceleration =
             force
-                |> Vector2.divide object.mass
-                |> Vector2.add object.acceleration
+                |> Vector2.divide particle.mass
+                |> Vector2.add particle.acceleration
     }
 
 
 {-| Janky friction for now
 -}
 applyFriciton : Float -> Particle a -> Particle a
-applyFriciton friction object =
+applyFriciton friction particle =
     let
         adjustedFriction : Float
         adjustedFriction =
             1 - clamp 0 1 friction
     in
-    { object | velocity = Vector2.scale adjustedFriction object.velocity }
+    { particle | velocity = Vector2.scale adjustedFriction particle.velocity }
 
 
 
@@ -79,130 +79,130 @@ applyFriciton friction object =
 {-| Set velocity to zero if velocity magnitude is below limit
 -}
 stopIfSlow : Float -> Particle a -> Particle a
-stopIfSlow limit object =
-    if Vector2.magnitude object.velocity < limit then
-        stop object
+stopIfSlow limit particle =
+    if Vector2.magnitude particle.velocity < limit then
+        stop particle
 
     else
-        object
+        particle
 
 
-{-| Move physics object
+{-| Move physics particle
 -}
 move : Float -> Particle a -> Particle a
-move dt object =
-    object
+move dt particle =
+    particle
         |> (\obj -> { obj | velocity = Vector2.add obj.velocity (Vector2.scale dt obj.acceleration) })
         |> (\obj -> { obj | position = Vector2.add obj.position (Vector2.scale dt obj.velocity) })
         |> resetAcceleration
 
 
-{-| Reset object acceleration
+{-| Reset particle acceleration
 -}
 resetAcceleration : Particle a -> Particle a
-resetAcceleration object =
-    { object | acceleration = Vector2.zero }
+resetAcceleration particle =
+    { particle | acceleration = Vector2.zero }
 
 
 setPosition : Vector2 -> Particle a -> Particle a
-setPosition pos object =
-    { object | position = pos }
+setPosition pos particle =
+    { particle | position = pos }
 
 
 setVelocity : Vector2 -> Particle a -> Particle a
-setVelocity vel object =
-    { object | velocity = vel }
+setVelocity vel particle =
+    { particle | velocity = vel }
 
 
 stop : Particle a -> Particle a
-stop object =
-    { object | velocity = Vector2.zero }
+stop particle =
+    { particle | velocity = Vector2.zero }
 
 
 
 -- ---- COLLISION ----
 
 
-{-| Check if two objects are colliding
+{-| Check if two particles are colliding
 
-A collision occurs when the distance between to objects with collisions enabled is less than their combine radii
+A collision occurs when the distance between to particles with collisions enabled is less than their combine radii
 
 -}
 isColliding : Particle a -> Particle b -> Bool
-isColliding object target =
-    if object.id /= target.id then
+isColliding particle target =
+    if particle.id /= target.id then
         let
             dist : Vector2
             dist =
-                Vector2.subtract object.position target.position
+                Vector2.subtract particle.position target.position
         in
-        (dist |> Vector2.multiply dist |> Vector2.sum) <= (object.radius + target.radius) ^ 2
+        (dist |> Vector2.multiply dist |> Vector2.sum) <= (particle.radius + target.radius) ^ 2
 
     else
         False
 
 
-{-| if object is colliding with target, run function f on object and return
+{-| if particle is colliding with target, run function f on particle and return
 -}
 collisionAction : (Particle b -> Particle a -> Particle a) -> List (Particle b) -> Particle a -> Particle a
-collisionAction f targets object =
+collisionAction f targets particle =
     let
         collisions : List (Particle b)
         collisions =
-            List.filter (isColliding object) targets
+            List.filter (isColliding particle) targets
 
         helper : Particle b -> Particle a -> Particle a
         helper target obj =
             f target obj
     in
-    List.foldl helper object collisions
+    List.foldl helper particle collisions
 
 
-{-| calculate how much each object should move based on the diference in mass
+{-| calculate how much each particle should move based on the diference in mass
 
-        When resolving collision between a light and a heavy object, the light one moves more
+        When resolving collision between a light and a heavy particle, the light one moves more
 
 -}
 overlapModifier : Particle b -> Particle a -> Float
-overlapModifier target object =
-    (((target.mass - object.mass) / (target.mass + object.mass)) + 1) * 0.5
+overlapModifier target particle =
+    (((target.mass - particle.mass) / (target.mass + particle.mass)) + 1) * 0.5
 
 
-{-| Resolve collision between two objects
+{-| Resolve collision between two particles
 -}
 resolveCollision : Particle b -> Particle a -> Particle a
-resolveCollision target object =
+resolveCollision target particle =
     let
         dist : Float
         dist =
-            Vector2.distance object.position target.position
+            Vector2.distance particle.position target.position
 
         overlap : Float
         overlap =
-            (dist - object.radius - target.radius) * overlapModifier target object
+            (dist - particle.radius - target.radius) * overlapModifier target particle
 
         normal : Vector2
         normal =
-            Vector2.direction object.position target.position
+            Vector2.direction particle.position target.position
 
         pos : Vector2
         pos =
-            Vector2.add object.position (Vector2.direction object.position target.position |> Vector2.scale overlap)
+            Vector2.add particle.position (Vector2.direction particle.position target.position |> Vector2.scale overlap)
 
         k : Vector2
         k =
-            Vector2.subtract object.velocity target.velocity
+            Vector2.subtract particle.velocity target.velocity
 
         p : Float
         p =
-            2 * (normal.x * k.x + normal.y * k.y) / (object.mass + target.mass)
+            2 * (normal.x * k.x + normal.y * k.y) / (particle.mass + target.mass)
 
         v : Vector2
         v =
-            Vector2.new (object.velocity.x - p * target.mass * normal.x)
-                (object.velocity.y - p * target.mass * normal.y)
+            Vector2.new (particle.velocity.x - p * target.mass * normal.x)
+                (particle.velocity.y - p * target.mass * normal.y)
     in
-    object
+    particle
         |> setPosition pos
         |> setVelocity v
 
@@ -211,9 +211,9 @@ resolveCollision target object =
 -- |> (\o -> { o | velocity = Vector2.new newVx newVy })
 -- |> stop
 -- |> applyForce
---     (Vector2.direction target.position object.position
---         -- |> Vector2.add (Vector2.add target.velocity object.velocity)
---         -- |> Vector2.scale ((target.mass - object.mass) / totalMass)
+--     (Vector2.direction target.position particle.position
+--         -- |> Vector2.add (Vector2.add target.velocity particle.velocity)
+--         -- |> Vector2.scale ((target.mass - particle.mass) / totalMass)
 --         |> Vector2.scale 2
 --     )
 
@@ -221,15 +221,15 @@ resolveCollision target object =
 {-| Detect and react to collisions
 -}
 resolveCollisions : List (Particle b) -> Particle a -> Particle a
-resolveCollisions targets object =
+resolveCollisions targets particle =
     let
         resolve : Particle b -> Particle a -> Particle a
         resolve res e =
             resolveCollision res e
     in
     targets
-        |> List.filter (isColliding object)
-        |> List.foldl resolve object
+        |> List.filter (isColliding particle)
+        |> List.foldl resolve particle
 
 
 
@@ -242,26 +242,26 @@ If none are present, do nothing
 
 -}
 moveToNearest : List (Particle b) -> Float -> Particle a -> Particle a
-moveToNearest targets speed object =
+moveToNearest targets speed particle =
     let
         nearest : Maybe Vector2
         nearest =
             targets
-                |> List.filter (\t -> t.id /= object.id)
+                |> List.filter (\t -> t.id /= particle.id)
                 |> List.map .position
-                |> List.sortBy (Vector2.distance object.position)
+                |> List.sortBy (Vector2.distance particle.position)
                 |> List.head
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction object.position target |> Vector2.scale speed
+            Vector2.direction particle.position target |> Vector2.scale speed
     in
     case nearest of
         Just target ->
-            applyForce (force target) object
+            applyForce (force target) particle
 
         Nothing ->
-            object
+            particle
 
 
 {-| Apply force away from nearest target in range
@@ -270,43 +270,43 @@ If none are present, do nothing
 
 -}
 moveAwayRange : Float -> List (Particle b) -> Float -> Particle a -> Particle a
-moveAwayRange range targets speed object =
+moveAwayRange range targets speed particle =
     let
         nearest : Maybe Vector2
         nearest =
             targets
-                |> List.filter (\t -> t.id /= object.id)
+                |> List.filter (\t -> t.id /= particle.id)
                 |> List.map .position
-                |> List.sortBy (Vector2.distance object.position)
-                |> List.filter (\t -> Vector2.distance t object.position < range)
+                |> List.sortBy (Vector2.distance particle.position)
+                |> List.filter (\t -> Vector2.distance t particle.position < range)
                 |> List.head
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction object.position target |> Vector2.scale speed |> Vector2.scale -1
+            Vector2.direction particle.position target |> Vector2.scale speed |> Vector2.scale -1
     in
     case nearest of
         Just target ->
-            applyForce (force target) object
+            applyForce (force target) particle
 
         Nothing ->
-            object
+            particle
 
 
-{-| Apply force towards target position if object is more than limitDistance units away
+{-| Apply force towards target position if particle is more than limitDistance units away
 -}
 moveToPosition : Float -> Vector2 -> Float -> Particle a -> Particle a
-moveToPosition limitDistance position speed object =
+moveToPosition limitDistance position speed particle =
     let
         force : Vector2
         force =
-            if Vector2.distance object.position position < limitDistance then
+            if Vector2.distance particle.position position < limitDistance then
                 Vector2.zero
 
             else
-                Vector2.direction object.position position |> Vector2.scale speed
+                Vector2.direction particle.position position |> Vector2.scale speed
     in
-    applyForce force object
+    applyForce force particle
 
 
 
@@ -314,5 +314,5 @@ moveToPosition limitDistance position speed object =
 
 
 updateState : (a -> a) -> Particle a -> Particle a
-updateState f object =
-    { object | state = f object.state }
+updateState f particle =
+    { particle | state = f particle.state }
