@@ -2,8 +2,10 @@ module Main exposing (Model, Msg, main)
 
 import Browser
 import Browser.Events
+import Content.Grids
+import Content.Particles
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.HexGrid as Grid exposing (HexGrid)
+import Engine.HexGrid exposing (HexGrid)
 import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
 import Engine.Point exposing (Point)
@@ -106,52 +108,8 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        (ParticleSystem.empty
-            |> ParticleSystem.addParticle 200 20 40 MoveToCenter
-            |> ParticleSystem.addParticle -300 200 70 Idle
-            |> ParticleSystem.addParticle 0 0 30 (MoveToPosition <| Vector2.new 200 -175)
-            |> ParticleSystem.addParticle -97 20 20 MoveToClosest
-            |> ParticleSystem.addParticle -100 20 20 MoveToCenter
-            |> ParticleSystem.addParticle -101 20 20 MoveToCenter
-            |> ParticleSystem.addParticle -102 20 20 MoveToCenter
-            |> ParticleSystem.addParticle -103 20 20 MoveToCenter
-            |> ParticleSystem.addParticle -104 20 20 MoveToCenter
-            |> ParticleSystem.addParticle -150 20 20 MoveToClosest
-            |> ParticleSystem.addParticle -150 50 20 MoveToClosest
-            |> ParticleSystem.addParticle 150 20 20 MoveToClosest
-            |> ParticleSystem.addParticle 0 0 70 Idle
-            |> ParticleSystem.addParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
-            |> ParticleSystem.addParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
-            |> ParticleSystem.addParticle 140 100 10 FollowMoveToPosition
-            |> ParticleSystem.addParticle 100 -107 8 FollowMoveToPosition
-            |> ParticleSystem.addParticle -107 12 9 FollowMoveToPosition
-            |> ParticleSystem.addParticle -240 -107 7 FollowMoveToPosition
-            |> ParticleSystem.addParticle -340 -107 23 Avoid
-            |> ParticleSystem.addParticle 240 -17 18 Avoid
-        )
-        (Grid.empty
-            |> Grid.insertTile ( 0, 0, 0 ) ()
-            |> Grid.insertTile ( -1, 0, 1 ) ()
-            |> Grid.insertTile ( 1, 1, -2 ) ()
-            |> Grid.insertTile ( 1, 1, -3 ) ()
-            |> Grid.insertTile ( 1, 2, -4 ) ()
-            |> Grid.insertTile ( 2, 2, -4 ) ()
-            |> Grid.insertTile ( 3, 2, -5 ) ()
-            |> Grid.insertTile ( 0, 2, -2 ) ()
-            |> Grid.insertTile ( -1, 2, -1 ) ()
-            |> Grid.insertTile ( -2, 2, 0 ) ()
-            |> Grid.insertTile ( -2, 0, 2 ) ()
-            |> Grid.insertTile ( -3, 1, 2 ) ()
-            |> Grid.insertTile ( -4, 2, 2 ) ()
-            |> Grid.insertTile ( 3, -2, -1 ) ()
-            |> Grid.insertTile ( 3, 1, -4 ) ()
-            |> Grid.insertTile ( -2, -2, 4 ) ()
-            |> Grid.insertTile ( 0, 2, -2 ) ()
-            |> Grid.insertTile ( 0, 3, -3 ) ()
-            |> Grid.insertTile ( 0, 4, -4 ) ()
-            |> Grid.insertTile ( 0, 5, -5 ) ()
-            |> Grid.insertTile ( 2, 3, -5 ) ()
-        )
+        Content.Particles.particleSystem1
+        Content.Grids.testGrid1
         (Engine.Render.initRenderConfig |> Engine.Render.withRenderDistance 1000)
         initConsole
         20
