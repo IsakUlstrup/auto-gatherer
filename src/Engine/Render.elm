@@ -221,7 +221,7 @@ viewMap renderFunc config grid =
         (grid
             |> Engine.HexGrid.toList
             |> List.filter (\( p, _ ) -> Vector2.distance config.position (pointToPixel p) < config.renderDistance)
-            |> List.sortBy (Tuple.first >> yPixelPosition)
+            -- |> List.sortBy (Tuple.first >> yPixelPosition)
             |> List.map (viewKeyedTile renderFunc)
         )
 
