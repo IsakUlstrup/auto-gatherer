@@ -9,7 +9,7 @@ import Engine.HexGrid exposing (HexGrid)
 import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
 import Engine.Point exposing (Point)
-import Engine.Render exposing (RenderConfig)
+import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
 import ParticleState exposing (ParticleState(..))
@@ -110,7 +110,7 @@ init _ =
     ( Model
         Content.Particles.particleSystem1
         Content.Grids.testGrid1
-        (Engine.Render.initRenderConfig |> Engine.Render.withRenderDistance 1000)
+        (Render.initRenderConfig |> Render.withRenderDistance 1000)
         initConsole
         20
         0
@@ -131,6 +131,11 @@ type Msg
     | SetMoveTarget Vector2
 
 
+focusCamera : Model -> Model
+focusCamera model =
+    { model | renderConfig = Render.withPosition (model.particles |> ParticleSystem.getPlayer |> .position) model.renderConfig }
+
+
 fixedUpdate : (Model -> Model) -> Float -> Model -> Model
 fixedUpdate f dt world =
     if dt >= world.stepTime then
@@ -146,7 +151,13 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick dt ->
-            fixedUpdate (\m -> { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }) (model.timeAccum + dt) model
+            model
+                |> fixedUpdate
+                    (\m ->
+                        { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }
+                            |> focusCamera
+                    )
+                    (model.timeAccum + dt)
 
         ConsoleMsg cmsg ->
             let
@@ -164,7 +175,7 @@ update msg model =
             { model | renderDebug = flag }
 
         SetDrawDistance dist ->
-            { model | renderConfig = Engine.Render.withRenderDistance dist model.renderConfig }
+            { model | renderConfig = Render.withRenderDistance dist model.renderConfig }
 
         SetMoveTarget target ->
             let
@@ -178,7 +189,7 @@ update msg model =
             in
             { model
                 | particles = ParticleSystem.updateParticles helper model.particles
-                , renderConfig = Engine.Render.withPosition target model.renderConfig
+                , renderConfig = Render.withPosition target model.renderConfig
             }
 
 
@@ -248,9 +259,9 @@ viewParticle showVectors particle =
 viewTile : ( Point, () ) -> Svg Msg
 viewTile ( p, _ ) =
     Svg.polygon
-        [ Engine.Render.generateHexCorners |> Engine.Render.cornersToPoints
+        [ Render.generateHexCorners |> Render.cornersToPoints
         , Svg.Attributes.class "tile"
-        , Svg.Events.onClick <| SetMoveTarget (Engine.Render.pointToPixel p)
+        , Svg.Events.onClick <| SetMoveTarget (Render.pointToPixel p)
         ]
         []
 
@@ -308,10 +319,10 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , transformStyle <| .position <| ParticleSystem.getPlayer model.particles
+                , transformStyle <| model.renderConfig.position
                 ]
                 [ Svg.defs [] [ gooFilter ]
-                , Svg.Lazy.lazy (Engine.Render.viewMap viewTile) model.map
+                , Svg.Lazy.lazy2 (Render.viewMap viewTile) model.renderConfig model.map
                 , Svg.g []
                     (ParticleSystem.getParticles model.particles
                         |> List.filter (\o -> Vector2.distance (.position <| ParticleSystem.getPlayer model.particles) o.position < model.renderConfig.renderDistance)
