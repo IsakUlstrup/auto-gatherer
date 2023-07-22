@@ -187,10 +187,7 @@ update msg model =
                         _ ->
                             p
             in
-            { model
-                | particles = ParticleSystem.updateParticles helper model.particles
-                , renderConfig = Render.withPosition target model.renderConfig
-            }
+            { model | particles = ParticleSystem.updateParticles helper model.particles }
 
 
 

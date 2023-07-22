@@ -20,7 +20,7 @@ type ParticleSystem a
 
 empty : a -> ParticleSystem a
 empty playerState =
-    ParticleSystem { particles = [], player = Particle.new 0 0 30 1000 0 playerState, idCounter = 1 }
+    ParticleSystem { particles = [], player = Particle.new 0 0 30 400 0 playerState, idCounter = 1 }
 
 
 addParticle : Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
