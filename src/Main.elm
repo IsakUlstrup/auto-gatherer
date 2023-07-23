@@ -306,11 +306,27 @@ transformStyle position =
             ++ "px)"
 
 
+fpsString : List Float -> String
+fpsString dts =
+    let
+        averageDelta =
+            List.sum dts / toFloat (List.length dts)
+
+        averageFps =
+            1000 / averageDelta
+    in
+    averageFps
+        |> String.fromFloat
+        |> String.split "."
+        |> List.head
+        |> Maybe.withDefault "-"
+
+
 view : Model -> Html Msg
 view model =
     main_ []
         [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ (String.fromFloat <| 1000 / (List.sum model.deltaHistory / toFloat (List.length model.deltaHistory))) ]
+        , Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
         , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
