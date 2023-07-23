@@ -136,7 +136,18 @@ type Msg
 
 focusCamera : Model -> Model
 focusCamera model =
-    { model | renderConfig = Render.withPosition (model.particles |> ParticleSystem.getPlayer |> .position) model.renderConfig }
+    let
+        playerPos =
+            model.particles |> ParticleSystem.getPlayer |> .position
+
+        cameraDist =
+            Vector2.distance playerPos model.renderConfig.position
+    in
+    if cameraDist > 50 then
+        { model | renderConfig = Render.withPosition playerPos model.renderConfig }
+
+    else
+        model
 
 
 fixedUpdate : (Model -> Model) -> Float -> Model -> Model
@@ -155,10 +166,10 @@ update msg model =
     case msg of
         Tick dt ->
             { model | deltaHistory = dt :: model.deltaHistory |> List.take 20 }
+                |> focusCamera
                 |> fixedUpdate
                     (\m ->
                         { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }
-                            |> focusCamera
                     )
                     (model.timeAccum + dt)
 
@@ -334,7 +345,7 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , transformStyle <| model.renderConfig.position
+                , transformStyle <| (.position <| ParticleSystem.getPlayer model.particles)
                 ]
                 [ Svg.defs [] [ gooFilter ]
                 , Svg.Lazy.lazy2 (Render.viewMap viewTile) model.renderConfig model.map
