@@ -1,6 +1,7 @@
 module Content.Grids exposing (..)
 
-import Engine.HexGrid as Grid
+import Engine.HexGrid as Grid exposing (HexGrid)
+import Engine.Point as Point
 
 
 testGrid1 : Grid.HexGrid ()
@@ -27,3 +28,11 @@ testGrid1 =
         |> Grid.insertTile ( 0, 4, -4 ) ()
         |> Grid.insertTile ( 0, 5, -5 ) ()
         |> Grid.insertTile ( 2, 3, -5 ) ()
+
+
+circle : Int -> HexGrid ()
+circle radius =
+    List.range 0 radius
+        |> List.concatMap (Point.ring ( 0, 0, 0 ))
+        |> List.map (\p -> ( p, () ))
+        |> Grid.fromList

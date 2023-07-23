@@ -166,8 +166,8 @@ scale i ( x1, y1, z1 ) =
 {-| Returns a ring around given point with given radius
 This is more of a hex for now. Will fix later
 -}
-ring : Int -> Point -> Set Point
-ring radius center =
+ring : Point -> Int -> List Point
+ring center radius =
     let
         getDirection s =
             case s of
@@ -195,4 +195,4 @@ ring radius center =
         side s =
             List.map (\i -> add (start s) (scale (toFloat i) (direction s))) (List.range 0 radius)
     in
-    List.concatMap side (List.range 0 6) |> Set.fromList
+    List.concatMap side (List.range 0 6)

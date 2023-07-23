@@ -1,4 +1,4 @@
-module Engine.HexGrid exposing (HexGrid, empty, get, insertTile, toList)
+module Engine.HexGrid exposing (HexGrid, empty, fromList, get, insertTile, toList)
 
 import Dict exposing (Dict)
 import Engine.Point as Point exposing (Point)
@@ -22,6 +22,11 @@ insertTile position tile (HexGrid grid) =
 
     else
         HexGrid grid
+
+
+fromList : List ( Point, tile ) -> HexGrid tile
+fromList tiles =
+    HexGrid <| Dict.fromList tiles
 
 
 toList : HexGrid tile -> List ( Point, tile )
