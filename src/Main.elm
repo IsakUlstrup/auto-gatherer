@@ -12,6 +12,7 @@ import Engine.Point exposing (Point)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
+import Html.Attributes
 import ParticleState exposing (ParticleState(..))
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -102,6 +103,7 @@ type alias Model =
     , stepTime : Float
     , timeAccum : Float
     , renderDebug : Bool
+    , deltaHistory : List Float
     }
 
 
@@ -115,6 +117,7 @@ init _ =
         20
         0
         False
+        []
     , Cmd.none
     )
 
@@ -151,7 +154,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick dt ->
-            model
+            { model | deltaHistory = dt :: model.deltaHistory |> List.take 20 }
                 |> fixedUpdate
                     (\m ->
                         { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }
@@ -307,6 +310,7 @@ view : Model -> Html Msg
 view model =
     main_ []
         [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        , Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ (String.fromFloat <| 1000 / (List.sum model.deltaHistory / toFloat (List.length model.deltaHistory))) ]
         , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
