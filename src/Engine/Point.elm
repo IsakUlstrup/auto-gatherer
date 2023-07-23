@@ -4,6 +4,7 @@ module Engine.Point exposing
     , distance
     , distanceFloat
     , neighbors
+    , ring
     , toAxial
     , toString
     , valid
@@ -126,3 +127,72 @@ distanceFloat ( x1, y1, z1 ) ( x2, y2, z2 ) =
 -- pathfind : (Point -> Bool) -> Point -> Point -> Maybe (List Point)
 -- pathfind walkable from to =
 --     Astar.findPath distanceFloat (movesFrom walkable) from to
+
+
+{-| Create a new point from float values, round to nearest valid point
+-}
+fromFloat : ( Float, Float, Float ) -> Point
+fromFloat ( x, y, z ) =
+    let
+        -- rounded point
+        ( rx, ry, rz ) =
+            ( round x, round y, round z )
+
+        -- diierence between input point and rounded point
+        ( dx, dy, dz ) =
+            ( abs (toFloat rx - x), abs (toFloat ry - y), abs (toFloat rz - z) )
+
+        -- final adjusted point
+        ( fx, fy, fz ) =
+            if dx > dy && dx > dz then
+                ( -ry - rz, ry, rz )
+
+            else if dy > dz then
+                ( rx, -rx - rz, rz )
+
+            else
+                ( rx, ry, -rx - ry )
+    in
+    ( fx, fy, fz )
+
+
+{-| Scale point
+-}
+scale : Float -> Point -> Point
+scale i ( x1, y1, z1 ) =
+    ( toFloat x1 * i, toFloat y1 * i, toFloat z1 * i ) |> fromFloat
+
+
+{-| Returns a ring around given point with given radius
+This is more of a hex for now. Will fix later
+-}
+ring : Int -> Point -> Set Point
+ring radius center =
+    let
+        getDirection s =
+            case s of
+                0 ->
+                    4
+
+                1 ->
+                    5
+
+                2 ->
+                    0
+
+                3 ->
+                    1
+
+                4 ->
+                    2
+
+                _ ->
+                    3
+
+        start s =
+            add center (scale (toFloat radius) (direction (getDirection s)))
+
+        side s =
+            List.map (\i -> add (start s) (scale (toFloat i) (direction s))) (List.range 0 radius)
+    in
+    List.concatMap side (List.range 0 6) |> Set.fromList
