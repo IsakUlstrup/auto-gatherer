@@ -255,12 +255,10 @@ viewParticle showVectors particle =
 
 viewTile : ( Point, () ) -> Svg Msg
 viewTile ( p, _ ) =
-    Svg.polygon
-        [ Svg.Attributes.points "40,0 20,35 -20,35 -40,0 -20,-35 20,-35"
-        , Svg.Attributes.class "tile"
+    Render.viewHex
+        [ Svg.Attributes.class "tile"
         , Svg.Events.onClick <| SetMoveTarget (Render.pointToPixel p)
         ]
-        []
 
 
 gooFilter : Svg msg
@@ -299,10 +297,10 @@ transformStyle : Vector2 -> Svg.Attribute msg
 transformStyle position =
     Svg.Attributes.style <|
         "transform: translate("
-            ++ String.fromFloat -position.x
+            ++ String.fromInt (round -position.x)
             ++ "px, "
-            ++ String.fromFloat -position.y
-            ++ "px) scale(0.7)"
+            ++ String.fromInt (round -position.y)
+            ++ "px)"
 
 
 view : Model -> Html Msg

@@ -7,6 +7,7 @@ module Engine.Render exposing
     , initRenderConfig
     , pointAdd
     , pointToPixel
+    , viewHex
     , viewMap
     , withHexFocus
     , withPosition
@@ -77,7 +78,7 @@ If you want to change hex size, use WithZoom instead
 -}
 hexSize : Float
 hexSize =
-    40
+    100
 
 
 {-| Get the center of a given point in screen coordinates
@@ -93,11 +94,12 @@ pointToPixel point =
         (hexSize * (sqrt 3 / 2 * toFloat q + sqrt 3 * toFloat r))
 
 
-{-| Get point y position in pixels
--}
-yPixelPosition : Point -> Float
-yPixelPosition position =
-    pointToPixel position |> .y
+
+-- {-| Get point y position in pixels
+-- -}
+-- yPixelPosition : Point -> Float
+-- yPixelPosition position =
+--     pointToPixel position |> .y
 
 
 {-| Convert a list of floats to a Svg points attribute
@@ -131,6 +133,11 @@ cornersToPoints points =
         |> List.intersperse " "
         |> String.concat
         |> Svg.Attributes.points
+
+
+viewHex : List (Svg.Attribute msg) -> Svg msg
+viewHex attrs =
+    Svg.polygon (cornersToPoints generateHexCorners :: attrs) []
 
 
 {-| Represents the points of a hexagon, staring with east and moving counter clockwise
