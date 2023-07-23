@@ -222,9 +222,7 @@ viewKeyedTile renderFunc entity =
 viewMap : (( Point, tileData ) -> Svg msg) -> RenderConfig -> HexGrid tileData -> Svg msg
 viewMap renderFunc config grid =
     Svg.Keyed.node "g"
-        [ Svg.Attributes.class "map"
-        , Svg.Attributes.filter "url(#goo-filter)"
-        ]
+        [ Svg.Attributes.class "map" ]
         (grid
             |> Engine.HexGrid.toList
             |> List.filter (\( p, _ ) -> Vector2.distance config.position (pointToPixel p) < config.renderDistance)

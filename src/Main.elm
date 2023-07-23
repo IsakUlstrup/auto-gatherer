@@ -272,7 +272,7 @@ gooFilter =
     Svg.filter [ Svg.Attributes.id "goo-filter" ]
         [ Svg.feGaussianBlur
             [ Svg.Attributes.in_ "SourceGraphic"
-            , Svg.Attributes.stdDeviation "5"
+            , Svg.Attributes.stdDeviation "15"
             , Svg.Attributes.result "blur"
             ]
             []
