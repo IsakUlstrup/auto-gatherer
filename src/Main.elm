@@ -109,8 +109,8 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Particles.particleSystem1
-        Content.Grids.testGrid1
-        (Render.initRenderConfig |> Render.withRenderDistance 1000)
+        (Content.Grids.circle 50)
+        (Render.initRenderConfig |> Render.withRenderDistance 400)
         initConsole
         20
         0
@@ -299,9 +299,9 @@ transformStyle : Vector2 -> Svg.Attribute msg
 transformStyle position =
     Svg.Attributes.style <|
         "transform: translate("
-            ++ String.fromInt (round -position.x)
+            ++ String.fromFloat -position.x
             ++ "px, "
-            ++ String.fromInt (round -position.y)
+            ++ String.fromFloat -position.y
             ++ "px) scale(0.7)"
 
 
