@@ -8,7 +8,7 @@ import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.HexGrid exposing (HexGrid)
 import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
-import Engine.Point exposing (Point)
+import Engine.Point as Point exposing (Point)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
@@ -269,9 +269,14 @@ viewParticle showVectors particle =
 
 viewTile : ( Point, () ) -> Svg Msg
 viewTile ( p, _ ) =
+    let
+        dist =
+            Point.distance ( 0, 0, 0 ) p
+    in
     Render.viewHex
         [ Svg.Attributes.class "tile"
         , Svg.Events.onClick <| SetMoveTarget (Render.pointToPixel p)
+        , Svg.Attributes.fill <| "hsl(" ++ String.fromInt (dist * 15) ++ " 45% 55%)"
         ]
 
 
