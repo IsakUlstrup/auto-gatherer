@@ -276,7 +276,7 @@ viewTile ( p, _ ) =
     Render.viewHex
         [ Svg.Attributes.class "tile"
         , Svg.Events.onClick <| SetMoveTarget (Render.pointToPixel p)
-        , Svg.Attributes.fill <| "hsl(" ++ String.fromInt (dist * 15) ++ " 45% 55%)"
+        , Svg.Attributes.fill <| "hsl(" ++ String.fromInt (dist * 15) ++ " 65% 90%)"
         ]
 
 
