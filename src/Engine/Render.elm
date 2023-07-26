@@ -1,22 +1,16 @@
 module Engine.Render exposing
-    ( HexCorners
-    , RenderConfig
-    , cornerListToPoints
-    , cornersToPoints
-    , generateHexCorners
+    ( RenderConfig
     , initRenderConfig
-    , pointAdd
-    , pointToPixel
-    , viewHex
-    , viewMap
-    , withHexFocus
+    , rect2d
+    , tileSize
+    , view2DGrid
     , withPosition
     , withRenderDistance
     , withZoom
     )
 
-import Engine.HexGrid exposing (HexGrid)
-import Engine.Point as Point exposing (Point)
+import Dict
+import Engine.Grid as Grid
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Svg exposing (Attribute, Svg)
 import Svg.Attributes
@@ -53,13 +47,6 @@ withPosition position config =
     { config | position = position }
 
 
-{-| move camera to focus on point
--}
-withHexFocus : Point -> RenderConfig -> RenderConfig
-withHexFocus point config =
-    { config | position = pointToPixel point }
-
-
 {-| Set camera zoom
 -}
 withZoom : Float -> RenderConfig -> RenderConfig
@@ -69,182 +56,99 @@ withZoom zoom config =
 
 
 -- HELPERS
-
-
-{-| Hex size constant
-
-If you want to change hex size, use WithZoom instead
-
--}
-hexSize : Float
-hexSize =
-    100
-
-
-{-| Get the center of a given point in screen coordinates
--}
-pointToPixel : Point -> Vector2
-pointToPixel point =
-    let
-        ( q, r ) =
-            Point.toAxial point
-    in
-    Vector2
-        (hexSize * (3 / 2 * toFloat q))
-        (hexSize * (sqrt 3 / 2 * toFloat q + sqrt 3 * toFloat r))
-
-
-
--- {-| Get point y position in pixels
--- -}
--- yPixelPosition : Point -> Float
--- yPixelPosition position =
---     pointToPixel position |> .y
-
-
-{-| Convert a list of floats to a Svg points attribute
--}
-cornerListToPoints : List ( Float, Float ) -> Attribute msg
-cornerListToPoints points =
-    let
-        tupleToString : ( Float, Float ) -> String
-        tupleToString ( x, y ) =
-            String.fromFloat x ++ "," ++ String.fromFloat y
-    in
-    List.map tupleToString points |> List.intersperse " " |> String.concat |> Svg.Attributes.points
-
-
-{-| Transform Hex Corners to Svg points attribute
--}
-cornersToPoints : HexCorners -> Attribute msg
-cornersToPoints points =
-    let
-        tupleToString : ( Float, Float ) -> String
-        tupleToString ( x, y ) =
-            String.fromFloat x ++ "," ++ String.fromFloat y
-    in
-    [ tupleToString points.p0
-    , tupleToString points.p1
-    , tupleToString points.p2
-    , tupleToString points.p3
-    , tupleToString points.p4
-    , tupleToString points.p5
-    ]
-        |> List.intersperse " "
-        |> String.concat
-        |> Svg.Attributes.points
-
-
-viewHex : List (Svg.Attribute msg) -> Svg msg
-viewHex attrs =
-    Svg.polygon (cornersToPoints generateHexCorners :: attrs) []
-
-
-{-| Represents the points of a hexagon, staring with east and moving counter clockwise
--}
-type alias HexCorners =
-    { p0 : ( Float, Float )
-    , p1 : ( Float, Float )
-    , p2 : ( Float, Float )
-    , p3 : ( Float, Float )
-    , p4 : ( Float, Float )
-    , p5 : ( Float, Float )
-    }
-
-
-{-| Add two tuples of floats together
--}
-pointAdd : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float )
-pointAdd ( x1, y1 ) ( x2, y2 ) =
-    ( x1 + x2, y1 + y2 )
-
-
-{-| Calculate hex corners in screen coordinates
--}
-generateHexCorners : HexCorners
-generateHexCorners =
-    let
-        corner : Float -> ( Float, Float )
-        corner cornerNumber =
-            ( hexSize * cos (degrees <| 60 * cornerNumber)
-            , hexSize * sin (degrees <| 60 * cornerNumber)
-            )
-    in
-    HexCorners
-        (corner 0)
-        (corner 1)
-        (corner 2)
-        (corner 3)
-        (corner 4)
-        (corner 5)
-
-
-
 -- RENDER
+-- 2d grid
+
+
+tileSize : Int
+tileSize =
+    50
+
+
+rect2d : List (Svg.Attribute msg) -> Svg msg
+rect2d attrs =
+    Svg.rect
+        (attrs
+            ++ [ Svg.Attributes.x <| String.fromInt -(tileSize // 2)
+               , Svg.Attributes.y <| String.fromInt -(tileSize // 2)
+               , Svg.Attributes.width <| String.fromInt tileSize
+               , Svg.Attributes.height <| String.fromInt tileSize
+               ]
+        )
+        []
 
 
 {-| CSS transform translate attribute based on position
 -}
-translatePoint : Point -> Attribute msg
-translatePoint position =
-    let
-        pos =
-            pointToPixel position
-    in
+translatePoint2D : Grid.Point -> Attribute msg
+translatePoint2D ( x, y ) =
     Svg.Attributes.style <|
         "transform: translate("
-            ++ String.fromInt (round pos.x)
+            ++ String.fromInt (x * tileSize)
             ++ "px, "
-            ++ String.fromInt (round pos.y)
+            ++ String.fromInt (y * tileSize)
             ++ "px);"
 
 
 {-| Create a wrapper with correct position and render a tile with provied function
 -}
-renderTile : (( Point, a ) -> Svg msg) -> ( Point, a ) -> Svg msg
-renderTile renderFunc ( point, t ) =
+renderTile2D : (( Grid.Point, a ) -> Svg msg) -> ( Grid.Point, a ) -> Svg msg
+renderTile2D renderFunc ( point, t ) =
     Svg.g
-        [ Svg.Attributes.class "tile"
-        , translatePoint point
+        [ Svg.Attributes.class "tile-container"
+        , translatePoint2D point
         ]
         [ renderFunc ( point, t ) ]
 
 
+pointToString2D : Grid.Point -> String
+pointToString2D ( x, y ) =
+    String.fromInt x ++ "," ++ String.fromInt y
+
+
 {-| Keyed and lazy tile render
 -}
-viewKeyedTile : (( Point, a ) -> Svg msg) -> ( Point, a ) -> ( String, Svg msg )
-viewKeyedTile renderFunc entity =
-    ( Point.toString (Tuple.first entity)
-    , renderTile renderFunc entity
+viewKeyedTile2D : (( Grid.Point, a ) -> Svg msg) -> ( Grid.Point, a ) -> ( String, Svg msg )
+viewKeyedTile2D renderFunc tile =
+    ( pointToString2D (Tuple.first tile)
+    , renderTile2D renderFunc tile
     )
 
 
-viewMap : (( Point, tileData ) -> Svg msg) -> RenderConfig -> HexGrid tileData -> Svg msg
-viewMap renderFunc config grid =
+{-| Convert local chunk corrdinates to screen coordinates
+-}
+screenPos : Grid.Point -> ( Grid.Point, a ) -> ( Grid.Point, a )
+screenPos ( cx, cy ) ( ( x, y ), t ) =
+    ( ( x + (cx * Grid.chunkSize)
+      , y + (cy * Grid.chunkSize)
+      )
+    , t
+    )
+
+
+view2DChunk : (( Grid.Point, a ) -> Svg msg) -> ( Grid.Point, Grid.Chunk a ) -> ( String, Svg msg )
+view2DChunk renderFunc ( chunkPos, chunk ) =
+    ( pointToString2D chunkPos
+    , Svg.Keyed.node "g"
+        [ Svg.Attributes.class "chunk"
+        ]
+        (chunk
+            |> Dict.toList
+            |> List.map (screenPos chunkPos)
+            -- |> List.filter (\( p, _ ) -> Vector2.distance config.position (Vector2.new (Tuple.first p |> toFloat) (Tuple.second p |> toFloat)) < config.renderDistance)
+            -- |> List.sortBy (Tuple.first >> yPixelPosition)
+            |> List.map (viewKeyedTile2D renderFunc)
+        )
+    )
+
+
+view2DGrid : (( Grid.Point, a ) -> Svg msg) -> Grid.WorldMap a -> Svg msg
+view2DGrid renderFunc grid =
     Svg.Keyed.node "g"
         [ Svg.Attributes.class "map" ]
         (grid
-            |> Engine.HexGrid.toList
-            |> List.filter (\( p, _ ) -> Vector2.distance config.position (pointToPixel p) < config.renderDistance)
+            |> Dict.toList
+            -- |> List.filter (\( p, _ ) -> Vector2.distance config.position (Grid.toVector2 p |> Vector2.scale (tileSize * Grid.chunkSize |> toFloat)) < config.renderDistance)
             -- |> List.sortBy (Tuple.first >> yPixelPosition)
-            |> List.map (viewKeyedTile renderFunc)
+            |> List.map (view2DChunk renderFunc)
         )
-
-
-
--- setMapKey : ( Point, Svg msg ) -> ( String, Svg msg )
--- setMapKey ( position, svg ) =
---     ( Point.toString position, svg )
--- mapIsActive : List Point -> Point -> a -> Bool
--- mapIsActive activeMaps position _ =
---     List.member position activeMaps
--- viewMaps : (( Point, tileData ) -> Svg msg) -> List Point -> Dict Point (HexGrid tileData) -> Svg msg
--- viewMaps renderFunc activeMaps grids =
---     Svg.Keyed.node "g"
---         [ Svg.Attributes.class "maps" ]
---         (grids
---             |> Dict.filter (mapIsActive activeMaps)
---             |> Dict.map (viewMap renderFunc)
---             |> Dict.toList
---             |> List.map setMapKey
---         )

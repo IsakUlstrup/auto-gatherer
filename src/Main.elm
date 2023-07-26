@@ -5,10 +5,9 @@ import Browser.Events
 import Content.Grids
 import Content.Particles
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.HexGrid exposing (HexGrid)
+import Engine.Grid as Grid
 import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
-import Engine.Point as Point exposing (Point)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
@@ -97,7 +96,7 @@ initConsole =
 
 type alias Model =
     { particles : ParticleSystem ParticleState
-    , map : HexGrid ()
+    , map : Grid.WorldMap ()
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -111,8 +110,8 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Particles.particleSystem1
-        (Content.Grids.circle 50)
-        (Render.initRenderConfig |> Render.withRenderDistance 400)
+        Content.Grids.test2dGrid2
+        (Render.initRenderConfig |> Render.withRenderDistance 1000)
         initConsole
         20
         0
@@ -267,48 +266,27 @@ viewParticle showVectors particle =
         )
 
 
-viewTile : ( Point, () ) -> Svg Msg
-viewTile ( p, _ ) =
+viewTile2D : ( Grid.Point, () ) -> Svg Msg
+viewTile2D ( p, _ ) =
     let
-        dist =
-            Point.distance ( 0, 0, 0 ) p
+        isOdd n =
+            modBy 2 n == 1
+
+        evenOddClass =
+            if Tuple.first p + Tuple.second p |> isOdd then
+                "odd"
+
+            else
+                "even"
     in
-    Render.viewHex
+    Svg.g
         [ Svg.Attributes.class "tile"
-        , Svg.Events.onClick <| SetMoveTarget (Render.pointToPixel p)
-        , Svg.Attributes.fill <| "hsl(" ++ String.fromInt (dist * 15) ++ " 65% 90%)"
+        , Svg.Attributes.class evenOddClass
         ]
-
-
-gooFilter : Svg msg
-gooFilter =
-    -- <filter id="drop-shadow">
-    --     <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="shadow" />
-    --     <feOffset in="shadow" dx="3" dy="4" result="shadow" />
-    --     <feColorMatrix in="shadow" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0" result="shadow" />
-    --     <feBlend in="SourceGraphic" in2="shadow" />
-    -- </filter>
-    Svg.filter [ Svg.Attributes.id "goo-filter" ]
-        [ Svg.feGaussianBlur
-            [ Svg.Attributes.in_ "SourceGraphic"
-            , Svg.Attributes.stdDeviation "15"
-            , Svg.Attributes.result "blur"
+        [ Render.rect2d
+            [ Svg.Events.onClick <| SetMoveTarget (Grid.toVector2 p |> Vector2.scale (toFloat Render.tileSize))
             ]
-            []
-        , Svg.feColorMatrix
-            [ Svg.Attributes.in_ "blur"
-            , Svg.Attributes.type_ "matrix"
-            , Svg.Attributes.values "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-            , Svg.Attributes.result "goo"
-            ]
-            []
-
-        -- , Svg.feComposite
-        --     [ Svg.Attributes.in_ "SourceGraphic"
-        --     , Svg.Attributes.in2 "goo"
-        --     , Svg.Attributes.operator "atop"
-        --     ]
-        --     []
+        , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (Tuple.first p |> String.fromInt) ++ ", " ++ (Tuple.second p |> String.fromInt) ]
         ]
 
 
@@ -341,8 +319,9 @@ fpsString dts =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
+        [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
+
+        -- , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
         , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"
@@ -352,8 +331,7 @@ view model =
                 [ Svg.Attributes.class "camera"
                 , transformStyle <| (.position <| ParticleSystem.getPlayer model.particles)
                 ]
-                [ Svg.defs [] [ gooFilter ]
-                , Svg.Lazy.lazy2 (Render.viewMap viewTile) model.renderConfig model.map
+                [ Svg.Lazy.lazy (Render.view2DGrid viewTile2D) model.map
                 , Svg.g []
                     (ParticleSystem.getParticles model.particles
                         |> List.filter (\o -> Vector2.distance (.position <| ParticleSystem.getPlayer model.particles) o.position < model.renderConfig.renderDistance)

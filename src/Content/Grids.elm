@@ -1,38 +1,38 @@
 module Content.Grids exposing (..)
 
-import Engine.HexGrid as Grid exposing (HexGrid)
-import Engine.Point as Point
+import Engine.Grid as Grid
 
 
-testGrid1 : Grid.HexGrid ()
-testGrid1 =
+test2dGrid : Grid.WorldMap ()
+test2dGrid =
     Grid.empty
-        |> Grid.insertTile ( 0, 0, 0 ) ()
-        |> Grid.insertTile ( -1, 0, 1 ) ()
-        |> Grid.insertTile ( 1, 1, -2 ) ()
-        |> Grid.insertTile ( 1, 1, -3 ) ()
-        |> Grid.insertTile ( 1, 2, -4 ) ()
-        |> Grid.insertTile ( 2, 2, -4 ) ()
-        |> Grid.insertTile ( 3, 2, -5 ) ()
-        |> Grid.insertTile ( 0, 2, -2 ) ()
-        |> Grid.insertTile ( -1, 2, -1 ) ()
-        |> Grid.insertTile ( -2, 2, 0 ) ()
-        |> Grid.insertTile ( -2, 0, 2 ) ()
-        |> Grid.insertTile ( -3, 1, 2 ) ()
-        |> Grid.insertTile ( -4, 2, 2 ) ()
-        |> Grid.insertTile ( 3, -2, -1 ) ()
-        |> Grid.insertTile ( 3, 1, -4 ) ()
-        |> Grid.insertTile ( -2, -2, 4 ) ()
-        |> Grid.insertTile ( 0, 2, -2 ) ()
-        |> Grid.insertTile ( 0, 3, -3 ) ()
-        |> Grid.insertTile ( 0, 4, -4 ) ()
-        |> Grid.insertTile ( 0, 5, -5 ) ()
-        |> Grid.insertTile ( 2, 3, -5 ) ()
+        |> Grid.insertTile ( 0, 0 ) ()
+        |> Grid.insertTile ( 1, 0 ) ()
+        |> Grid.insertTile ( 1, 1 ) ()
+        |> Grid.insertTile ( 1, 2 ) ()
+        |> Grid.insertTile ( 2, 0 ) ()
+        |> Grid.insertTile ( 3, 0 ) ()
+        |> Grid.insertTile ( 4, 0 ) ()
+        |> Grid.insertTile ( 5, 0 ) ()
+        |> Grid.insertTile ( 7, 0 ) ()
+        |> Grid.insertTile ( 9, 0 ) ()
+        |> Grid.insertTile ( 10, 0 ) ()
+        |> Grid.insertTile ( 14, 0 ) ()
+        |> Grid.insertTile ( -1, 0 ) ()
+        |> Grid.insertTile ( -2, 0 ) ()
+        |> Grid.insertTile ( -3, 0 ) ()
+        |> Grid.insertTile ( -4, 0 ) ()
 
 
-circle : Int -> HexGrid ()
-circle radius =
-    List.range 0 radius
-        |> List.concatMap (Point.ring ( 0, 0, 0 ))
-        |> List.map (\p -> ( p, () ))
-        |> Grid.fromList
+test2dGrid2 : Grid.WorldMap ()
+test2dGrid2 =
+    Grid.empty
+        |> Grid.insertChunk ( 0, 0 ) (Grid.fill ())
+        |> Grid.insertChunk ( -1, -1 ) (Grid.fill ())
+        |> Grid.insertChunk ( 1, 1 ) (Grid.fill ())
+        |> Grid.insertChunk ( 1, 0 ) (Grid.fill ())
+        |> Grid.insertChunk ( 0, 1 ) (Grid.fill ())
+        |> Grid.insertChunk ( -1, 0 ) (Grid.fill ())
+        |> Grid.insertChunk ( 0, -1 ) (Grid.fill ())
+        |> Grid.insertChunk ( 1, -1 ) (Grid.fill ())
+        |> Grid.insertChunk ( -1, 1 ) (Grid.fill ())

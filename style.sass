@@ -53,13 +53,26 @@ main
     height: 100%
 
     .map
-        // filter: url(#goo-filter)
+
         .tile
-            // fill: rgb(255, 250, 211)
-            // polygon
-            //     animation: fade-scale 300ms
-            // &:hover polygon
-            //     transform: scale(0.8)
+            fill: rgb(255, 250, 211)
+            // stroke: #262626
+            // stroke-width: 2
+            &.odd
+                fill: rgb(227, 222, 192)
+
+        .coordinates
+            fill: none
+            text-anchor: middle
+            stroke-width: 0
+            pointer-events: none
+        .chunk
+            // filter: drop-shadow(0 0 0.2rem red)
+        .chunk-debug
+            pointer-events: none
+            fill: none
+            stroke: magenta
+            stroke-width: 2
 
     .particle
         pointer-events: none
