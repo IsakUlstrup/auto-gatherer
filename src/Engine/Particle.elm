@@ -1,5 +1,6 @@
 module Engine.Particle exposing
-    ( Particle
+    ( CollisionResponse
+    , Particle
     , applyForce
     , applyFriciton
     , collisionAction
@@ -8,12 +9,19 @@ module Engine.Particle exposing
     , moveToNearest
     , moveToPosition
     , new
+    , resolveCollision
     , resolveCollisions
     , stopIfSlow
     , updateState
     )
 
 import Engine.Vector2 as Vector2 exposing (Vector2)
+
+
+type CollisionResponse
+    = None
+    | Static
+    | Dynamic
 
 
 type alias Particle a =
@@ -23,6 +31,7 @@ type alias Particle a =
     , acceleration : Vector2
     , radius : Float
     , mass : Float
+    , collisionResponse : CollisionResponse
     , state : a
     }
 
@@ -41,6 +50,7 @@ new x y size mass id state =
         Vector2.zero
         (clamp 1 562949953421311 size)
         (clamp 1 562949953421311 mass)
+        Dynamic
         state
 
 
@@ -168,10 +178,31 @@ overlapModifier target particle =
     (((target.mass - particle.mass) / (target.mass + particle.mass)) + 1) * 0.5
 
 
+{-| Resolve collision without forces
+-}
+resolveStaticCollision : Particle b -> Particle a -> Particle a
+resolveStaticCollision target particle =
+    let
+        dist : Float
+        dist =
+            Vector2.distance particle.position target.position
+
+        overlap : Float
+        overlap =
+            (dist - particle.radius - target.radius) * overlapModifier target particle
+
+        pos : Vector2
+        pos =
+            Vector2.add particle.position (Vector2.direction particle.position target.position |> Vector2.scale overlap)
+    in
+    particle
+        |> setPosition pos
+
+
 {-| Resolve collision between two particles
 -}
-resolveCollision : Particle b -> Particle a -> Particle a
-resolveCollision target particle =
+resolveDynamicCollision : Particle b -> Particle a -> Particle a
+resolveDynamicCollision target particle =
     let
         dist : Float
         dist =
@@ -205,6 +236,19 @@ resolveCollision target particle =
     particle
         |> setPosition pos
         |> setVelocity v
+
+
+resolveCollision : Particle b -> Particle a -> Particle a
+resolveCollision target particle =
+    case target.collisionResponse of
+        None ->
+            particle
+
+        Static ->
+            resolveStaticCollision target particle
+
+        Dynamic ->
+            resolveDynamicCollision target particle
 
 
 
