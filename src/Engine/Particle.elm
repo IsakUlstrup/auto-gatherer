@@ -9,6 +9,7 @@ module Engine.Particle exposing
     , moveToNearest
     , moveToPosition
     , new
+    , newStatic
     , resolveCollision
     , resolveCollisions
     , stopIfSlow
@@ -51,6 +52,19 @@ new x y size mass id state =
         (clamp 1 562949953421311 size)
         (clamp 1 562949953421311 mass)
         Dynamic
+        state
+
+
+newStatic : Float -> Float -> Float -> Float -> Int -> a -> Particle a
+newStatic x y size mass id state =
+    Particle
+        id
+        (Vector2.new x y)
+        Vector2.zero
+        Vector2.zero
+        (clamp 1 562949953421311 size)
+        (clamp 1 562949953421311 mass)
+        Static
         state
 
 

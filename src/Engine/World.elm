@@ -1,6 +1,7 @@
 module Engine.World exposing
     ( World
     , addParticle
+    , addStaticParticle
     , getMap
     , getParticles
     , getPlayer
@@ -36,6 +37,15 @@ addParticle x y size state (World world) =
     World
         { world
             | particles = Particle.new x y size (size * 10) world.idCounter state :: world.particles
+            , idCounter = world.idCounter + 1
+        }
+
+
+addStaticParticle : Float -> Float -> Float -> a -> World a b -> World a b
+addStaticParticle x y size state (World world) =
+    World
+        { world
+            | particles = Particle.newStatic x y size (size * 10) world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
