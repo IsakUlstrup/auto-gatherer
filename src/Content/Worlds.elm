@@ -1,4 +1,4 @@
-module Content.Particles exposing (..)
+module Content.Worlds exposing (..)
 
 import Engine.Grid as Grid exposing (WorldMap)
 import Engine.Vector2 as Vector2
@@ -6,8 +6,8 @@ import Engine.World as World exposing (World)
 import GameState exposing (Particle(..), Tile(..))
 
 
-particleSystem1 : World Particle Tile
-particleSystem1 =
+testWorld1 : World Particle Tile
+testWorld1 =
     World.new (MoveToPosition <| Vector2.zero) testMap
         |> World.addParticle 200 20 40 MoveToCenter
         |> World.addParticle -300 200 55 Idle

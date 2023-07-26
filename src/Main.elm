@@ -2,7 +2,7 @@ module Main exposing (Model, Msg, main)
 
 import Browser
 import Browser.Events
-import Content.Particles
+import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Grid as Grid
 import Engine.Particle as Particle exposing (Particle)
@@ -107,7 +107,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
-        Content.Particles.particleSystem1
+        Content.Worlds.testWorld1
         (Render.initRenderConfig |> Render.withRenderDistance 1000)
         initConsole
         20
