@@ -55,11 +55,12 @@ main
     .map
 
         .tile
-            fill: rgb(255, 250, 211)
-            // stroke: #262626
-            // stroke-width: 2
-            &.odd
-                fill: rgb(227, 222, 192)
+            &.water
+                fill: rgb(211, 255, 254)
+            &.ground
+                fill: rgb(255, 249, 211)
+            &.wall
+                fill: rgb(169, 95, 132)
 
         .coordinates
             fill: none

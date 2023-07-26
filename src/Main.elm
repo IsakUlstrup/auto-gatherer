@@ -2,7 +2,7 @@ module Main exposing (Model, Msg, main)
 
 import Browser
 import Browser.Events
-import Content.Grids
+import Content.Grids exposing (Tile(..))
 import Content.Particles
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Grid as Grid
@@ -96,7 +96,7 @@ initConsole =
 
 type alias Model =
     { particles : ParticleSystem ParticleState
-    , map : Grid.WorldMap ()
+    , map : Grid.WorldMap Content.Grids.Tile
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -110,7 +110,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Particles.particleSystem1
-        Content.Grids.test2dGrid2
+        Content.Grids.testMap
         (Render.initRenderConfig |> Render.withRenderDistance 1000)
         initConsole
         20
@@ -266,8 +266,8 @@ viewParticle showVectors particle =
         )
 
 
-viewTile2D : ( Grid.Point, () ) -> Svg Msg
-viewTile2D ( p, _ ) =
+viewTile2D : ( Grid.Point, Content.Grids.Tile ) -> Svg Msg
+viewTile2D ( p, t ) =
     let
         isOdd n =
             modBy 2 n == 1
@@ -278,10 +278,22 @@ viewTile2D ( p, _ ) =
 
             else
                 "even"
+
+        tileType =
+            case t of
+                Water ->
+                    "water"
+
+                Ground ->
+                    "ground"
+
+                Wall ->
+                    "wall"
     in
     Svg.g
         [ Svg.Attributes.class "tile"
         , Svg.Attributes.class evenOddClass
+        , Svg.Attributes.class tileType
         ]
         [ Render.rect2d
             [ Svg.Events.onClick <| SetMoveTarget (Grid.toVector2 p |> Vector2.scale (toFloat Render.tileSize))
