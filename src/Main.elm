@@ -6,12 +6,12 @@ import Content.Particles
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Grid as Grid
 import Engine.Particle as Particle exposing (Particle)
-import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
+import Engine.World as World exposing (World)
+import GameState exposing (Particle(..), Tile(..))
 import Html exposing (Html, main_)
 import Html.Attributes
-import ParticleState exposing (ParticleState(..), Tile(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -22,7 +22,7 @@ import Svg.Lazy
 -- SYSTEM
 
 
-forces : ParticleSystem ParticleState Tile -> ParticleSystem ParticleState Tile
+forces : World Particle Tile -> World Particle Tile
 forces system =
     let
         moveSpeed =
@@ -46,28 +46,28 @@ forces system =
                                 _ ->
                                     False
                     in
-                    Particle.moveToNearest (system |> ParticleSystem.getParticles |> List.filter followTarget) moveSpeed o
+                    Particle.moveToNearest (system |> World.getParticles |> List.filter followTarget) moveSpeed o
 
                 MoveToClosest ->
-                    Particle.moveToNearest (system |> ParticleSystem.getParticles) moveSpeed o
+                    Particle.moveToNearest (system |> World.getParticles) moveSpeed o
 
                 Idle ->
                     o
 
                 Avoid ->
-                    Particle.moveAwayRange 100 (system |> ParticleSystem.getParticles) moveSpeed o
+                    Particle.moveAwayRange 100 (system |> World.getParticles) moveSpeed o
     in
-    ParticleSystem.updateParticles forceHelper system
+    World.updateParticles forceHelper system
 
 
-movement : Float -> ParticleSystem ParticleState Tile -> ParticleSystem ParticleState Tile
+movement : Float -> World Particle Tile -> World Particle Tile
 movement dt system =
-    ParticleSystem.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
+    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : ParticleSystem ParticleState Tile -> ParticleSystem ParticleState Tile
+resolveCollisions : World Particle Tile -> World Particle Tile
 resolveCollisions system =
-    ParticleSystem.updateParticles (Particle.resolveCollisions (system |> ParticleSystem.getParticles)) system
+    World.updateParticles (Particle.resolveCollisions (system |> World.getParticles)) system
 
 
 
@@ -94,7 +94,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : ParticleSystem ParticleState Tile
+    { particles : World Particle Tile
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -134,7 +134,7 @@ focusCamera : Model -> Model
 focusCamera model =
     let
         playerPos =
-            model.particles |> ParticleSystem.getPlayer |> .position
+            model.particles |> World.getPlayer |> .position
 
         cameraDist =
             Vector2.distance playerPos model.renderConfig.position
@@ -197,7 +197,7 @@ update msg model =
                         _ ->
                             p
             in
-            { model | particles = ParticleSystem.updateParticles helper model.particles }
+            { model | particles = World.updateParticles helper model.particles }
 
 
 
@@ -213,7 +213,7 @@ transformString position =
         ++ ")"
 
 
-viewParticle : Bool -> Particle ParticleState -> Svg msg
+viewParticle : Bool -> Particle.Particle Particle -> Svg msg
 viewParticle showVectors particle =
     let
         typeString =
@@ -338,12 +338,12 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , transformStyle <| (.position <| ParticleSystem.getPlayer model.particles)
+                , transformStyle <| (.position <| World.getPlayer model.particles)
                 ]
-                [ Svg.Lazy.lazy (Render.view2DGrid viewTile2D) (ParticleSystem.getMap model.particles)
+                [ Svg.Lazy.lazy (Render.view2DGrid viewTile2D) (World.getMap model.particles)
                 , Svg.g []
-                    (ParticleSystem.getParticles model.particles
-                        |> List.filter (\o -> Vector2.distance (.position <| ParticleSystem.getPlayer model.particles) o.position < model.renderConfig.renderDistance)
+                    (World.getParticles model.particles
+                        |> List.filter (\o -> Vector2.distance (.position <| World.getPlayer model.particles) o.position < model.renderConfig.renderDistance)
                         |> List.map (viewParticle model.renderDebug)
                     )
                 ]

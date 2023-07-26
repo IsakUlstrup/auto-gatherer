@@ -1,7 +1,7 @@
 module Content.Grids exposing (..)
 
 import Engine.Grid as Grid exposing (WorldMap)
-import ParticleState exposing (Tile(..))
+import GameState exposing (Tile(..))
 
 
 test2dGrid : Grid.WorldMap ()
