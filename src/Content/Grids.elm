@@ -55,6 +55,9 @@ testMap =
         |> Grid.insertTile ( -2, 1 ) Ground
         |> Grid.insertTile ( -2, 2 ) Ground
         |> Grid.insertTile ( -2, -1 ) Water
+        |> Grid.insertTile ( -3, -1 ) Water
+        |> Grid.insertTile ( -3, -2 ) Water
+        |> Grid.insertTile ( -3, 0 ) Water
         |> Grid.insertTile ( -2, -2 ) Ground
         |> Grid.insertTile ( -1, -2 ) Ground
         |> Grid.insertTile ( -1, -1 ) Ground
@@ -65,9 +68,12 @@ testMap =
         |> Grid.insertTile ( 0, -3 ) Ground
         |> Grid.insertTile ( 1, -3 ) Ground
         |> Grid.insertTile ( 1, -2 ) Ground
+        |> Grid.insertTile ( -1, -3 ) Ground
         |> Grid.insertTile ( -1, -4 ) Wall
         |> Grid.insertTile ( 0, -4 ) Wall
         |> Grid.insertTile ( 1, -4 ) Wall
         |> Grid.insertTile ( 2, -4 ) Wall
         |> Grid.insertTile ( 2, -3 ) Wall
         |> Grid.insertTile ( 2, -2 ) Wall
+        |> Grid.insertTile ( -2, -4 ) Wall
+        |> Grid.insertTile ( -2, -3 ) Ground
