@@ -2,7 +2,6 @@ module Main exposing (Model, Msg, main)
 
 import Browser
 import Browser.Events
-import Content.Grids exposing (Tile(..))
 import Content.Particles
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Grid as Grid
@@ -12,7 +11,7 @@ import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Html exposing (Html, main_)
 import Html.Attributes
-import ParticleState exposing (ParticleState(..))
+import ParticleState exposing (ParticleState(..), Tile(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -23,7 +22,7 @@ import Svg.Lazy
 -- SYSTEM
 
 
-forces : ParticleSystem ParticleState -> ParticleSystem ParticleState
+forces : ParticleSystem ParticleState Tile -> ParticleSystem ParticleState Tile
 forces system =
     let
         moveSpeed =
@@ -61,12 +60,12 @@ forces system =
     ParticleSystem.updateParticles forceHelper system
 
 
-movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
+movement : Float -> ParticleSystem ParticleState Tile -> ParticleSystem ParticleState Tile
 movement dt system =
     ParticleSystem.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
+resolveCollisions : ParticleSystem ParticleState Tile -> ParticleSystem ParticleState Tile
 resolveCollisions system =
     ParticleSystem.updateParticles (Particle.resolveCollisions (system |> ParticleSystem.getParticles)) system
 
@@ -95,8 +94,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : ParticleSystem ParticleState
-    , map : Grid.WorldMap Content.Grids.Tile
+    { particles : ParticleSystem ParticleState Tile
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -110,7 +108,6 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Particles.particleSystem1
-        Content.Grids.testMap
         (Render.initRenderConfig |> Render.withRenderDistance 1000)
         initConsole
         20
@@ -266,7 +263,7 @@ viewParticle showVectors particle =
         )
 
 
-viewTile2D : ( Grid.Point, Content.Grids.Tile ) -> Svg Msg
+viewTile2D : ( Grid.Point, Tile ) -> Svg Msg
 viewTile2D ( p, t ) =
     let
         isOdd n =
@@ -343,7 +340,7 @@ view model =
                 [ Svg.Attributes.class "camera"
                 , transformStyle <| (.position <| ParticleSystem.getPlayer model.particles)
                 ]
-                [ Svg.Lazy.lazy (Render.view2DGrid viewTile2D) model.map
+                [ Svg.Lazy.lazy (Render.view2DGrid viewTile2D) (ParticleSystem.getMap model.particles)
                 , Svg.g []
                     (ParticleSystem.getParticles model.particles
                         |> List.filter (\o -> Vector2.distance (.position <| ParticleSystem.getPlayer model.particles) o.position < model.renderConfig.renderDistance)

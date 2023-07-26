@@ -1,12 +1,7 @@
 module Content.Grids exposing (..)
 
 import Engine.Grid as Grid exposing (WorldMap)
-
-
-type Tile
-    = Water
-    | Ground
-    | Wall
+import ParticleState exposing (Tile(..))
 
 
 test2dGrid : Grid.WorldMap ()
