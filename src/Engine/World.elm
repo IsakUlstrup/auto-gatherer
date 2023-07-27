@@ -9,20 +9,20 @@ module Engine.World exposing
     , updateParticles
     )
 
-import Engine.Grid exposing (WorldMap)
 import Engine.Particle as Particle exposing (Particle)
+import Engine.Tile exposing (Tile)
 
 
 type World a b
     = World
         { particles : List (Particle a)
         , player : Particle a
-        , map : WorldMap b
+        , map : List (Tile b)
         , idCounter : Int
         }
 
 
-new : a -> WorldMap b -> World a b
+new : a -> List (Tile b) -> World a b
 new playerState map =
     World
         { particles = []
@@ -65,6 +65,6 @@ getPlayer (World world) =
     world.player
 
 
-getMap : World a b -> WorldMap b
+getMap : World a b -> List (Tile b)
 getMap (World world) =
     world.map

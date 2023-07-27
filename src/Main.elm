@@ -4,9 +4,9 @@ import Browser
 import Browser.Events
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Grid as Grid
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Render as Render exposing (RenderConfig)
+import Engine.Tile exposing (Tile)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import GameState exposing (Particle(..), TileData(..))
@@ -263,21 +263,21 @@ viewParticle showVectors particle =
         )
 
 
-viewTile2D : ( Grid.Point, TileData ) -> Svg Msg
-viewTile2D ( p, t ) =
+viewTile2D : Tile TileData -> Svg Msg
+viewTile2D tile =
     let
         isOdd n =
             modBy 2 n == 1
 
         evenOddClass =
-            if Tuple.first p + Tuple.second p |> isOdd then
+            if tile.position.x + tile.position.y |> round |> isOdd then
                 "odd"
 
             else
                 "even"
 
         tileType =
-            case t of
+            case tile.state of
                 Water ->
                     "water"
 
@@ -292,10 +292,10 @@ viewTile2D ( p, t ) =
         , Svg.Attributes.class evenOddClass
         , Svg.Attributes.class tileType
         ]
-        [ Render.rect2d
-            [ Svg.Events.onClick <| SetMoveTarget (Grid.toVector2 p |> Vector2.scale (toFloat Render.tileSize))
+        [ Render.rect2d (round tile.size)
+            [ Svg.Events.onClick <| SetMoveTarget (tile.position |> Vector2.scale tile.size)
             ]
-        , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (Tuple.first p |> String.fromInt) ++ ", " ++ (Tuple.second p |> String.fromInt) ]
+        , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (tile.position.x |> String.fromFloat) ++ ", " ++ (tile.position.y |> String.fromFloat) ]
         ]
 
 

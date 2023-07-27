@@ -14,6 +14,7 @@ module Engine.Vector2 exposing
     , subtract
     , sum
     , tangent
+    , toString
     , zero
     )
 
@@ -128,3 +129,8 @@ tangent vector =
 dot : Vector2 -> Vector2 -> Float
 dot v1 v2 =
     (v2.x * v1.x) + (v2.y * v1.y)
+
+
+toString : Vector2 -> String
+toString vector =
+    String.fromFloat vector.x ++ "," ++ String.fromFloat vector.y

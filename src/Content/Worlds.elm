@@ -1,6 +1,6 @@
 module Content.Worlds exposing (..)
 
-import Engine.Grid as Grid exposing (WorldMap)
+import Engine.Tile as Tile
 import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
 import GameState exposing (Particle(..), TileData(..))
@@ -32,36 +32,36 @@ testWorld1 =
         |> World.addParticle 240 -17 18 Avoid
 
 
-testMap : WorldMap TileData
+testMap : List (Tile.Tile TileData)
 testMap =
-    Grid.empty
-        |> Grid.insertTile ( 0, 0 ) Ground
-        |> Grid.insertTile ( 1, 0 ) Ground
-        |> Grid.insertTile ( 2, 0 ) Ground
-        |> Grid.insertTile ( -1, 0 ) Ground
-        |> Grid.insertTile ( -2, 0 ) Ground
-        |> Grid.insertTile ( -2, 1 ) Ground
-        |> Grid.insertTile ( -2, 2 ) Ground
-        |> Grid.insertTile ( -2, -1 ) Water
-        |> Grid.insertTile ( -3, -1 ) Water
-        |> Grid.insertTile ( -3, -2 ) Water
-        |> Grid.insertTile ( -3, 0 ) Water
-        |> Grid.insertTile ( -2, -2 ) Ground
-        |> Grid.insertTile ( -1, -2 ) Ground
-        |> Grid.insertTile ( -1, -1 ) Ground
-        |> Grid.insertTile ( 2, -1 ) Ground
-        |> Grid.insertTile ( 1, -1 ) Ground
-        |> Grid.insertTile ( 0, -1 ) Ground
-        |> Grid.insertTile ( 0, -2 ) Ground
-        |> Grid.insertTile ( 0, -3 ) Ground
-        |> Grid.insertTile ( 1, -3 ) Ground
-        |> Grid.insertTile ( 1, -2 ) Ground
-        |> Grid.insertTile ( -1, -3 ) Ground
-        |> Grid.insertTile ( -1, -4 ) Wall
-        |> Grid.insertTile ( 0, -4 ) Wall
-        |> Grid.insertTile ( 1, -4 ) Wall
-        |> Grid.insertTile ( 2, -4 ) Wall
-        |> Grid.insertTile ( 2, -3 ) Wall
-        |> Grid.insertTile ( 2, -2 ) Wall
-        |> Grid.insertTile ( -2, -4 ) Wall
-        |> Grid.insertTile ( -2, -3 ) Ground
+    [ Tile.new 0 0 Ground
+    , Tile.new 1 0 Ground
+    , Tile.new 2 0 Ground
+    , Tile.new -1 0 Ground
+    , Tile.new -2 0 Ground
+    , Tile.new -2 1 Ground
+    , Tile.new -2 2 Ground
+    , Tile.new -2 -1 Water
+    , Tile.new -3 -1 Water
+    , Tile.new -3 -2 Water
+    , Tile.new -3 0 Water
+    , Tile.new -2 -2 Ground
+    , Tile.new -1 -2 Ground
+    , Tile.new -1 -1 Ground
+    , Tile.new 2 -1 Ground
+    , Tile.new 1 -1 Ground
+    , Tile.new 0 -1 Ground
+    , Tile.new 0 -2 Ground
+    , Tile.new 0 -3 Ground
+    , Tile.new 1 -3 Ground
+    , Tile.new 1 -2 Ground
+    , Tile.new -1 -3 Ground
+    , Tile.new -1 -4 Wall
+    , Tile.new 0 -4 Wall
+    , Tile.new 1 -4 Wall
+    , Tile.new 2 -4 Wall
+    , Tile.new 2 -3 Wall
+    , Tile.new 2 -2 Wall
+    , Tile.new -2 -4 Wall
+    , Tile.new -2 -3 Ground
+    ]
