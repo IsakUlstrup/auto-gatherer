@@ -294,9 +294,52 @@ resolveCollisions targets particle =
         |> List.foldl resolve particle
 
 
+isCollidingRect : Particle a -> Tile b -> Bool
+isCollidingRect particle target =
+    let
+        closest =
+            Vector2.new
+                (clamp (target.position.x - (target.size / 2)) (target.position.x + (target.size / 2)) particle.position.x)
+                (clamp (target.position.y - (target.size / 2)) (target.position.y + (target.size / 2)) particle.position.y)
+
+        dist =
+            Vector2.subtract particle.position closest
+    in
+    (dist.x ^ 2) + (dist.y ^ 2) < (particle.radius ^ 2)
+
+
+resolveCollisionRect : Tile b -> Particle a -> Particle a
+resolveCollisionRect target particle =
+    let
+        closest =
+            Vector2.new
+                (clamp (target.position.x - (target.size / 2)) (target.position.x + (target.size / 2)) particle.position.x)
+                (clamp (target.position.y - (target.size / 2)) (target.position.y + (target.size / 2)) particle.position.y)
+
+        dist =
+            Vector2.distance particle.position closest
+
+        nd =
+            Vector2.direction closest particle.position
+
+        overlap =
+            dist - particle.radius
+    in
+    { particle
+        | position = Vector2.subtract particle.position (Vector2.scale overlap nd)
+    }
+
+
 resolveRectCollisions : List (Tile b) -> Particle a -> Particle a
-resolveRectCollisions _ particle =
-    particle
+resolveRectCollisions targets particle =
+    let
+        resolve : Tile b -> Particle a -> Particle a
+        resolve tile p =
+            resolveCollisionRect tile p
+    in
+    targets
+        |> List.filter (isCollidingRect particle)
+        |> List.foldl resolve particle
 
 
 
@@ -389,7 +432,7 @@ updateState f particle =
 -- TILE
 
 
-tileSize : Int
+tileSize : Float
 tileSize =
     50
 
@@ -404,9 +447,9 @@ type alias Tile a =
 
 newTile : Float -> Float -> a -> Tile a
 newTile x y state =
-    Tile (Vector2.new x y) (toFloat tileSize) None state
+    Tile (Vector2.new (x * tileSize) (y * tileSize)) tileSize None state
 
 
 newColliderTile : Float -> Float -> a -> Tile a
 newColliderTile x y state =
-    Tile (Vector2.new x y) (toFloat tileSize) Static state
+    Tile (Vector2.new (x * tileSize) (y * tileSize)) tileSize Static state

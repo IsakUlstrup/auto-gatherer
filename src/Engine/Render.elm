@@ -73,13 +73,13 @@ rect2d size attrs =
 
 {-| CSS transform translate attribute based on position
 -}
-translatePoint2D : Float -> Vector2 -> Attribute msg
-translatePoint2D size pos =
+translatePoint2D : Vector2 -> Attribute msg
+translatePoint2D pos =
     Svg.Attributes.style <|
         "transform: translate("
-            ++ String.fromInt (round (pos.x * size))
+            ++ String.fromInt (round pos.x)
             ++ "px, "
-            ++ String.fromInt (round (pos.y * size))
+            ++ String.fromInt (round pos.y)
             ++ "px);"
 
 
@@ -89,7 +89,7 @@ renderTile2D : (Tile a -> Svg msg) -> Tile a -> Svg msg
 renderTile2D renderFunc tile =
     Svg.g
         [ Svg.Attributes.class "tile-container"
-        , translatePoint2D tile.size tile.position
+        , translatePoint2D tile.position
         ]
         [ renderFunc tile ]
 

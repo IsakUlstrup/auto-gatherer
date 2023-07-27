@@ -307,7 +307,7 @@ viewTile2D tile =
         , Svg.Attributes.class tileType
         ]
         [ Render.rect2d (round tile.size)
-            [ Svg.Events.onClick <| SetMoveTarget (tile.position |> Vector2.scale tile.size)
+            [ Svg.Events.onClick <| SetMoveTarget tile.position
             ]
         , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (tile.position.x |> String.fromFloat) ++ ", " ++ (tile.position.y |> String.fromFloat) ]
         ]
