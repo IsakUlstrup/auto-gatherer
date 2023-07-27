@@ -280,16 +280,6 @@ viewParticle showVectors particle =
 viewTile2D : Tile TileData -> Svg Msg
 viewTile2D tile =
     let
-        isOdd n =
-            modBy 2 n == 1
-
-        evenOddClass =
-            if tile.position.x + tile.position.y |> round |> isOdd then
-                "odd"
-
-            else
-                "even"
-
         tileType =
             case tile.state of
                 Water ->
@@ -303,13 +293,12 @@ viewTile2D tile =
     in
     Svg.g
         [ Svg.Attributes.class "tile"
-        , Svg.Attributes.class evenOddClass
         , Svg.Attributes.class tileType
         ]
         [ Render.rect2d (round tile.size)
             [ Svg.Events.onClick <| SetMoveTarget tile.position
             ]
-        , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (tile.position.x |> String.fromFloat) ++ ", " ++ (tile.position.y |> String.fromFloat) ]
+        , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (tile.position.x / tile.size |> String.fromFloat) ++ ", " ++ (tile.position.y / tile.size |> String.fromFloat) ]
         ]
 
 

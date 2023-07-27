@@ -64,4 +64,46 @@ testMap =
     , Particle.newColliderTile 2 -2 Wall
     , Particle.newColliderTile -2 -4 Wall
     , Particle.newTile -2 -3 Ground
+    , Particle.newTile -1 1 Ground
+    , Particle.newTile -1 2 Ground
+    , Particle.newTile -1 3 Ground
+    , Particle.newTile -1 4 Ground
+    , Particle.newTile 0 1 Ground
+    , Particle.newTile 0 2 Ground
+    , Particle.newTile 0 3 Ground
+    , Particle.newTile 0 4 Ground
+    , Particle.newTile 1 1 Ground
+    , Particle.newTile 1 2 Ground
+    , Particle.newTile 1 3 Ground
+    , Particle.newTile 1 4 Ground
+    , Particle.newTile 2 1 Ground
+    , Particle.newTile 2 2 Ground
+    , Particle.newTile 2 3 Ground
+    , Particle.newTile 2 4 Ground
+    , Particle.newTile 3 -4 Ground
+    , Particle.newTile 3 -3 Ground
+    , Particle.newTile 3 -2 Ground
+    , Particle.newTile 3 -1 Ground
+    , Particle.newTile 3 0 Ground
+    , Particle.newTile 3 1 Ground
+    , Particle.newTile 3 2 Ground
+    , Particle.newTile 3 3 Ground
+    , Particle.newTile 3 4 Ground
+    , Particle.newTile 4 -4 Ground
+    , Particle.newTile 4 -3 Ground
+    , Particle.newTile 4 -2 Ground
+    , Particle.newTile 4 -1 Ground
+    , Particle.newTile 4 0 Ground
+    , Particle.newTile 4 1 Ground
+    , Particle.newTile 4 2 Ground
+    , Particle.newTile 4 3 Ground
+    , Particle.newTile 4 4 Ground
+    , Particle.newTile -3 1 Water
+    , Particle.newTile -3 2 Water
+    , Particle.newTile -3 3 Water
+    , Particle.newTile -2 3 Water
+    , Particle.newTile -3 4 Water
+    , Particle.newTile -2 4 Water
+    , Particle.newTile -3 -3 Water
+    , Particle.newTile -3 -4 Water
     ]

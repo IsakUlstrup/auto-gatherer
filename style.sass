@@ -4,28 +4,6 @@ $player_color: rgb(69, 232, 142)
 $tile_color: rgb(152, 83, 163)
 $item_color: rgb(243, 101, 101)
 
-@keyframes pop
-    75%
-        transform: scale(1.4)
-    100%
-        transform: scale(1)
-@keyframes slide-down
-    0%
-        opacity: 0
-        transform: translateY(-1rem)
-
-    100%
-        opacity: 1
-        transform: translateY(0rem)
-
-@keyframes fade-scale
-    0%
-        opacity: 0
-        transform: scale(0)
-    100%
-        opacity: 1
-        transform: scale(1)
-
 *
     padding: 0
     margin: 0
@@ -56,7 +34,7 @@ main
 
         .tile
             &.water
-                fill: rgb(211, 255, 254)
+                fill: rgb(158, 239, 237)
             &.ground
                 fill: rgb(255, 249, 211)
             &.wall
@@ -67,13 +45,6 @@ main
             text-anchor: middle
             stroke-width: 0
             pointer-events: none
-        .chunk
-            // filter: drop-shadow(0 0 0.2rem red)
-        .chunk-debug
-            pointer-events: none
-            fill: none
-            stroke: magenta
-            stroke-width: 2
 
     .particle
         pointer-events: none
