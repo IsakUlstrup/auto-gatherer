@@ -327,6 +327,7 @@ resolveCollisionRect target particle =
     in
     { particle
         | position = Vector2.subtract particle.position (Vector2.scale overlap nd)
+        , velocity = nd |> Vector2.scale (Vector2.magnitude particle.velocity)
     }
 
 
