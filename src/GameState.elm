@@ -1,4 +1,4 @@
-module GameState exposing (Particle(..), Tile(..))
+module GameState exposing (Particle(..), TileData(..))
 
 import Engine.Vector2 exposing (Vector2)
 
@@ -12,7 +12,7 @@ type Particle
     | Avoid
 
 
-type Tile
+type TileData
     = Water
     | Ground
     | Wall

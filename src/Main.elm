@@ -9,7 +9,7 @@ import Engine.Particle as Particle exposing (Particle)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
-import GameState exposing (Particle(..), Tile(..))
+import GameState exposing (Particle(..), TileData(..))
 import Html exposing (Html, main_)
 import Html.Attributes
 import Svg exposing (Svg)
@@ -22,7 +22,7 @@ import Svg.Lazy
 -- SYSTEM
 
 
-forces : World Particle Tile -> World Particle Tile
+forces : World Particle TileData -> World Particle TileData
 forces system =
     let
         moveSpeed =
@@ -60,12 +60,12 @@ forces system =
     World.updateParticles forceHelper system
 
 
-movement : Float -> World Particle Tile -> World Particle Tile
+movement : Float -> World Particle TileData -> World Particle TileData
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : World Particle Tile -> World Particle Tile
+resolveCollisions : World Particle TileData -> World Particle TileData
 resolveCollisions system =
     World.updateParticles (Particle.resolveCollisions (system |> World.getParticles)) system
 
@@ -94,7 +94,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : World Particle Tile
+    { particles : World Particle TileData
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -263,7 +263,7 @@ viewParticle showVectors particle =
         )
 
 
-viewTile2D : ( Grid.Point, Tile ) -> Svg Msg
+viewTile2D : ( Grid.Point, TileData ) -> Svg Msg
 viewTile2D ( p, t ) =
     let
         isOdd n =

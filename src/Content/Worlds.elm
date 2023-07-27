@@ -3,10 +3,10 @@ module Content.Worlds exposing (..)
 import Engine.Grid as Grid exposing (WorldMap)
 import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
-import GameState exposing (Particle(..), Tile(..))
+import GameState exposing (Particle(..), TileData(..))
 
 
-testWorld1 : World Particle Tile
+testWorld1 : World Particle TileData
 testWorld1 =
     World.new (MoveToPosition <| Vector2.zero) testMap
         |> World.addParticle 200 20 40 MoveToCenter
@@ -32,7 +32,7 @@ testWorld1 =
         |> World.addParticle 240 -17 18 Avoid
 
 
-testMap : WorldMap Tile
+testMap : WorldMap TileData
 testMap =
     Grid.empty
         |> Grid.insertTile ( 0, 0 ) Ground
