@@ -24,8 +24,8 @@ testWorld1 =
         |> World.addParticle 0 0 50 Idle
         -- |> World.addParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
         -- |> World.addParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
-        |> World.addStaticParticle 140 100 15 FollowMoveToPosition
-        |> World.addStaticParticle 100 -107 14 FollowMoveToPosition
+        |> World.addStaticParticle 180 100 15 FollowMoveToPosition
+        |> World.addStaticParticle 140 -107 14 FollowMoveToPosition
         |> World.addStaticParticle -107 12 13 FollowMoveToPosition
         |> World.addStaticParticle -240 -107 12 FollowMoveToPosition
         |> World.addParticle -340 -107 23 Avoid
