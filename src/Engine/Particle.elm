@@ -1,6 +1,7 @@
 module Engine.Particle exposing
     ( CollisionResponse
     , Particle
+    , Tile
     , applyForce
     , applyFriciton
     , collisionAction
@@ -9,7 +10,9 @@ module Engine.Particle exposing
     , moveToNearest
     , moveToPosition
     , new
+    , newColliderTile
     , newStatic
+    , newTile
     , resolveCollision
     , resolveCollisions
     , stopIfSlow
@@ -374,3 +377,30 @@ moveToPosition limitDistance position speed particle =
 updateState : (a -> a) -> Particle a -> Particle a
 updateState f particle =
     { particle | state = f particle.state }
+
+
+
+-- TILE
+
+
+tileSize : Int
+tileSize =
+    50
+
+
+type alias Tile a =
+    { position : Vector2
+    , size : Float
+    , collisionResponse : CollisionResponse
+    , state : a
+    }
+
+
+newTile : Float -> Float -> a -> Tile a
+newTile x y state =
+    Tile (Vector2.new x y) (toFloat tileSize) None state
+
+
+newColliderTile : Float -> Float -> a -> Tile a
+newColliderTile x y state =
+    Tile (Vector2.new x y) (toFloat tileSize) Static state

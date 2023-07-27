@@ -4,9 +4,8 @@ import Browser
 import Browser.Events
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Particle as Particle exposing (Particle)
+import Engine.Particle as Particle exposing (Particle, Tile)
 import Engine.Render as Render exposing (RenderConfig)
-import Engine.Tile exposing (Tile)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import GameState exposing (Particle(..), TileData(..))

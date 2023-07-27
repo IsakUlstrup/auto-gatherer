@@ -9,8 +9,7 @@ module Engine.World exposing
     , updateParticles
     )
 
-import Engine.Particle as Particle exposing (Particle)
-import Engine.Tile exposing (Tile)
+import Engine.Particle as Particle exposing (Particle, Tile)
 
 
 type World a b

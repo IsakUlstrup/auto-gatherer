@@ -8,7 +8,7 @@ module Engine.Render exposing
     , withZoom
     )
 
-import Engine.Tile exposing (Tile)
+import Engine.Particle exposing (Tile)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Svg exposing (Attribute, Svg)
 import Svg.Attributes
