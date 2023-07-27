@@ -1,5 +1,5 @@
 module Engine.Particle exposing
-    ( CollisionResponse
+    ( CollisionResponse(..)
     , Particle
     , Tile
     , applyForce
@@ -15,6 +15,7 @@ module Engine.Particle exposing
     , newTile
     , resolveCollision
     , resolveCollisions
+    , resolveRectCollisions
     , stopIfSlow
     , updateState
     )
@@ -291,6 +292,11 @@ resolveCollisions targets particle =
     targets
         |> List.filter (isColliding particle)
         |> List.foldl resolve particle
+
+
+resolveRectCollisions : List (Tile b) -> Particle a -> Particle a
+resolveRectCollisions _ particle =
+    particle
 
 
 

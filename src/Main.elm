@@ -4,7 +4,7 @@ import Browser
 import Browser.Events
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Particle as Particle exposing (Particle, Tile)
+import Engine.Particle as Particle exposing (CollisionResponse(..), Particle, Tile)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
@@ -66,7 +66,22 @@ movement dt system =
 
 resolveCollisions : World Particle TileData -> World Particle TileData
 resolveCollisions system =
-    World.updateParticles (Particle.resolveCollisions (system |> World.getParticles)) system
+    let
+        colliderTile : Tile TileData -> Bool
+        colliderTile t =
+            case t.collisionResponse of
+                None ->
+                    False
+
+                Static ->
+                    True
+
+                Dynamic ->
+                    True
+    in
+    system
+        |> World.updateParticles (Particle.resolveCollisions (system |> World.getParticles))
+        |> World.updateParticles (Particle.resolveRectCollisions (system |> World.getMap |> List.filter colliderTile))
 
 
 
