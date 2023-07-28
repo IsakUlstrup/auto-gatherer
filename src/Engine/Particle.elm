@@ -303,9 +303,9 @@ isCollidingRect particle target =
                 (clamp (target.position.y - (target.size / 2)) (target.position.y + (target.size / 2)) particle.position.y)
 
         dist =
-            Vector2.subtract particle.position closest
+            Vector2.distance particle.position closest
     in
-    (dist.x ^ 2) + (dist.y ^ 2) < (particle.radius ^ 2)
+    (dist ^ 2) <= (particle.radius ^ 2)
 
 
 resolveCollisionRect : Tile b -> Particle a -> Particle a
@@ -327,7 +327,8 @@ resolveCollisionRect target particle =
     in
     { particle
         | position = Vector2.subtract particle.position (Vector2.scale overlap nd)
-        , velocity = nd |> Vector2.scale (Vector2.magnitude particle.velocity)
+
+        -- , velocity = nd |> Vector2.scale (Vector2.magnitude particle.velocity)
     }
 
 
