@@ -25,7 +25,7 @@ forces : World Particle -> World Particle
 forces system =
     let
         moveSpeed =
-            0.05
+            0.1
 
         forceHelper o =
             case o.state of
@@ -55,13 +55,16 @@ forces system =
 
                 Avoid ->
                     Particle.moveAwayRange 100 (system |> World.getParticles) moveSpeed o
+
+                FollowId id ->
+                    Particle.moveToId id (system |> World.getParticles) moveSpeed o
     in
     World.updateParticles forceHelper system
 
 
 movement : Float -> World Particle -> World Particle
 movement dt system =
-    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
+    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.06 >> Particle.stopIfSlow 0.0001) system
 
 
 resolveCollisions : World Particle -> World Particle
@@ -245,6 +248,9 @@ viewParticle showVectors particle =
 
                 Avoid ->
                     "avoid"
+
+                FollowId _ ->
+                    "follow-id"
     in
     Svg.g
         [ Svg.Attributes.transform <| transformString particle.position

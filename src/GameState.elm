@@ -10,3 +10,4 @@ type Particle
     | MoveToClosest
     | Idle
     | Avoid
+    | FollowId Int

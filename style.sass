@@ -3,7 +3,8 @@ $resource_color: rgb(233, 67, 130)
 $player_color: rgb(69, 232, 142)
 $idle_color: rgb(152, 83, 163)
 $item_color: rgb(243, 101, 101)
-$tile_color: rgb(88, 47, 60)
+$tile_color: #2d5e51
+$follow_id_color: rgb(54, 54, 54)
 
 *
     padding: 0
@@ -62,6 +63,9 @@ main
         &.avoid .body
             fill: rgb(90, 100, 152)
             stroke: lighten(rgb(90, 100, 152), 25)
+        &.follow-id .body
+            fill: $follow_id_color
+            stroke: lighten($follow_id_color, 25)
 
         .body
             stroke-width: 2

@@ -6,6 +6,7 @@ module Engine.Particle exposing
     , collisionAction
     , move
     , moveAwayRange
+    , moveToId
     , moveToNearest
     , moveToPosition
     , new
@@ -306,6 +307,31 @@ moveToNearest targets speed particle =
         nearest =
             targets
                 |> List.filter (\t -> t.id /= particle.id)
+                |> List.map .position
+                |> List.sortBy (Vector2.distance particle.position)
+                |> List.head
+
+        force : Vector2 -> Vector2
+        force target =
+            Vector2.direction particle.position target |> Vector2.scale speed
+    in
+    case nearest of
+        Just target ->
+            applyForce (force target) particle
+
+        Nothing ->
+            particle
+
+
+{-| Move towards particle with a given id
+-}
+moveToId : Int -> List (Particle b) -> Float -> Particle a -> Particle a
+moveToId id targets speed particle =
+    let
+        nearest : Maybe Vector2
+        nearest =
+            targets
+                |> List.filter (\t -> t.id /= particle.id && t.id == id)
                 |> List.map .position
                 |> List.sortBy (Vector2.distance particle.position)
                 |> List.head
