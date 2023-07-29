@@ -144,6 +144,16 @@ stop particle =
     { particle | velocity = Vector2.zero }
 
 
+distance : Particle a -> Particle b -> Float
+distance p1 p2 =
+    Vector2.distance p1.position p2.position - (p1.radius + p2.radius)
+
+
+isNotEqual : Particle a -> Particle b -> Bool
+isNotEqual p1 p2 =
+    p1.id /= p2.id
+
+
 
 -- ---- COLLISION ----
 
@@ -306,7 +316,8 @@ moveToNearest targets speed particle =
         nearest : Maybe Vector2
         nearest =
             targets
-                |> List.filter (\t -> t.id /= particle.id)
+                |> List.filter (isNotEqual particle)
+                |> List.filter (\t -> distance t particle > 0)
                 |> List.map .position
                 |> List.sortBy (Vector2.distance particle.position)
                 |> List.head
@@ -331,9 +342,9 @@ moveToId id targets speed particle =
         nearest : Maybe Vector2
         nearest =
             targets
-                |> List.filter (\t -> t.id /= particle.id && t.id == id)
+                |> List.filter (isNotEqual particle)
+                |> List.filter (\t -> distance t particle > 0 && t.id == id)
                 |> List.map .position
-                |> List.sortBy (Vector2.distance particle.position)
                 |> List.head
 
         force : Vector2 -> Vector2
@@ -360,9 +371,9 @@ moveAwayRange range targets speed particle =
         nearest =
             targets
                 |> List.filter (\t -> t.id /= particle.id)
+                |> List.filter (\t -> distance t particle < range)
                 |> List.map .position
                 |> List.sortBy (Vector2.distance particle.position)
-                |> List.filter (\t -> Vector2.distance t particle.position < range)
                 |> List.head
 
         force : Vector2 -> Vector2
@@ -384,7 +395,7 @@ moveToPosition limitDistance position speed particle =
     let
         force : Vector2
         force =
-            if Vector2.distance particle.position position < limitDistance then
+            if Vector2.distance particle.position position - particle.radius < limitDistance then
                 Vector2.zero
 
             else
