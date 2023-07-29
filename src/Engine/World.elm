@@ -2,36 +2,33 @@ module Engine.World exposing
     ( World
     , addParticle
     , addStaticParticle
-    , getMap
     , getParticles
     , getPlayer
     , new
     , updateParticles
     )
 
-import Engine.Particle as Particle exposing (Particle, Tile)
+import Engine.Particle as Particle exposing (Particle)
 
 
-type World a b
+type World a
     = World
         { particles : List (Particle a)
         , player : Particle a
-        , map : List (Tile b)
         , idCounter : Int
         }
 
 
-new : a -> List (Tile b) -> World a b
-new playerState map =
+new : a -> World a
+new playerState =
     World
         { particles = []
         , player = Particle.new 0 0 30 400 0 playerState
-        , map = map
         , idCounter = 1
         }
 
 
-addParticle : Float -> Float -> Float -> a -> World a b -> World a b
+addParticle : Float -> Float -> Float -> a -> World a -> World a
 addParticle x y size state (World world) =
     World
         { world
@@ -40,7 +37,7 @@ addParticle x y size state (World world) =
         }
 
 
-addStaticParticle : Float -> Float -> Float -> a -> World a b -> World a b
+addStaticParticle : Float -> Float -> Float -> a -> World a -> World a
 addStaticParticle x y size state (World world) =
     World
         { world
@@ -49,21 +46,16 @@ addStaticParticle x y size state (World world) =
         }
 
 
-updateParticles : (Particle a -> Particle a) -> World a b -> World a b
+updateParticles : (Particle a -> Particle a) -> World a -> World a
 updateParticles f (World world) =
     World { world | particles = List.map f world.particles, player = f world.player }
 
 
-getParticles : World a b -> List (Particle a)
+getParticles : World a -> List (Particle a)
 getParticles (World world) =
     world.player :: world.particles
 
 
-getPlayer : World a b -> Particle a
+getPlayer : World a -> Particle a
 getPlayer (World world) =
     world.player
-
-
-getMap : World a b -> List (Tile b)
-getMap (World world) =
-    world.map

@@ -1,4 +1,4 @@
-module GameState exposing (Particle(..), TileData(..))
+module GameState exposing (Particle(..))
 
 import Engine.Vector2 exposing (Vector2)
 
@@ -10,9 +10,3 @@ type Particle
     | MoveToClosest
     | Idle
     | Avoid
-
-
-type TileData
-    = Water
-    | Ground
-    | Wall

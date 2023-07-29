@@ -4,11 +4,11 @@ import Browser
 import Browser.Events
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Particle as Particle exposing (CollisionResponse(..), Particle, Tile)
+import Engine.Particle as Particle exposing (CollisionResponse(..), Particle)
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
-import GameState exposing (Particle(..), TileData(..))
+import GameState exposing (Particle(..))
 import Html exposing (Html, main_)
 import Html.Attributes
 import Svg exposing (Svg)
@@ -21,7 +21,7 @@ import Svg.Lazy
 -- SYSTEM
 
 
-forces : World Particle TileData -> World Particle TileData
+forces : World Particle -> World Particle
 forces system =
     let
         moveSpeed =
@@ -59,29 +59,15 @@ forces system =
     World.updateParticles forceHelper system
 
 
-movement : Float -> World Particle TileData -> World Particle TileData
+movement : Float -> World Particle -> World Particle
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.02 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : World Particle TileData -> World Particle TileData
+resolveCollisions : World Particle -> World Particle
 resolveCollisions system =
-    let
-        colliderTile : Tile TileData -> Bool
-        colliderTile t =
-            case t.collisionResponse of
-                None ->
-                    False
-
-                Static ->
-                    True
-
-                Dynamic ->
-                    True
-    in
     system
         |> World.updateParticles (Particle.resolveCollisions (system |> World.getParticles))
-        |> World.updateParticles (Particle.resolveRectCollisions (system |> World.getMap |> List.filter colliderTile))
 
 
 
@@ -108,7 +94,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : World Particle TileData
+    { particles : World Particle
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -122,7 +108,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Worlds.testWorld1
-        (Render.initRenderConfig |> Render.withRenderDistance 1000)
+        (Render.initRenderConfig |> Render.withRenderDistance 500)
         initConsole
         20
         0
@@ -227,6 +213,16 @@ transformString position =
         ++ ")"
 
 
+cameraTransform : Vector2 -> Svg.Attribute msg
+cameraTransform position =
+    Svg.Attributes.style <|
+        "transform: translate("
+            ++ String.fromInt (round -position.x)
+            ++ "px, "
+            ++ String.fromInt (round -position.y)
+            ++ "px)"
+
+
 viewParticle : Bool -> Particle.Particle Particle -> Svg msg
 viewParticle showVectors particle =
     let
@@ -277,39 +273,42 @@ viewParticle showVectors particle =
         )
 
 
-viewTile2D : Tile TileData -> Svg Msg
-viewTile2D tile =
+viewTile2D : Float -> Vector2 -> Svg Msg
+viewTile2D size position =
     let
-        tileType =
-            case tile.state of
-                Water ->
-                    "water"
+        isOdd n =
+            modBy 2 n == 1
 
-                Ground ->
-                    "ground"
+        oddString =
+            if isOdd <| round (position.x / size) + round (position.y / size) then
+                "odd"
 
-                Wall ->
-                    "wall"
+            else
+                "even"
     in
-    Svg.g
-        [ Svg.Attributes.class "tile"
-        , Svg.Attributes.class tileType
-        ]
-        [ Render.rect2d (round tile.size)
-            [ Svg.Events.onClick <| SetMoveTarget tile.position
-            ]
-        , Svg.text_ [ Svg.Attributes.class "coordinates" ] [ Svg.text <| (tile.position.x / tile.size |> String.fromFloat) ++ ", " ++ (tile.position.y / tile.size |> String.fromFloat) ]
+    Render.rect2d (round size)
+        [ Svg.Events.onClick <| SetMoveTarget position
+        , Svg.Attributes.class "tile"
+        , Svg.Attributes.class oddString
+        , Svg.Attributes.transform <| transformString position
         ]
 
 
-transformStyle : Vector2 -> Svg.Attribute msg
-transformStyle position =
-    Svg.Attributes.style <|
-        "transform: translate("
-            ++ String.fromInt (round -position.x)
-            ++ "px, "
-            ++ String.fromInt (round -position.y)
-            ++ "px)"
+viewMap : RenderConfig -> Svg Msg
+viewMap config =
+    let
+        row y =
+            List.range -30 30
+                |> List.map (\x -> Vector2.new (toFloat x) (toFloat y))
+
+        map =
+            List.range -30 30
+                |> List.reverse
+                |> List.concatMap row
+                |> List.map (Vector2.scale 50)
+                |> List.filter (\t -> Vector2.distance t config.position < config.renderDistance)
+    in
+    Svg.g [] (List.map (viewTile2D 50) map)
 
 
 fpsString : List Float -> String
@@ -341,9 +340,9 @@ view model =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "camera"
-                , transformStyle <| (.position <| World.getPlayer model.particles)
+                , cameraTransform <| (.position <| World.getPlayer model.particles)
                 ]
-                [ Svg.Lazy.lazy (Render.view2DGrid viewTile2D) (World.getMap model.particles)
+                [ Svg.Lazy.lazy viewMap model.renderConfig
                 , Svg.g []
                     (World.getParticles model.particles
                         |> List.filter (\o -> Vector2.distance (.position <| World.getPlayer model.particles) o.position < model.renderConfig.renderDistance)

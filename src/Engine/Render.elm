@@ -2,17 +2,14 @@ module Engine.Render exposing
     ( RenderConfig
     , initRenderConfig
     , rect2d
-    , view2DGrid
     , withPosition
     , withRenderDistance
     , withZoom
     )
 
-import Engine.Particle exposing (Tile)
 import Engine.Vector2 as Vector2 exposing (Vector2)
-import Svg exposing (Attribute, Svg)
+import Svg exposing (Svg)
 import Svg.Attributes
-import Svg.Keyed
 
 
 
@@ -71,45 +68,36 @@ rect2d size attrs =
         []
 
 
-{-| CSS transform translate attribute based on position
--}
-translatePoint2D : Vector2 -> Attribute msg
-translatePoint2D pos =
-    Svg.Attributes.style <|
-        "transform: translate("
-            ++ String.fromInt (round pos.x)
-            ++ "px, "
-            ++ String.fromInt (round pos.y)
-            ++ "px);"
 
-
-{-| Create a wrapper with correct position and render a tile with provied function
--}
-renderTile2D : (Tile a -> Svg msg) -> Tile a -> Svg msg
-renderTile2D renderFunc tile =
-    Svg.g
-        [ Svg.Attributes.class "tile-container"
-        , translatePoint2D tile.position
-        ]
-        [ renderFunc tile ]
-
-
-
+-- {-| CSS transform translate attribute based on position
+-- -}
+-- translatePoint2D : Vector2 -> Attribute msg
+-- translatePoint2D pos =
+--     Svg.Attributes.style <|
+--         "transform: translate("
+--             ++ String.fromInt (round pos.x)
+--             ++ "px, "
+--             ++ String.fromInt (round pos.y)
+--             ++ "px);"
+-- {-| Create a wrapper with correct position and render a tile with provied function
+-- -}
+-- renderTile2D : (Tile a -> Svg msg) -> Tile a -> Svg msg
+-- renderTile2D renderFunc tile =
+--     Svg.g
+--         [ Svg.Attributes.class "tile-container"
+--         , translatePoint2D tile.position
+--         ]
+--         [ renderFunc tile ]
 -- pointToString2D : Grid.Point -> String
 -- pointToString2D ( x, y ) =
 --     String.fromInt x ++ "," ++ String.fromInt y
-
-
-{-| Keyed and lazy tile render
--}
-viewKeyedTile2D : (Tile a -> Svg msg) -> Tile a -> ( String, Svg msg )
-viewKeyedTile2D renderFunc tile =
-    ( Vector2.toString tile.position
-    , renderTile2D renderFunc tile
-    )
-
-
-
+-- {-| Keyed and lazy tile render
+-- -}
+-- viewKeyedTile2D : (Tile a -> Svg msg) -> Tile a -> ( String, Svg msg )
+-- viewKeyedTile2D renderFunc tile =
+--     ( Vector2.toString tile.position
+--     , renderTile2D renderFunc tile
+--     )
 -- {-| Convert local chunk corrdinates to screen coordinates
 -- -}
 -- screenPos : Grid.Point -> ( Grid.Point, a ) -> ( Grid.Point, a )
@@ -133,15 +121,13 @@ viewKeyedTile2D renderFunc tile =
 --             |> List.map (viewKeyedTile2D renderFunc)
 --         )
 --     )
-
-
-view2DGrid : (Tile a -> Svg msg) -> List (Tile a) -> Svg msg
-view2DGrid renderFunc grid =
-    Svg.Keyed.node "g"
-        [ Svg.Attributes.class "map" ]
-        (grid
-            -- |> Dict.toList
-            -- |> List.filter (\( p, _ ) -> Vector2.distance config.position (Grid.toVector2 p |> Vector2.scale (tileSize * Grid.chunkSize |> toFloat)) < config.renderDistance)
-            -- |> List.sortBy (Tuple.first >> yPixelPosition)
-            |> List.map (viewKeyedTile2D renderFunc)
-        )
+-- view2DGrid : (Tile a -> Svg msg) -> List (Tile a) -> Svg msg
+-- view2DGrid renderFunc grid =
+--     Svg.Keyed.node "g"
+--         [ Svg.Attributes.class "map" ]
+--         (grid
+--             -- |> Dict.toList
+--             -- |> List.filter (\( p, _ ) -> Vector2.distance config.position (Grid.toVector2 p |> Vector2.scale (tileSize * Grid.chunkSize |> toFloat)) < config.renderDistance)
+--             -- |> List.sortBy (Tuple.first >> yPixelPosition)
+--             |> List.map (viewKeyedTile2D renderFunc)
+--         )

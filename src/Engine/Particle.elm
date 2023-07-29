@@ -1,7 +1,6 @@
 module Engine.Particle exposing
     ( CollisionResponse(..)
     , Particle
-    , Tile
     , applyForce
     , applyFriciton
     , collisionAction
@@ -10,12 +9,9 @@ module Engine.Particle exposing
     , moveToNearest
     , moveToPosition
     , new
-    , newColliderTile
     , newStatic
-    , newTile
     , resolveCollision
     , resolveCollisions
-    , resolveRectCollisions
     , stopIfSlow
     , updateState
     )
@@ -294,56 +290,6 @@ resolveCollisions targets particle =
         |> List.foldl resolve particle
 
 
-isCollidingRect : Particle a -> Tile b -> Bool
-isCollidingRect particle target =
-    let
-        closest =
-            Vector2.new
-                (clamp (target.position.x - (target.size / 2)) (target.position.x + (target.size / 2)) particle.position.x)
-                (clamp (target.position.y - (target.size / 2)) (target.position.y + (target.size / 2)) particle.position.y)
-
-        dist =
-            Vector2.distance particle.position closest
-    in
-    (dist ^ 2) <= (particle.radius ^ 2)
-
-
-resolveCollisionRect : Tile b -> Particle a -> Particle a
-resolveCollisionRect target particle =
-    let
-        closest =
-            Vector2.new
-                (clamp (target.position.x - (target.size / 2)) (target.position.x + (target.size / 2)) particle.position.x)
-                (clamp (target.position.y - (target.size / 2)) (target.position.y + (target.size / 2)) particle.position.y)
-
-        dist =
-            Vector2.distance particle.position closest
-
-        nd =
-            Vector2.direction closest particle.position
-
-        overlap =
-            dist - particle.radius
-    in
-    { particle
-        | position = Vector2.subtract particle.position (Vector2.scale overlap nd)
-
-        -- , velocity = nd |> Vector2.scale (Vector2.magnitude particle.velocity)
-    }
-
-
-resolveRectCollisions : List (Tile b) -> Particle a -> Particle a
-resolveRectCollisions targets particle =
-    let
-        resolve : Tile b -> Particle a -> Particle a
-        resolve tile p =
-            resolveCollisionRect tile p
-    in
-    targets
-        |> List.filter (isCollidingRect particle)
-        |> List.foldl resolve particle
-
-
 
 -- AI
 
@@ -428,30 +374,3 @@ moveToPosition limitDistance position speed particle =
 updateState : (a -> a) -> Particle a -> Particle a
 updateState f particle =
     { particle | state = f particle.state }
-
-
-
--- TILE
-
-
-tileSize : Float
-tileSize =
-    50
-
-
-type alias Tile a =
-    { position : Vector2
-    , size : Float
-    , collisionResponse : CollisionResponse
-    , state : a
-    }
-
-
-newTile : Float -> Float -> a -> Tile a
-newTile x y state =
-    Tile (Vector2.new (x * tileSize) (y * tileSize)) tileSize None state
-
-
-newColliderTile : Float -> Float -> a -> Tile a
-newColliderTile x y state =
-    Tile (Vector2.new (x * tileSize) (y * tileSize)) tileSize Static state
