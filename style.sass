@@ -34,7 +34,9 @@ main
 
     .tile
         fill: $tile_color
+        fill-opacity: 0
         &.odd
+            fill-opacity: 1
             fill: darken($tile_color, 7)
 
         .coordinates
@@ -68,7 +70,7 @@ main
             stroke: lighten($follow_id_color, 25)
 
         .body
-            stroke-width: 2
+            stroke-width: 1.5
 
         .velocity
             stroke: lighten($player_color, 25)

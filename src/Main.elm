@@ -297,6 +297,7 @@ viewTile2D size position =
         , Svg.Attributes.class "tile"
         , Svg.Attributes.class oddString
         , Svg.Attributes.transform <| transformString position
+        , Svg.Attributes.rx "3"
         ]
 
 
