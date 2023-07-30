@@ -32,13 +32,13 @@ testWorld1 =
         -- |> World.addStaticParticle 140 -107 14 FollowMoveToPosition
         -- |> World.addStaticParticle -107 12 13 FollowMoveToPosition
         -- |> World.addStaticParticle -240 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -241 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -242 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -243 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -244 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -245 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -246 -107 12 FollowMoveToPosition
-        |> World.addStaticParticle -247 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -241 -97 12 (FollowMoveToPosition 100)
+        |> World.addStaticParticle -252 -117 12 (FollowMoveToPosition 100)
+        |> World.addStaticParticle -263 -137 12 (FollowMoveToPosition 100)
+        |> World.addStaticParticle -274 -87 12 (FollowMoveToPosition 100)
+        |> World.addStaticParticle -285 -117 12 (FollowMoveToPosition 100)
+        |> World.addStaticParticle -296 -77 12 (FollowMoveToPosition 100)
+        |> World.addStaticParticle -207 -107 12 (FollowMoveToPosition 100)
         -- |> World.addStaticParticle -248 -107 12 FollowMoveToPosition
         |> World.addParticle -340 -107 23 Avoid
         |> World.addParticle 240 -17 18 Avoid

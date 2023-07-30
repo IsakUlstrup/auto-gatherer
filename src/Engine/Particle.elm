@@ -4,6 +4,7 @@ module Engine.Particle exposing
     , applyForce
     , applyFriciton
     , collisionAction
+    , distance
     , move
     , moveAwayRange
     , moveToId

@@ -37,7 +37,7 @@ forces system =
                 MoveToPosition p ->
                     Particle.moveToPosition 50 p moveSpeed o
 
-                FollowMoveToPosition ->
+                FollowMoveToPosition range ->
                     let
                         followTarget : Particle.Particle Particle -> Bool
                         followTarget t =
@@ -47,8 +47,11 @@ forces system =
 
                                 _ ->
                                     False
+
+                        isInRange p =
+                            Particle.distance p o < range
                     in
-                    Particle.moveToNearest 50 (system |> World.getParticles |> List.filter followTarget) moveSpeed o
+                    Particle.moveToNearest 50 (system |> World.getParticles |> List.filter followTarget |> List.filter isInRange) moveSpeed o
 
                 MoveToClosest ->
                     Particle.moveToNearest 50 (system |> World.getParticles) moveSpeed o
@@ -244,7 +247,7 @@ viewParticle showVectors particle =
                 MoveToPosition _ ->
                     "move-to"
 
-                FollowMoveToPosition ->
+                FollowMoveToPosition _ ->
                     "follow-move-to"
 
                 MoveToClosest ->
