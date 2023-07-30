@@ -296,18 +296,18 @@ viewTile2D size position =
         isOdd n =
             modBy 2 n == 1
 
-        oddString : String
-        oddString =
+        fillSting : String
+        fillSting =
             if isOdd <| round (position.x / size) + round (position.y / size) then
-                "odd"
+                "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 5) ++ " 80% 90%)"
 
             else
-                "even"
+                "transparent"
     in
     Render.rect2d (round size)
         [ Svg.Events.onClick <| SetMoveTarget position
         , Svg.Attributes.class "tile"
-        , Svg.Attributes.class oddString
+        , Svg.Attributes.fill fillSting
         , Svg.Attributes.transform <| transformString position
         , Svg.Attributes.rx "3"
         ]
