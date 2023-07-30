@@ -13,7 +13,7 @@ overlapModifier target object =
 
 testObject : Float -> Particle ()
 testObject mass =
-    Engine.Particle.new 0 0 0 mass 0 ()
+    Engine.Particle.new 0 0 0 mass 0.1 0 ()
 
 
 collision : Test

@@ -23,25 +23,25 @@ new : a -> World a
 new playerState =
     World
         { particles = []
-        , player = Particle.new 0 0 30 400 0 playerState
+        , player = Particle.new 0 0 30 400 0.3 0 playerState
         , idCounter = 1
         }
 
 
-addParticle : Float -> Float -> Float -> a -> World a -> World a
-addParticle x y size state (World world) =
+addParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
+addParticle x y size speed state (World world) =
     World
         { world
-            | particles = Particle.new x y size (size * 10) world.idCounter state :: world.particles
+            | particles = Particle.new x y size (size * 10) speed world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
 
-addStaticParticle : Float -> Float -> Float -> a -> World a -> World a
-addStaticParticle x y size state (World world) =
+addStaticParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
+addStaticParticle x y size speed state (World world) =
     World
         { world
-            | particles = Particle.newStatic x y size (size * 10) world.idCounter state :: world.particles
+            | particles = Particle.newStatic x y size (size * 10) speed world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 

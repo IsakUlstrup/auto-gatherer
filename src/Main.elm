@@ -24,18 +24,14 @@ import Svg.Lazy
 forces : World Particle -> World Particle
 forces system =
     let
-        moveSpeed : Float
-        moveSpeed =
-            0.1
-
         forceHelper : Particle.Particle Particle -> Particle.Particle Particle
         forceHelper o =
             case o.state of
                 MoveToCenter ->
-                    Particle.moveToPosition 50 Vector2.zero moveSpeed o
+                    Particle.moveToPosition 50 Vector2.zero o
 
                 MoveToPosition p ->
-                    Particle.moveToPosition 50 p moveSpeed o
+                    Particle.moveToPosition 50 p o
 
                 FollowMoveToPosition range ->
                     let
@@ -51,19 +47,19 @@ forces system =
                         isInRange p =
                             Particle.distance p o < range
                     in
-                    Particle.moveToNearest 50 (system |> World.getParticles |> List.filter followTarget |> List.filter isInRange) moveSpeed o
+                    Particle.moveToNearest 50 (system |> World.getParticles |> List.filter followTarget |> List.filter isInRange) o
 
                 MoveToClosest ->
-                    Particle.moveToNearest 50 (system |> World.getParticles) moveSpeed o
+                    Particle.moveToNearest 50 (system |> World.getParticles) o
 
                 Idle ->
                     o
 
                 Avoid ->
-                    Particle.moveAwayRange 100 (system |> World.getParticles) moveSpeed o
+                    Particle.moveAwayRange 100 (system |> World.getParticles) o
 
                 FollowId id ->
-                    Particle.moveToId 5 id (system |> World.getParticles) moveSpeed o
+                    Particle.moveToId 5 id (system |> World.getParticles) o
     in
     World.updateParticles forceHelper system
 

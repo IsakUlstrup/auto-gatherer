@@ -33,6 +33,7 @@ type alias Particle a =
     , mass : Float
     , collisionResponse : CollisionResponse
     , state : a
+    , speed : Float
     }
 
 
@@ -41,8 +42,8 @@ type alias Particle a =
 Mass and size will be clamped between 1 and 562949953421311
 
 -}
-new : Float -> Float -> Float -> Float -> Int -> a -> Particle a
-new x y size mass id state =
+new : Float -> Float -> Float -> Float -> Float -> Int -> a -> Particle a
+new x y size mass speed id state =
     Particle
         id
         (Vector2.new x y)
@@ -52,10 +53,11 @@ new x y size mass id state =
         (clamp 1 562949953421311 mass)
         Dynamic
         state
+        speed
 
 
-newStatic : Float -> Float -> Float -> Float -> Int -> a -> Particle a
-newStatic x y size mass id state =
+newStatic : Float -> Float -> Float -> Float -> Float -> Int -> a -> Particle a
+newStatic x y size mass speed id state =
     Particle
         id
         (Vector2.new x y)
@@ -65,6 +67,7 @@ newStatic x y size mass id state =
         (clamp 1 562949953421311 mass)
         Static
         state
+        speed
 
 
 
@@ -294,8 +297,8 @@ resolveCollisions targets particle =
 If none are present, do nothing
 
 -}
-moveToNearest : Float -> List (Particle b) -> Float -> Particle a -> Particle a
-moveToNearest maxDistance targets speed particle =
+moveToNearest : Float -> List (Particle b) -> Particle a -> Particle a
+moveToNearest maxDistance targets particle =
     let
         nearest : Maybe Vector2
         nearest =
@@ -308,7 +311,7 @@ moveToNearest maxDistance targets speed particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale speed
+            Vector2.direction particle.position target |> Vector2.scale particle.speed
     in
     case nearest of
         Just target ->
@@ -320,8 +323,8 @@ moveToNearest maxDistance targets speed particle =
 
 {-| Move towards particle with a given id
 -}
-moveToId : Float -> Int -> List (Particle b) -> Float -> Particle a -> Particle a
-moveToId maxDistance id targets speed particle =
+moveToId : Float -> Int -> List (Particle b) -> Particle a -> Particle a
+moveToId maxDistance id targets particle =
     let
         nearest : Maybe Vector2
         nearest =
@@ -333,7 +336,7 @@ moveToId maxDistance id targets speed particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale speed
+            Vector2.direction particle.position target |> Vector2.scale particle.speed
     in
     case nearest of
         Just target ->
@@ -348,8 +351,8 @@ moveToId maxDistance id targets speed particle =
 If none are present, do nothing
 
 -}
-moveAwayRange : Float -> List (Particle b) -> Float -> Particle a -> Particle a
-moveAwayRange range targets speed particle =
+moveAwayRange : Float -> List (Particle b) -> Particle a -> Particle a
+moveAwayRange range targets particle =
     let
         nearest : Maybe Vector2
         nearest =
@@ -362,7 +365,7 @@ moveAwayRange range targets speed particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale speed |> Vector2.scale -1
+            Vector2.direction particle.position target |> Vector2.scale particle.speed |> Vector2.scale -1
     in
     case nearest of
         Just target ->
@@ -374,8 +377,8 @@ moveAwayRange range targets speed particle =
 
 {-| Apply force towards target position if particle is more than limitDistance units away
 -}
-moveToPosition : Float -> Vector2 -> Float -> Particle a -> Particle a
-moveToPosition limitDistance position speed particle =
+moveToPosition : Float -> Vector2 -> Particle a -> Particle a
+moveToPosition limitDistance position particle =
     let
         force : Vector2
         force =
@@ -383,6 +386,6 @@ moveToPosition limitDistance position speed particle =
                 Vector2.zero
 
             else
-                Vector2.direction particle.position position |> Vector2.scale speed
+                Vector2.direction particle.position position |> Vector2.scale particle.speed
     in
     applyForce force particle
