@@ -48,10 +48,10 @@ forces system =
                                 _ ->
                                     False
                     in
-                    Particle.moveToNearest (system |> World.getParticles |> List.filter followTarget) moveSpeed o
+                    Particle.moveToNearest 50 (system |> World.getParticles |> List.filter followTarget) moveSpeed o
 
                 MoveToClosest ->
-                    Particle.moveToNearest (system |> World.getParticles) moveSpeed o
+                    Particle.moveToNearest 50 (system |> World.getParticles) moveSpeed o
 
                 Idle ->
                     o
@@ -60,7 +60,7 @@ forces system =
                     Particle.moveAwayRange 100 (system |> World.getParticles) moveSpeed o
 
                 FollowId id ->
-                    Particle.moveToId id (system |> World.getParticles) moveSpeed o
+                    Particle.moveToId 5 id (system |> World.getParticles) moveSpeed o
     in
     World.updateParticles forceHelper system
 

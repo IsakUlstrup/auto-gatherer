@@ -270,17 +270,6 @@ resolveCollision target particle =
             resolveDynamicCollision target particle
 
 
-
--- |> (\o -> { o | velocity = Vector2.new newVx newVy })
--- |> stop
--- |> applyForce
---     (Vector2.direction target.position particle.position
---         -- |> Vector2.add (Vector2.add target.velocity particle.velocity)
---         -- |> Vector2.scale ((target.mass - particle.mass) / totalMass)
---         |> Vector2.scale 2
---     )
-
-
 {-| Detect and react to collisions
 -}
 resolveCollisions : List (Particle b) -> Particle a -> Particle a
@@ -304,14 +293,14 @@ resolveCollisions targets particle =
 If none are present, do nothing
 
 -}
-moveToNearest : List (Particle b) -> Float -> Particle a -> Particle a
-moveToNearest targets speed particle =
+moveToNearest : Float -> List (Particle b) -> Float -> Particle a -> Particle a
+moveToNearest maxDistance targets speed particle =
     let
         nearest : Maybe Vector2
         nearest =
             targets
                 |> List.filter (isNotEqual particle)
-                |> List.filter (\t -> distance t particle > 0)
+                |> List.filter (\t -> distance t particle > maxDistance)
                 |> List.map .position
                 |> List.sortBy (Vector2.distance particle.position)
                 |> List.head
@@ -330,14 +319,14 @@ moveToNearest targets speed particle =
 
 {-| Move towards particle with a given id
 -}
-moveToId : Int -> List (Particle b) -> Float -> Particle a -> Particle a
-moveToId id targets speed particle =
+moveToId : Float -> Int -> List (Particle b) -> Float -> Particle a -> Particle a
+moveToId maxDistance id targets speed particle =
     let
         nearest : Maybe Vector2
         nearest =
             targets
                 |> List.filter (isNotEqual particle)
-                |> List.filter (\t -> distance t particle > 0 && t.id == id)
+                |> List.filter (\t -> distance t particle > maxDistance && t.id == id)
                 |> List.map .position
                 |> List.head
 

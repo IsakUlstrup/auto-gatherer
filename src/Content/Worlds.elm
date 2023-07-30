@@ -22,8 +22,8 @@ testWorld1 =
         |> World.addParticle -102 20 20 MoveToCenter
         |> World.addParticle -103 20 20 MoveToCenter
         |> World.addParticle -104 20 20 MoveToCenter
-        |> World.addParticle -150 20 20 MoveToClosest
-        |> World.addParticle -150 50 20 MoveToClosest
+        -- |> World.addParticle -150 20 20 MoveToClosest
+        -- |> World.addParticle -150 50 20 MoveToClosest
         |> World.addParticle 150 20 20 MoveToClosest
         |> World.addParticle 0 0 50 Idle
         -- |> World.addParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
