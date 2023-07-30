@@ -4,7 +4,7 @@ import Browser
 import Browser.Events
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Particle as Particle exposing (CollisionResponse(..), Particle)
+import Engine.Particle as Particle
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
@@ -24,9 +24,11 @@ import Svg.Lazy
 forces : World Particle -> World Particle
 forces system =
     let
+        moveSpeed : Float
         moveSpeed =
             0.1
 
+        forceHelper : Particle.Particle Particle -> Particle.Particle Particle
         forceHelper o =
             case o.state of
                 MoveToCenter ->
@@ -37,6 +39,7 @@ forces system =
 
                 FollowMoveToPosition ->
                     let
+                        followTarget : Particle.Particle Particle -> Bool
                         followTarget t =
                             case t.state of
                                 MoveToPosition _ ->
@@ -136,9 +139,11 @@ type Msg
 focusCamera : Model -> Model
 focusCamera model =
     let
+        playerPos : Vector2
         playerPos =
             model.particles |> World.getPlayer |> .position
 
+        cameraDist : Float
         cameraDist =
             Vector2.distance playerPos model.renderConfig.position
     in
@@ -192,6 +197,7 @@ update msg model =
 
         SetMoveTarget target ->
             let
+                helper : Particle.Particle Particle -> Particle.Particle Particle
                 helper p =
                     case p.state of
                         MoveToPosition _ ->
@@ -229,6 +235,7 @@ cameraTransform position =
 viewParticle : Bool -> Particle.Particle Particle -> Svg msg
 viewParticle showVectors particle =
     let
+        typeString : String
         typeString =
             case particle.state of
                 MoveToCenter ->
@@ -282,9 +289,11 @@ viewParticle showVectors particle =
 viewTile2D : Float -> Vector2 -> Svg Msg
 viewTile2D size position =
     let
+        isOdd : Int -> Bool
         isOdd n =
             modBy 2 n == 1
 
+        oddString : String
         oddString =
             if isOdd <| round (position.x / size) + round (position.y / size) then
                 "odd"
@@ -304,10 +313,12 @@ viewTile2D size position =
 viewMap : RenderConfig -> Svg Msg
 viewMap config =
     let
+        row : Int -> List Vector2
         row y =
             List.range -30 30
                 |> List.map (\x -> Vector2.new (toFloat x) (toFloat y))
 
+        map : List Vector2
         map =
             List.range -30 30
                 |> List.reverse
@@ -321,9 +332,11 @@ viewMap config =
 fpsString : List Float -> String
 fpsString dts =
     let
+        averageDelta : Float
         averageDelta =
             List.sum dts / toFloat (List.length dts)
 
+        averageFps : Float
         averageFps =
             1000 / averageDelta
     in
@@ -338,8 +351,7 @@ view : Model -> Html Msg
 view model =
     main_ []
         [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
-
-        -- , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
         , Svg.svg
             [ Svg.Attributes.class "game"
             , Svg.Attributes.viewBox "-500 -500 1000 1000"

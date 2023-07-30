@@ -11,18 +11,15 @@ module Engine.Particle exposing
     , moveToPosition
     , new
     , newStatic
-    , resolveCollision
     , resolveCollisions
     , stopIfSlow
-    , updateState
     )
 
 import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
 type CollisionResponse
-    = None
-    | Static
+    = Static
     | Dynamic
 
 
@@ -266,9 +263,6 @@ resolveDynamicCollision target particle =
 resolveCollision : Particle b -> Particle a -> Particle a
 resolveCollision target particle =
     case target.collisionResponse of
-        None ->
-            particle
-
         Static ->
             resolveStaticCollision target particle
 
@@ -402,12 +396,3 @@ moveToPosition limitDistance position speed particle =
                 Vector2.direction particle.position position |> Vector2.scale speed
     in
     applyForce force particle
-
-
-
--- STATE
-
-
-updateState : (a -> a) -> Particle a -> Particle a
-updateState f particle =
-    { particle | state = f particle.state }

@@ -1,4 +1,4 @@
-module Content.Worlds exposing (..)
+module Content.Worlds exposing (testWorld1)
 
 import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
@@ -32,13 +32,13 @@ testWorld1 =
         -- |> World.addStaticParticle 140 -107 14 FollowMoveToPosition
         -- |> World.addStaticParticle -107 12 13 FollowMoveToPosition
         -- |> World.addStaticParticle -240 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -241 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -242 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -243 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -244 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -245 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -246 -107 12 FollowMoveToPosition
-        -- |> World.addStaticParticle -247 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -241 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -242 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -243 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -244 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -245 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -246 -107 12 FollowMoveToPosition
+        |> World.addStaticParticle -247 -107 12 FollowMoveToPosition
         -- |> World.addStaticParticle -248 -107 12 FollowMoveToPosition
         |> World.addParticle -340 -107 23 Avoid
         |> World.addParticle 240 -17 18 Avoid
