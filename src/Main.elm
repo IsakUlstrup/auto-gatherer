@@ -113,7 +113,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Worlds.testWorld1
-        (Render.initRenderConfig |> Render.withRenderDistance 500)
+        (Render.initRenderConfig |> Render.withRenderDistance 600)
         initConsole
         20
         0
