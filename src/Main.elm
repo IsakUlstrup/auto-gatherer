@@ -66,7 +66,7 @@ forces system =
 
 movement : Float -> World Particle -> World Particle
 movement dt system =
-    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.06 >> Particle.stopIfSlow 0.0001) system
+    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
 resolveCollisions : World Particle -> World Particle
