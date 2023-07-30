@@ -7,7 +7,7 @@ import GameState exposing (Particle(..))
 
 testWorld1 : World Particle
 testWorld1 =
-    World.new (MoveToPosition <| Vector2.zero)
+    World.new (MoveToPosition <| Vector2.zero) 0.15
         |> World.addStaticParticle 200 20 15 0.1 (FollowId 0)
         |> World.addStaticParticle 220 30 15 0.1 (FollowId 1)
         |> World.addStaticParticle 220 35 15 0.1 (FollowId 2)

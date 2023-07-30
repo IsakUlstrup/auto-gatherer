@@ -19,11 +19,11 @@ type World a
         }
 
 
-new : a -> World a
-new playerState =
+new : a -> Float -> World a
+new playerState playerSpeed =
     World
         { particles = []
-        , player = Particle.new 0 0 30 400 0.3 0 playerState
+        , player = Particle.new 0 0 30 400 playerSpeed 0 playerState
         , idCounter = 1
         }
 

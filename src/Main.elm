@@ -146,7 +146,7 @@ focusCamera model =
         cameraDist =
             Vector2.distance playerPos model.renderConfig.position
     in
-    if cameraDist > 50 then
+    if cameraDist > 100 then
         { model | renderConfig = Render.withPosition playerPos model.renderConfig }
 
     else
@@ -295,7 +295,7 @@ viewTile2D size position =
         fillSting : String
         fillSting =
             if isOdd <| round (position.x / size) + round (position.y / size) then
-                "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 5) ++ " 80% 90%)"
+                "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 20) ++ " 80% 90%)"
 
             else
                 "transparent"
