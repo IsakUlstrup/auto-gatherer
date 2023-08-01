@@ -5,6 +5,20 @@ import Engine.World as World exposing (World)
 import GameState exposing (Particle(..))
 
 
+{-| A tree is a static particle that slowly returns to target position if pushed
+-}
+addTree : Float -> Float -> Float -> Float -> World Particle -> World Particle
+addTree x y tx ty =
+    World.addStaticParticle x y 20 0.05 (MoveToPosition <| Vector2.new tx ty)
+
+
+{-| A wall is an immoveable particle with no movement ai
+-}
+addWall : Float -> Float -> Float -> World Particle -> World Particle
+addWall x y r =
+    World.addFixedParticle x y r Idle
+
+
 testWorld1 : World Particle
 testWorld1 =
     World.new (MoveToPosition <| Vector2.zero) 0.15
@@ -13,10 +27,9 @@ testWorld1 =
         |> World.addStaticParticle 220 35 15 0.1 (FollowId 2)
         |> World.addStaticParticle 190 35 15 0.1 (FollowId 3)
         |> World.addStaticParticle 190 15 15 0.1 (FollowId 4)
-        |> World.addDynamicParticle -97 20 20 0.08 MoveToClosest
+        |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
         |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
         |> World.addDynamicParticle -300 200 55 0 Idle
-        -- |> World.addDynamicParticle 0 0 30 (MoveToPosition <| Vector2.new 200 -175)
         |> World.addDynamicParticle -100 20 20 0.1 MoveToCenter
         |> World.addDynamicParticle -101 20 20 0.12 MoveToCenter
         |> World.addDynamicParticle -102 20 20 0.13 MoveToCenter
@@ -24,14 +37,18 @@ testWorld1 =
         |> World.addDynamicParticle -104 20 20 0.15 MoveToCenter
         -- |> World.addDynamicParticle -150 20 20 MoveToClosest
         -- |> World.addDynamicParticle -150 50 20 MoveToClosest
-        |> World.addDynamicParticle 150 20 20 0.08 MoveToClosest
+        |> World.addDynamicParticle 150 20 12 0.08 MoveToClosest
         |> World.addDynamicParticle 0 0 50 0 Idle
-        -- |> World.addDynamicParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
-        -- |> World.addDynamicParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
-        -- |> World.addStaticParticle 180 100 15 FollowMoveToPosition
-        -- |> World.addStaticParticle 140 -107 14 FollowMoveToPosition
-        -- |> World.addStaticParticle -107 12 13 FollowMoveToPosition
-        -- |> World.addStaticParticle -240 -107 12 FollowMoveToPosition
+        |> addTree 200 0 500 -73
+        |> World.addStaticParticle -100 -100 20 0.05 (MoveToPosition <| Vector2.new 460 -80)
+        |> World.addStaticParticle 100 100 20 0.05 (MoveToPosition <| Vector2.new 450 -75)
+        |> World.addStaticParticle 300 -100 20 0.05 (MoveToPosition <| Vector2.new 440 -65)
+        |> World.addStaticParticle 350 -120 20 0.05 (MoveToPosition <| Vector2.new 455 -55)
+        |> World.addStaticParticle 350 120 20 0.05 (MoveToPosition <| Vector2.new 440 -35)
+        |> World.addStaticParticle 180 100 15 0.1 (FollowMoveToPosition 50)
+        |> World.addStaticParticle 140 -107 14 0.1 (FollowMoveToPosition 50)
+        |> World.addStaticParticle -107 12 13 0.1 (FollowMoveToPosition 50)
+        |> World.addStaticParticle -240 -107 12 0.09 (FollowMoveToPosition 50)
         |> World.addStaticParticle -241 -97 12 0.08 (FollowMoveToPosition 100)
         |> World.addStaticParticle -252 -117 12 0.08 (FollowMoveToPosition 100)
         |> World.addStaticParticle -263 -137 12 0.07 (FollowMoveToPosition 100)
@@ -53,3 +70,6 @@ testWorld1 =
         |> World.addStaticParticle 385 -117 12 0.05 Idle
         |> World.addStaticParticle 396 -77 12 0.07 Idle
         |> World.addStaticParticle 307 -107 12 0.05 Idle
+        |> addWall 527 -207 102
+        |> addWall 587 -307 82
+        |> addWall 627 -407 72

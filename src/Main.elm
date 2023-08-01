@@ -205,7 +205,7 @@ update msg model =
                         _ ->
                             p
             in
-            { model | particles = World.updateParticles helper model.particles }
+            { model | particles = World.updatePlayer helper model.particles }
 
 
 

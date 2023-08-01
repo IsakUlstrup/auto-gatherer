@@ -7,6 +7,7 @@ module Engine.World exposing
     , getPlayer
     , new
     , updateParticles
+    , updatePlayer
     )
 
 import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
@@ -59,6 +60,11 @@ addFixedParticle x y size state (World world) =
 updateParticles : (Particle a -> Particle a) -> World a -> World a
 updateParticles f (World world) =
     World { world | particles = List.map f world.particles, player = f world.player }
+
+
+updatePlayer : (Particle a -> Particle a) -> World a -> World a
+updatePlayer f (World world) =
+    World { world | player = f world.player }
 
 
 getParticles : World a -> List (Particle a)
