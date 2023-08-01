@@ -46,3 +46,10 @@ testWorld1 =
         |> World.addFixedParticle 170 -420 88 Idle
         |> World.addFixedParticle 250 -390 103 Idle
         |> World.addFixedParticle 350 -450 133 Idle
+        |> World.addStaticParticle 341 -97 12 0.08 Idle
+        |> World.addStaticParticle 352 -117 12 0.08 Idle
+        |> World.addStaticParticle 363 -137 12 0.07 Idle
+        |> World.addStaticParticle 374 -87 12 0.06 Idle
+        |> World.addStaticParticle 385 -117 12 0.05 Idle
+        |> World.addStaticParticle 396 -77 12 0.07 Idle
+        |> World.addStaticParticle 307 -107 12 0.05 Idle
