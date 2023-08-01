@@ -27,17 +27,17 @@ testWorld1 =
         |> World.addStaticParticle 220 35 15 0.1 (FollowId 2)
         |> World.addStaticParticle 190 35 15 0.1 (FollowId 3)
         |> World.addStaticParticle 190 15 15 0.1 (FollowId 4)
-        |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
-        |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
+        -- |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
+        -- |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
         |> World.addDynamicParticle -300 200 55 0 Idle
-        |> World.addDynamicParticle -100 20 20 0.1 MoveToCenter
-        |> World.addDynamicParticle -101 20 20 0.12 MoveToCenter
-        |> World.addDynamicParticle -102 20 20 0.13 MoveToCenter
-        |> World.addDynamicParticle -103 20 20 0.14 MoveToCenter
-        |> World.addDynamicParticle -104 20 20 0.15 MoveToCenter
+        -- |> World.addDynamicParticle -100 20 20 0.1 MoveToCenter
+        -- |> World.addDynamicParticle -101 20 20 0.12 MoveToCenter
+        -- |> World.addDynamicParticle -102 20 20 0.13 MoveToCenter
+        -- |> World.addDynamicParticle -103 20 20 0.14 MoveToCenter
+        -- |> World.addDynamicParticle -104 20 20 0.15 MoveToCenter
         -- |> World.addDynamicParticle -150 20 20 MoveToClosest
         -- |> World.addDynamicParticle -150 50 20 MoveToClosest
-        |> World.addDynamicParticle 150 20 12 0.08 MoveToClosest
+        -- |> World.addDynamicParticle 150 20 12 0.08 MoveToClosest
         |> World.addDynamicParticle 0 0 50 0 Idle
         |> addTree 200 0 500 -73
         |> World.addStaticParticle -100 -100 20 0.05 (MoveToPosition <| Vector2.new 460 -80)
@@ -45,10 +45,10 @@ testWorld1 =
         |> World.addStaticParticle 300 -100 20 0.05 (MoveToPosition <| Vector2.new 440 -65)
         |> World.addStaticParticle 350 -120 20 0.05 (MoveToPosition <| Vector2.new 455 -55)
         |> World.addStaticParticle 350 120 20 0.05 (MoveToPosition <| Vector2.new 440 -35)
-        |> World.addStaticParticle 180 100 15 0.1 (FollowMoveToPosition 50)
-        |> World.addStaticParticle 140 -107 14 0.1 (FollowMoveToPosition 50)
-        |> World.addStaticParticle -107 12 13 0.1 (FollowMoveToPosition 50)
-        |> World.addStaticParticle -240 -107 12 0.09 (FollowMoveToPosition 50)
+        |> World.addStaticParticle 180 100 15 0.1 (FollowMoveToPosition 150)
+        |> World.addStaticParticle 140 -107 14 0.1 (FollowMoveToPosition 150)
+        |> World.addStaticParticle -107 12 13 0.1 (FollowMoveToPosition 150)
+        |> World.addStaticParticle -240 -107 12 0.09 (FollowMoveToPosition 150)
         |> World.addStaticParticle -241 -97 12 0.08 (FollowMoveToPosition 100)
         |> World.addStaticParticle -252 -117 12 0.08 (FollowMoveToPosition 100)
         |> World.addStaticParticle -263 -137 12 0.07 (FollowMoveToPosition 100)
