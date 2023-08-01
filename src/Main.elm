@@ -4,7 +4,7 @@ import Browser
 import Browser.Events
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Particle as Particle
+import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
@@ -257,11 +257,24 @@ viewParticle showVectors particle =
 
                 FollowId _ ->
                     "follow-id"
+
+        physicsTypeString : String
+        physicsTypeString =
+            case particle.physicsType of
+                Fixed ->
+                    "fixed"
+
+                Static _ ->
+                    "static"
+
+                Dynamic _ ->
+                    "dynamic"
     in
     Svg.g
         [ Svg.Attributes.transform <| transformString particle.position
         , Svg.Attributes.class "particle"
         , Svg.Attributes.class typeString
+        , Svg.Attributes.class physicsTypeString
         ]
         (Svg.circle
             [ Svg.Attributes.r <| String.fromInt (round particle.radius)
@@ -272,8 +285,8 @@ viewParticle showVectors particle =
                     [ Svg.line
                         [ Svg.Attributes.x1 "0"
                         , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round (particle.velocity.x * 300))
-                        , Svg.Attributes.y2 <| String.fromInt (round (particle.velocity.y * 300))
+                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getVelocity particle).x * 300))
+                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getVelocity particle).y * 300))
                         , Svg.Attributes.class "velocity"
                         ]
                         []

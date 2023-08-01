@@ -13,21 +13,21 @@ testWorld1 =
         |> World.addStaticParticle 220 35 15 0.1 (FollowId 2)
         |> World.addStaticParticle 190 35 15 0.1 (FollowId 3)
         |> World.addStaticParticle 190 15 15 0.1 (FollowId 4)
-        |> World.addParticle -97 20 20 0.08 MoveToClosest
-        |> World.addParticle 200 20 40 0.08 MoveToCenter
-        |> World.addParticle -300 200 55 0 Idle
-        -- |> World.addParticle 0 0 30 (MoveToPosition <| Vector2.new 200 -175)
-        |> World.addParticle -100 20 20 0.1 MoveToCenter
-        |> World.addParticle -101 20 20 0.12 MoveToCenter
-        |> World.addParticle -102 20 20 0.13 MoveToCenter
-        |> World.addParticle -103 20 20 0.14 MoveToCenter
-        |> World.addParticle -104 20 20 0.15 MoveToCenter
-        -- |> World.addParticle -150 20 20 MoveToClosest
-        -- |> World.addParticle -150 50 20 MoveToClosest
-        |> World.addParticle 150 20 20 0.08 MoveToClosest
-        |> World.addParticle 0 0 50 0 Idle
-        -- |> World.addParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
-        -- |> World.addParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
+        |> World.addDynamicParticle -97 20 20 0.08 MoveToClosest
+        |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
+        |> World.addDynamicParticle -300 200 55 0 Idle
+        -- |> World.addDynamicParticle 0 0 30 (MoveToPosition <| Vector2.new 200 -175)
+        |> World.addDynamicParticle -100 20 20 0.1 MoveToCenter
+        |> World.addDynamicParticle -101 20 20 0.12 MoveToCenter
+        |> World.addDynamicParticle -102 20 20 0.13 MoveToCenter
+        |> World.addDynamicParticle -103 20 20 0.14 MoveToCenter
+        |> World.addDynamicParticle -104 20 20 0.15 MoveToCenter
+        -- |> World.addDynamicParticle -150 20 20 MoveToClosest
+        -- |> World.addDynamicParticle -150 50 20 MoveToClosest
+        |> World.addDynamicParticle 150 20 20 0.08 MoveToClosest
+        |> World.addDynamicParticle 0 0 50 0 Idle
+        -- |> World.addDynamicParticle -100 -100 30 (MoveToPosition <| Vector2.new 50 -75)
+        -- |> World.addDynamicParticle 100 100 30 (MoveToPosition <| Vector2.new 150 -75)
         -- |> World.addStaticParticle 180 100 15 FollowMoveToPosition
         -- |> World.addStaticParticle 140 -107 14 FollowMoveToPosition
         -- |> World.addStaticParticle -107 12 13 FollowMoveToPosition
@@ -40,5 +40,9 @@ testWorld1 =
         |> World.addStaticParticle -296 -77 12 0.07 (FollowMoveToPosition 100)
         |> World.addStaticParticle -207 -107 12 0.05 (FollowMoveToPosition 100)
         -- |> World.addStaticParticle -248 -107 12 FollowMoveToPosition
-        |> World.addParticle -340 -107 23 0.06 Avoid
-        |> World.addParticle 240 -17 18 0.05 Avoid
+        |> World.addDynamicParticle -340 -107 23 0.06 Avoid
+        |> World.addDynamicParticle 240 -17 18 0.05 Avoid
+        |> World.addFixedParticle 23 -400 108 Idle
+        |> World.addFixedParticle 170 -420 88 Idle
+        |> World.addFixedParticle 250 -390 103 Idle
+        |> World.addFixedParticle 350 -450 133 Idle

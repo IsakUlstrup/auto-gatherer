@@ -1,17 +1,19 @@
 module Engine.Particle exposing
-    ( CollisionResponse(..)
+    ( Kinematics
     , Particle
+    , PhysicsType(..)
     , applyForce
     , applyFriciton
     , collisionAction
     , distance
+    , getVelocity
     , move
     , moveAwayRange
     , moveToId
     , moveToNearest
     , moveToPosition
     , new
-    , newStatic
+    , newKinematics
     , resolveCollisions
     , stopIfSlow
     )
@@ -19,55 +21,103 @@ module Engine.Particle exposing
 import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
-type CollisionResponse
-    = Static
-    | Dynamic
+type alias Kinematics =
+    { velocity : Vector2
+    , acceleration : Vector2
+    , mass : Float
+    , speed : Float
+    }
+
+
+newKinematics : Float -> Float -> Kinematics
+newKinematics mass speed =
+    Kinematics Vector2.zero Vector2.zero mass speed
+
+
+updateKinematics : (Kinematics -> Kinematics) -> Particle a -> Particle a
+updateKinematics f particle =
+    case particle.physicsType of
+        Fixed ->
+            particle
+
+        Static k ->
+            { particle | physicsType = Static <| f k }
+
+        Dynamic k ->
+            { particle | physicsType = Dynamic <| f k }
+
+
+getSpeed : Particle a -> Float
+getSpeed particle =
+    case particle.physicsType of
+        Fixed ->
+            0
+
+        Static k ->
+            k.speed
+
+        Dynamic k ->
+            k.speed
+
+
+getVelocity : Particle a -> Vector2
+getVelocity particle =
+    case particle.physicsType of
+        Fixed ->
+            Vector2.zero
+
+        Static k ->
+            k.velocity
+
+        Dynamic k ->
+            k.velocity
+
+
+getMass : Particle a -> Float
+getMass particle =
+    case particle.physicsType of
+        Fixed ->
+            0
+
+        Static k ->
+            k.mass
+
+        Dynamic k ->
+            k.mass
+
+
+{-| Fixed: A particle that can't move and can't collide with other particles. Other particles can collide with a fixed one however
+
+Static: A particle with normal movement that resolves collisions in a static way. It only moves position, no forces are involved
+
+Dynamic: A particle with normal movement and dynamic collision handling
+
+-}
+type PhysicsType
+    = Fixed
+    | Static Kinematics
+    | Dynamic Kinematics
 
 
 type alias Particle a =
     { id : Int
     , position : Vector2
-    , velocity : Vector2
-    , acceleration : Vector2
     , radius : Float
-    , mass : Float
-    , collisionResponse : CollisionResponse
+    , physicsType : PhysicsType
     , state : a
-    , speed : Float
     }
 
 
-{-| Physics object constructor
-
-Mass and size will be clamped between 1 and 562949953421311
-
+{-| Particle constructor
 -}
-new : Float -> Float -> Float -> Float -> Float -> Int -> a -> Particle a
-new x y size mass speed id state =
+new : Float -> Float -> Float -> PhysicsType -> Int -> a -> Particle a
+new x y size physics id state =
     Particle
         id
         (Vector2.new x y)
-        Vector2.zero
-        Vector2.zero
         (clamp 1 562949953421311 size)
-        (clamp 1 562949953421311 mass)
-        Dynamic
+        physics
         state
-        speed
-
-
-newStatic : Float -> Float -> Float -> Float -> Float -> Int -> a -> Particle a
-newStatic x y size mass speed id state =
-    Particle
-        id
-        (Vector2.new x y)
-        Vector2.zero
-        Vector2.zero
-        (clamp 1 562949953421311 size)
-        (clamp 1 562949953421311 mass)
-        Static
-        state
-        speed
 
 
 
@@ -78,12 +128,17 @@ newStatic x y size mass speed id state =
 -}
 applyForce : Vector2 -> Particle a -> Particle a
 applyForce force particle =
-    { particle
-        | acceleration =
-            force
-                |> Vector2.divide particle.mass
-                |> Vector2.add particle.acceleration
-    }
+    let
+        forceHelper : Kinematics -> Kinematics
+        forceHelper k =
+            { k
+                | acceleration =
+                    force
+                        |> Vector2.divide k.mass
+                        |> Vector2.add k.acceleration
+            }
+    in
+    updateKinematics forceHelper particle
 
 
 {-| Janky friction for now
@@ -94,8 +149,11 @@ applyFriciton friction particle =
         adjustedFriction : Float
         adjustedFriction =
             1 - clamp 0 1 friction
+
+        frictionHelper k =
+            { k | velocity = Vector2.scale adjustedFriction k.velocity }
     in
-    { particle | velocity = Vector2.scale adjustedFriction particle.velocity }
+    updateKinematics frictionHelper particle
 
 
 
@@ -106,20 +164,41 @@ applyFriciton friction particle =
 -}
 stopIfSlow : Float -> Particle a -> Particle a
 stopIfSlow limit particle =
-    if Vector2.magnitude particle.velocity < limit then
-        stop particle
+    let
+        helper k =
+            if Vector2.magnitude k.velocity < limit then
+                { k | velocity = Vector2.zero }
 
-    else
-        particle
+            else
+                k
+    in
+    updateKinematics helper particle
 
 
 {-| Move physics particle
 -}
 move : Float -> Particle a -> Particle a
 move dt particle =
+    let
+        velocity : Kinematics -> Kinematics
+        velocity k =
+            { k | velocity = Vector2.add k.velocity (Vector2.scale dt k.acceleration) }
+
+        position : Particle a -> Particle a
+        position p =
+            case p.physicsType of
+                Fixed ->
+                    p
+
+                Static k ->
+                    { p | position = Vector2.add p.position (Vector2.scale dt k.velocity) }
+
+                Dynamic k ->
+                    { p | position = Vector2.add p.position (Vector2.scale dt k.velocity) }
+    in
     particle
-        |> (\obj -> { obj | velocity = Vector2.add obj.velocity (Vector2.scale dt obj.acceleration) })
-        |> (\obj -> { obj | position = Vector2.add obj.position (Vector2.scale dt obj.velocity) })
+        |> updateKinematics velocity
+        |> position
         |> resetAcceleration
 
 
@@ -127,7 +206,11 @@ move dt particle =
 -}
 resetAcceleration : Particle a -> Particle a
 resetAcceleration particle =
-    { particle | acceleration = Vector2.zero }
+    let
+        reset k =
+            { k | acceleration = Vector2.zero }
+    in
+    updateKinematics reset particle
 
 
 setPosition : Vector2 -> Particle a -> Particle a
@@ -137,12 +220,7 @@ setPosition pos particle =
 
 setVelocity : Vector2 -> Particle a -> Particle a
 setVelocity vel particle =
-    { particle | velocity = vel }
-
-
-stop : Particle a -> Particle a
-stop particle =
-    { particle | velocity = Vector2.zero }
+    updateKinematics (\k -> { k | velocity = vel }) particle
 
 
 distance : Particle a -> Particle b -> Float
@@ -201,7 +279,31 @@ collisionAction f targets particle =
 -}
 overlapModifier : Particle b -> Particle a -> Float
 overlapModifier target particle =
-    (((target.mass - particle.mass) / (target.mass + particle.mass)) + 1) * 0.5
+    let
+        ratio x y =
+            (((x - y) / (x + y)) + 1) * 0.5
+    in
+    case ( target.physicsType, particle.physicsType ) of
+        ( _, Fixed ) ->
+            0
+
+        ( Fixed, Static _ ) ->
+            1
+
+        ( Fixed, Dynamic _ ) ->
+            1
+
+        ( Static k1, Static k2 ) ->
+            ratio k1.mass k2.mass
+
+        ( Dynamic k1, Static k2 ) ->
+            ratio k1.mass k2.mass
+
+        ( Static k1, Dynamic k2 ) ->
+            ratio k1.mass k2.mass
+
+        ( Dynamic k1, Dynamic k2 ) ->
+            ratio k1.mass k2.mass
 
 
 {-| Resolve collision without forces
@@ -248,16 +350,16 @@ resolveDynamicCollision target particle =
 
         k : Vector2
         k =
-            Vector2.subtract particle.velocity target.velocity
+            Vector2.subtract (getVelocity particle) (getVelocity target)
 
         p : Float
         p =
-            2 * (normal.x * k.x + normal.y * k.y) / (particle.mass + target.mass)
+            2 * (normal.x * k.x + normal.y * k.y) / (getMass particle + getMass target)
 
         v : Vector2
         v =
-            Vector2.new (particle.velocity.x - p * target.mass * normal.x)
-                (particle.velocity.y - p * target.mass * normal.y)
+            Vector2.new ((getVelocity particle).x - p * getMass target * normal.x)
+                ((getVelocity particle).y - p * getMass target * normal.y)
     in
     particle
         |> setPosition pos
@@ -266,11 +368,26 @@ resolveDynamicCollision target particle =
 
 resolveCollision : Particle b -> Particle a -> Particle a
 resolveCollision target particle =
-    case target.collisionResponse of
-        Static ->
+    case ( target.physicsType, particle.physicsType ) of
+        ( _, Fixed ) ->
+            particle
+
+        ( Fixed, Static _ ) ->
             resolveStaticCollision target particle
 
-        Dynamic ->
+        ( Fixed, Dynamic _ ) ->
+            resolveStaticCollision target particle
+
+        ( Static _, Static _ ) ->
+            resolveStaticCollision target particle
+
+        ( Dynamic _, Static _ ) ->
+            resolveDynamicCollision target particle
+
+        ( Static _, Dynamic _ ) ->
+            resolveStaticCollision target particle
+
+        ( Dynamic _, Dynamic _ ) ->
             resolveDynamicCollision target particle
 
 
@@ -311,7 +428,7 @@ moveToNearest maxDistance targets particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale particle.speed
+            Vector2.direction particle.position target |> Vector2.scale (getSpeed particle)
     in
     case nearest of
         Just target ->
@@ -336,7 +453,7 @@ moveToId maxDistance id targets particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale particle.speed
+            Vector2.direction particle.position target |> Vector2.scale (getSpeed particle)
     in
     case nearest of
         Just target ->
@@ -365,7 +482,7 @@ moveAwayRange range targets particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale particle.speed |> Vector2.scale -1
+            Vector2.direction particle.position target |> Vector2.scale -(getSpeed particle)
     in
     case nearest of
         Just target ->
@@ -386,6 +503,6 @@ moveToPosition limitDistance position particle =
                 Vector2.zero
 
             else
-                Vector2.direction particle.position position |> Vector2.scale particle.speed
+                Vector2.direction particle.position position |> Vector2.scale (getSpeed particle)
     in
     applyForce force particle

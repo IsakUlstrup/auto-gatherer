@@ -1,6 +1,7 @@
 module Engine.World exposing
     ( World
-    , addParticle
+    , addDynamicParticle
+    , addFixedParticle
     , addStaticParticle
     , getParticles
     , getPlayer
@@ -8,7 +9,7 @@ module Engine.World exposing
     , updateParticles
     )
 
-import Engine.Particle as Particle exposing (Particle)
+import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
 
 
 type World a
@@ -23,16 +24,16 @@ new : a -> Float -> World a
 new playerState playerSpeed =
     World
         { particles = []
-        , player = Particle.new 0 0 30 400 playerSpeed 0 playerState
+        , player = Particle.new 0 0 30 (Dynamic <| Particle.newKinematics 400 playerSpeed) 0 playerState
         , idCounter = 1
         }
 
 
-addParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
-addParticle x y size speed state (World world) =
+addDynamicParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
+addDynamicParticle x y size speed state (World world) =
     World
         { world
-            | particles = Particle.new x y size (size * 10) speed world.idCounter state :: world.particles
+            | particles = Particle.new x y size (Dynamic <| Particle.newKinematics (size * 10) speed) world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
@@ -41,7 +42,16 @@ addStaticParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
 addStaticParticle x y size speed state (World world) =
     World
         { world
-            | particles = Particle.newStatic x y size (size * 10) speed world.idCounter state :: world.particles
+            | particles = Particle.new x y size (Static <| Particle.newKinematics (size * 10) speed) world.idCounter state :: world.particles
+            , idCounter = world.idCounter + 1
+        }
+
+
+addFixedParticle : Float -> Float -> Float -> a -> World a -> World a
+addFixedParticle x y size state (World world) =
+    World
+        { world
+            | particles = Particle.new x y size Fixed world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
