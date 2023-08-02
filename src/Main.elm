@@ -293,8 +293,8 @@ viewParticle showVectors particle =
                     , Svg.line
                         [ Svg.Attributes.x1 "0"
                         , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getImpulse particle).x * 300))
-                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getImpulse particle).y * 300))
+                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getImpulse particle).x * 100))
+                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getImpulse particle).y * 100))
                         , Svg.Attributes.class "impulse"
                         ]
                         []
