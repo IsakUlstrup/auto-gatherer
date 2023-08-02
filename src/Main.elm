@@ -376,7 +376,7 @@ view model =
                 [ Svg.Lazy.lazy viewMap model.renderConfig
                 , Svg.g []
                     (World.getParticles model.particles
-                        |> List.filter (\o -> Vector2.distance (.position <| World.getPlayer model.particles) o.position < model.renderConfig.renderDistance)
+                        |> List.filter (\o -> Particle.distance (World.getPlayer model.particles) o < model.renderConfig.renderDistance)
                         |> List.map (viewParticle model.renderDebug)
                     )
                 ]
