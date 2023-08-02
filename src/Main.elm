@@ -2,13 +2,13 @@ module Main exposing (Model, Msg, main)
 
 import Browser
 import Browser.Events
+import Content.ParticleState exposing (ParticleState(..))
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
-import GameState exposing (Particle(..))
 import Html exposing (Html, main_)
 import Html.Attributes
 import Svg exposing (Svg)
@@ -21,10 +21,10 @@ import Svg.Lazy
 -- SYSTEM
 
 
-forces : World Particle -> World Particle
+forces : World ParticleState -> World ParticleState
 forces system =
     let
-        forceHelper : Particle.Particle Particle -> Particle.Particle Particle
+        forceHelper : Particle.Particle ParticleState -> Particle.Particle ParticleState
         forceHelper o =
             case o.state of
                 MoveToCenter ->
@@ -35,7 +35,7 @@ forces system =
 
                 FollowMoveToPosition range ->
                     let
-                        followTarget : Particle.Particle Particle -> Bool
+                        followTarget : Particle.Particle ParticleState -> Bool
                         followTarget t =
                             case t.state of
                                 MoveToPosition _ ->
@@ -64,12 +64,12 @@ forces system =
     World.updateParticles forceHelper system
 
 
-movement : Float -> World Particle -> World Particle
+movement : Float -> World ParticleState -> World ParticleState
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : World Particle -> World Particle
+resolveCollisions : World ParticleState -> World ParticleState
 resolveCollisions system =
     system
         |> World.updateParticles (Particle.resolveCollisions (system |> World.getParticles))
@@ -99,7 +99,7 @@ initConsole =
 
 
 type alias Model =
-    { particles : World Particle
+    { particles : World ParticleState
     , renderConfig : RenderConfig
     , console : Console Msg
     , stepTime : Float
@@ -196,7 +196,7 @@ update msg model =
 
         SetMoveTarget target ->
             let
-                helper : Particle.Particle Particle -> Particle.Particle Particle
+                helper : Particle.Particle ParticleState -> Particle.Particle ParticleState
                 helper p =
                     case p.state of
                         MoveToPosition _ ->
@@ -231,7 +231,7 @@ cameraTransform position =
             ++ "px)"
 
 
-viewParticle : Bool -> Particle.Particle Particle -> Svg msg
+viewParticle : Bool -> Particle.Particle ParticleState -> Svg msg
 viewParticle showVectors particle =
     let
         typeString : String

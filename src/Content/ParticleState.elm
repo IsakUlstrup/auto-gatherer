@@ -1,9 +1,9 @@
-module GameState exposing (Particle(..))
+module Content.ParticleState exposing (ParticleState(..))
 
 import Engine.Vector2 exposing (Vector2)
 
 
-type Particle
+type ParticleState
     = MoveToCenter
     | MoveToPosition Vector2
     | FollowMoveToPosition Float
