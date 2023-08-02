@@ -38,7 +38,7 @@ testWorld1 =
         -- |> World.addDynamicParticle -150 20 20 MoveToClosest
         -- |> World.addDynamicParticle -150 50 20 MoveToClosest
         -- |> World.addDynamicParticle 150 20 12 0.08 MoveToClosest
-        |> World.addDynamicParticle 0 0 50 0 Idle
+        |> World.addDynamicParticle 0 80 50 0 Idle
         |> addTree 200 0 500 -73
         |> World.addStaticParticle -100 -100 20 0.05 (MoveToPosition <| Vector2.new 460 -80)
         |> World.addStaticParticle 100 100 20 0.05 (MoveToPosition <| Vector2.new 450 -75)
