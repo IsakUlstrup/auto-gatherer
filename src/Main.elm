@@ -13,6 +13,7 @@ import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
 import SvgRenderer exposing (RenderConfig)
+import WebGlRenderer
 
 
 
@@ -244,7 +245,11 @@ view model =
     main_ []
         [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig
+        , if model.experimentalRender then
+            WebGlRenderer.viewWebGl 1000 1000
+
+          else
+            SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig
         ]
 
 
