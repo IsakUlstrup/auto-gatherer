@@ -1,20 +1,18 @@
 module Main exposing (Model, Msg, main)
 
+-- import Engine.Render as Render exposing (RenderConfig)
+
 import Browser
 import Browser.Events
 import Content.ParticleState exposing (ParticleState(..))
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle exposing (PhysicsType(..))
-import Engine.Render as Render exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
-import Svg exposing (Svg)
-import Svg.Attributes
-import Svg.Events
-import Svg.Lazy
+import SvgRenderer exposing (RenderConfig)
 
 
 
@@ -87,6 +85,11 @@ initConsole =
                 SetRenderDebug
                 (Engine.Console.argBool "Debug enabled")
             )
+        |> Engine.Console.addMessage "Enable experimental renderer"
+            (Engine.Console.constructor1
+                SetExperimentalRender
+                (Engine.Console.argBool "Experimental")
+            )
         |> Engine.Console.addMessage "Set render distance"
             (Engine.Console.constructor1
                 SetDrawDistance
@@ -106,6 +109,7 @@ type alias Model =
     , timeAccum : Float
     , renderDebug : Bool
     , deltaHistory : List Float
+    , experimentalRender : Bool
     }
 
 
@@ -113,12 +117,13 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Worlds.testWorld1
-        (Render.initRenderConfig |> Render.withRenderDistance 600)
+        (SvgRenderer.initRenderConfig |> SvgRenderer.withRenderDistance 600)
         initConsole
         20
         0
         False
         []
+        False
     , Cmd.none
     )
 
@@ -133,6 +138,7 @@ type Msg
     | SetRenderDebug Bool
     | SetDrawDistance Float
     | SetMoveTarget Vector2
+    | SetExperimentalRender Bool
 
 
 focusCamera : Model -> Model
@@ -147,7 +153,7 @@ focusCamera model =
             Vector2.distance playerPos model.renderConfig.position
     in
     if cameraDist > 100 then
-        { model | renderConfig = Render.withPosition playerPos model.renderConfig }
+        { model | renderConfig = SvgRenderer.withPosition playerPos model.renderConfig }
 
     else
         model
@@ -192,7 +198,7 @@ update msg model =
             { model | renderDebug = flag }
 
         SetDrawDistance dist ->
-            { model | renderConfig = Render.withRenderDistance dist model.renderConfig }
+            { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }
 
         SetMoveTarget target ->
             let
@@ -207,146 +213,12 @@ update msg model =
             in
             { model | particles = World.updatePlayer helper model.particles }
 
+        SetExperimentalRender flag ->
+            { model | experimentalRender = flag }
+
 
 
 -- VIEW
-
-
-transformString : Vector2 -> String
-transformString position =
-    "translate("
-        ++ String.fromInt (round position.x)
-        ++ ", "
-        ++ String.fromInt (round position.y)
-        ++ ")"
-
-
-cameraTransform : Vector2 -> Svg.Attribute msg
-cameraTransform position =
-    Svg.Attributes.style <|
-        "transform: translate("
-            ++ String.fromInt (round -position.x)
-            ++ "px, "
-            ++ String.fromInt (round -position.y)
-            ++ "px)"
-
-
-viewParticle : Bool -> Particle.Particle ParticleState -> Svg msg
-viewParticle showVectors particle =
-    let
-        typeString : String
-        typeString =
-            case particle.state of
-                MoveToCenter ->
-                    "move-center"
-
-                MoveToPosition _ ->
-                    "move-to"
-
-                FollowMoveToPosition _ ->
-                    "follow-move-to"
-
-                MoveToClosest ->
-                    "move-closest"
-
-                Idle ->
-                    "idle"
-
-                Avoid ->
-                    "avoid"
-
-                FollowId _ ->
-                    "follow-id"
-
-        physicsTypeString : String
-        physicsTypeString =
-            case particle.physicsType of
-                Fixed ->
-                    "fixed"
-
-                Static _ ->
-                    "static"
-
-                Dynamic _ ->
-                    "dynamic"
-    in
-    Svg.g
-        [ Svg.Attributes.transform <| transformString particle.position
-        , Svg.Attributes.class "particle"
-        , Svg.Attributes.class typeString
-        , Svg.Attributes.class physicsTypeString
-        ]
-        (Svg.circle
-            [ Svg.Attributes.r <| String.fromInt (round particle.radius)
-            , Svg.Attributes.class "body"
-            ]
-            []
-            :: (if showVectors then
-                    [ Svg.line
-                        [ Svg.Attributes.x1 "0"
-                        , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getVelocity particle).x * 300))
-                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getVelocity particle).y * 300))
-                        , Svg.Attributes.class "velocity"
-                        ]
-                        []
-                    , Svg.line
-                        [ Svg.Attributes.x1 "0"
-                        , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getImpulse particle).x * 300))
-                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getImpulse particle).y * 300))
-                        , Svg.Attributes.class "impulse"
-                        ]
-                        []
-                    ]
-
-                else
-                    []
-               )
-        )
-
-
-viewTile2D : Float -> Vector2 -> Svg Msg
-viewTile2D size position =
-    let
-        isOdd : Int -> Bool
-        isOdd n =
-            modBy 2 n == 1
-
-        fillSting : String
-        fillSting =
-            if isOdd <| round (position.x / size) + round (position.y / size) then
-                "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 20) ++ " 80% 90%)"
-
-            else
-                "transparent"
-    in
-    Render.rect2d (round size)
-        [ Svg.Events.onClick <| SetMoveTarget position
-        , Svg.Attributes.class "tile"
-        , Svg.Attributes.fill fillSting
-        , Svg.Attributes.transform <| transformString position
-        , Svg.Attributes.rx "3"
-        ]
-
-
-viewMap : RenderConfig -> Svg Msg
-viewMap config =
-    let
-        row : Int -> List Vector2
-        row y =
-            List.range -30 30
-                |> List.map (\x -> Vector2.new (toFloat x) (toFloat y))
-
-        map : List Vector2
-        map =
-            List.range -30 30
-                |> List.reverse
-                |> List.concatMap row
-                |> List.map (Vector2.scale 50)
-                |> List.filter (\t -> Vector2.distance t config.position < config.renderDistance)
-    in
-    Svg.g [] (List.map (viewTile2D 50) map)
 
 
 fpsString : List Float -> String
@@ -372,23 +244,7 @@ view model =
     main_ []
         [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , Svg.svg
-            [ Svg.Attributes.class "game"
-            , Svg.Attributes.viewBox "-500 -500 1000 1000"
-            , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
-            ]
-            [ Svg.g
-                [ Svg.Attributes.class "camera"
-                , cameraTransform <| (.position <| World.getPlayer model.particles)
-                ]
-                [ Svg.Lazy.lazy viewMap model.renderConfig
-                , Svg.g []
-                    (World.getParticles model.particles
-                        |> List.filter (\o -> Particle.distance (World.getPlayer model.particles) o < model.renderConfig.renderDistance)
-                        |> List.map (viewParticle model.renderDebug)
-                    )
-                ]
-            ]
+        , SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig
         ]
 
 
