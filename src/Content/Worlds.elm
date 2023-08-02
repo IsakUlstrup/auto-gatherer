@@ -75,3 +75,5 @@ testWorld1 =
         |> addWall 627 -407 72
         |> addWall -527 -207 92
         |> addWall -527 20 92
+        |> addWall -727 -197 92
+        |> addWall -727 10 92
