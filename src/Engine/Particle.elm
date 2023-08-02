@@ -6,6 +6,7 @@ module Engine.Particle exposing
     , applyFriciton
     , collisionAction
     , distance
+    , getImpulse
     , getVelocity
     , move
     , moveAwayRange
@@ -72,6 +73,19 @@ getVelocity particle =
 
         Dynamic k ->
             k.velocity
+
+
+getImpulse : Particle a -> Vector2
+getImpulse particle =
+    case particle.physicsType of
+        Fixed ->
+            Vector2.zero
+
+        Static k ->
+            k.impulse
+
+        Dynamic k ->
+            k.impulse
 
 
 getMass : Particle a -> Float
