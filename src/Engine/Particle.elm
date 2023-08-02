@@ -24,6 +24,7 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 type alias Kinematics =
     { velocity : Vector2
     , acceleration : Vector2
+    , impulse : Vector2
     , mass : Float
     , speed : Float
     }
@@ -31,7 +32,7 @@ type alias Kinematics =
 
 newKinematics : Float -> Float -> Kinematics
 newKinematics mass speed =
-    Kinematics Vector2.zero Vector2.zero mass speed
+    Kinematics Vector2.zero Vector2.zero Vector2.zero mass speed
 
 
 updateKinematics : (Kinematics -> Kinematics) -> Particle a -> Particle a
@@ -141,6 +142,18 @@ applyForce force particle =
     updateKinematics forceHelper particle
 
 
+{-| Apply impulse to object
+-}
+applyImpulse : Vector2 -> Particle a -> Particle a
+applyImpulse impulse particle =
+    let
+        impulseHelper : Kinematics -> Kinematics
+        impulseHelper k =
+            { k | impulse = Vector2.add k.impulse impulse }
+    in
+    updateKinematics impulseHelper particle
+
+
 {-| Janky friction for now
 -}
 applyFriciton : Float -> Particle a -> Particle a
@@ -184,6 +197,18 @@ move dt particle =
         velocity k =
             { k | velocity = Vector2.add k.velocity (Vector2.scale dt k.acceleration) }
 
+        impulse : Particle a -> Particle a
+        impulse p =
+            case p.physicsType of
+                Fixed ->
+                    p
+
+                Static k ->
+                    { p | position = Vector2.add p.position k.impulse }
+
+                Dynamic k ->
+                    { p | position = Vector2.add p.position k.impulse }
+
         position : Particle a -> Particle a
         position p =
             case p.physicsType of
@@ -198,8 +223,10 @@ move dt particle =
     in
     particle
         |> updateKinematics velocity
+        |> impulse
         |> position
         |> resetAcceleration
+        |> resetImpulse
 
 
 {-| Reset particle acceleration
@@ -209,6 +236,17 @@ resetAcceleration particle =
     let
         reset k =
             { k | acceleration = Vector2.zero }
+    in
+    updateKinematics reset particle
+
+
+{-| Reset particle impulse
+-}
+resetImpulse : Particle a -> Particle a
+resetImpulse particle =
+    let
+        reset k =
+            { k | impulse = Vector2.zero }
     in
     updateKinematics reset particle
 
@@ -319,12 +357,16 @@ resolveStaticCollision target particle =
         overlap =
             (dist - particle.radius - target.radius) * overlapModifier target particle
 
+        impulse : Vector2
+        impulse =
+            Vector2.direction particle.position target.position |> Vector2.scale overlap
+
         pos : Vector2
         pos =
             Vector2.add particle.position (Vector2.direction particle.position target.position |> Vector2.scale overlap)
     in
     particle
-        |> setPosition pos
+        |> applyImpulse impulse
 
 
 {-| Resolve collision between two particles
@@ -344,6 +386,10 @@ resolveDynamicCollision target particle =
         normal =
             Vector2.direction particle.position target.position
 
+        impulse : Vector2
+        impulse =
+            Vector2.direction particle.position target.position |> Vector2.scale overlap
+
         pos : Vector2
         pos =
             Vector2.add particle.position (Vector2.direction particle.position target.position |> Vector2.scale overlap)
@@ -362,7 +408,7 @@ resolveDynamicCollision target particle =
                 ((getVelocity particle).y - p * getMass target * normal.y)
     in
     particle
-        |> setPosition pos
+        |> applyImpulse impulse
         |> setVelocity v
 
 
