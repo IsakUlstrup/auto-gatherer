@@ -265,11 +265,6 @@ resetImpulse particle =
     updateKinematics reset particle
 
 
-setPosition : Vector2 -> Particle a -> Particle a
-setPosition pos particle =
-    { particle | position = pos }
-
-
 setVelocity : Vector2 -> Particle a -> Particle a
 setVelocity vel particle =
     updateKinematics (\k -> { k | velocity = vel }) particle
@@ -374,10 +369,6 @@ resolveStaticCollision target particle =
         impulse : Vector2
         impulse =
             Vector2.direction particle.position target.position |> Vector2.scale overlap
-
-        pos : Vector2
-        pos =
-            Vector2.add particle.position (Vector2.direction particle.position target.position |> Vector2.scale overlap)
     in
     particle
         |> applyImpulse impulse
@@ -403,10 +394,6 @@ resolveDynamicCollision target particle =
         impulse : Vector2
         impulse =
             Vector2.direction particle.position target.position |> Vector2.scale overlap
-
-        pos : Vector2
-        pos =
-            Vector2.add particle.position (Vector2.direction particle.position target.position |> Vector2.scale overlap)
 
         k : Vector2
         k =
