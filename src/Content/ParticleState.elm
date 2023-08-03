@@ -15,8 +15,8 @@ type ParticleState
     | Meander ( Float, Float )
 
 
-particleForce : List (Particle ParticleState) -> Particle ParticleState -> Particle ParticleState
-particleForce particles particle =
+particleForce : Vector2 -> List (Particle ParticleState) -> Particle ParticleState -> Particle ParticleState
+particleForce randomVector particles particle =
     case particle.state of
         MoveToCenter ->
             Particle.moveToPosition 50 Vector2.zero particle
@@ -63,7 +63,7 @@ particleForce particles particle =
                             p
             in
             if cd <= 0 then
-                Particle.applyForce (Vector2.new 1 -1) particle
+                Particle.applyForce randomVector particle
                     |> setCooldown
 
             else

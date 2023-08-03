@@ -19,8 +19,12 @@ import WebGlRenderer
 
 
 forces : World ParticleState -> World ParticleState
-forces system =
-    World.updateParticles (particleForce (World.getParticles system)) system
+forces world =
+    let
+        ( randomVector, newWorld ) =
+            World.generate Vector2.random world
+    in
+    World.updateParticles (particleForce randomVector (World.getParticles newWorld)) newWorld
 
 
 movement : Float -> World ParticleState -> World ParticleState

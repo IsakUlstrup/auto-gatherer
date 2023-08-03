@@ -3,6 +3,7 @@ module Engine.World exposing
     , addDynamicParticle
     , addFixedParticle
     , addStaticParticle
+    , generate
     , getParticles
     , getPlayer
     , new
@@ -78,3 +79,12 @@ getParticles (World world) =
 getPlayer : World a -> Particle a
 getPlayer (World world) =
     world.player
+
+
+generate : Random.Generator b -> World a -> ( b, World a )
+generate gen (World world) =
+    let
+        ( val, seed ) =
+            Random.step gen world.seed
+    in
+    ( val, World { world | seed = seed } )
