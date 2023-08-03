@@ -5,7 +5,7 @@ import Browser.Events
 import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
-import Engine.Particle as Particle exposing (PhysicsType(..))
+import Engine.Particle as Particle
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)

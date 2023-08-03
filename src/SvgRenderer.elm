@@ -1,4 +1,4 @@
-module SvgRenderer exposing (..)
+module SvgRenderer exposing (RenderConfig, initRenderConfig, viewSvg, withPosition, withRenderDistance, withZoom)
 
 import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))

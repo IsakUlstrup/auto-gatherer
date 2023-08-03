@@ -1,4 +1,4 @@
-module WebGlRenderer exposing (..)
+module WebGlRenderer exposing (viewWebGl)
 
 import Engine.Particle exposing (Particle)
 import Html exposing (Html)
