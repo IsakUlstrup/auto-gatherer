@@ -1,10 +1,8 @@
 module Main exposing (Model, Msg, main)
 
--- import Engine.Render as Render exposing (RenderConfig)
-
 import Browser
 import Browser.Events
-import Content.ParticleState exposing (ParticleState(..))
+import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle exposing (PhysicsType(..))
@@ -22,45 +20,7 @@ import WebGlRenderer
 
 forces : World ParticleState -> World ParticleState
 forces system =
-    let
-        forceHelper : Particle.Particle ParticleState -> Particle.Particle ParticleState
-        forceHelper o =
-            case o.state of
-                MoveToCenter ->
-                    Particle.moveToPosition 50 Vector2.zero o
-
-                MoveToPosition p ->
-                    Particle.moveToPosition 50 p o
-
-                FollowMoveToPosition range ->
-                    let
-                        followTarget : Particle.Particle ParticleState -> Bool
-                        followTarget t =
-                            case t.state of
-                                MoveToPosition _ ->
-                                    True
-
-                                _ ->
-                                    False
-
-                        isInRange p =
-                            Particle.distance p o < range
-                    in
-                    Particle.moveToNearest 50 (system |> World.getParticles |> List.filter followTarget |> List.filter isInRange) o
-
-                MoveToClosest ->
-                    Particle.moveToNearest 50 (system |> World.getParticles) o
-
-                Idle ->
-                    o
-
-                Avoid ->
-                    Particle.moveAwayRange 100 (system |> World.getParticles) o
-
-                FollowId id ->
-                    Particle.moveToId 5 id (system |> World.getParticles) o
-    in
-    World.updateParticles forceHelper system
+    World.updateParticles (particleForce (World.getParticles system)) system
 
 
 movement : Float -> World ParticleState -> World ParticleState
