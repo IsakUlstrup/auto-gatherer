@@ -246,7 +246,7 @@ view model =
         [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
         , if model.experimentalRender then
-            WebGlRenderer.viewWebGl 1000 1000
+            WebGlRenderer.viewWebGl 1000 1000 2 (World.getParticles model.particles)
 
           else
             SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig

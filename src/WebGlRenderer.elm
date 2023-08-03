@@ -1,32 +1,37 @@
 module WebGlRenderer exposing (..)
 
+import Engine.Particle exposing (Particle)
 import Html exposing (Html)
 import Html.Attributes exposing (class)
 import Math.Matrix4 as Mat4 exposing (Mat4)
-import Math.Vector3 as Vec3 exposing (Vec3, vec3)
-import WebGL exposing (Mesh, Shader)
+import Math.Vector3 exposing (Vec3, vec3)
+import WebGL exposing (Entity, Mesh, Shader)
 
 
-viewWebGl : Int -> Int -> Html msg
-viewWebGl width height =
+viewWebGl : Int -> Int -> Int -> List (Particle a) -> Html msg
+viewWebGl width height pixelRatio particles =
     WebGL.toHtml
-        [ Html.Attributes.width width
-        , Html.Attributes.height height
+        [ Html.Attributes.width (width * pixelRatio)
+        , Html.Attributes.height (height * pixelRatio)
         , class "game"
         ]
-        [ WebGL.entity
-            vertexShader
-            fragmentShader
-            mesh
-            { perspective = perspective (1000 / 1000) }
-        ]
+        (List.map viewParticle particles)
 
 
-perspective : Float -> Mat4
-perspective t =
+viewParticle : Particle a -> Entity
+viewParticle particle =
+    WebGL.entity
+        vertexShader
+        fragmentShader
+        (mesh particle.radius)
+        { perspective = perspective particle.position.x particle.position.y }
+
+
+perspective : Float -> Float -> Mat4
+perspective x y =
     Mat4.mul
-        (Mat4.makePerspective 45 1 0.01 100)
-        (Mat4.makeLookAt (vec3 (4 * cos t) 0 (4 * sin t)) (vec3 0 0 0) (vec3 0 1 0))
+        (Mat4.makePerspective 85 1 0.01 500)
+        (Mat4.makeLookAt (vec3 0 0 -500) (vec3 x y 0) (vec3 0 1 0))
 
 
 
@@ -39,12 +44,12 @@ type alias Vertex =
     }
 
 
-mesh : Mesh Vertex
-mesh =
+mesh : Float -> Mesh Vertex
+mesh r =
     WebGL.triangles
         [ ( Vertex (vec3 0 0 0) (vec3 1 0 0)
-          , Vertex (vec3 1 1 0) (vec3 0 1 0)
-          , Vertex (vec3 1 -1 0) (vec3 0 0 1)
+          , Vertex (vec3 r r 0) (vec3 0 1 0)
+          , Vertex (vec3 r -r 0) (vec3 0 0 1)
           )
         ]
 
