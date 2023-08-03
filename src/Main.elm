@@ -2,7 +2,7 @@ module Main exposing (Model, Msg, main)
 
 import Browser
 import Browser.Events
-import Content.ParticleState exposing (ParticleState(..), particleForce)
+import Content.ParticleState exposing (ParticleState(..), particleForce, updateState)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
@@ -32,6 +32,11 @@ resolveCollisions : World ParticleState -> World ParticleState
 resolveCollisions system =
     system
         |> World.updateParticles (Particle.resolveCollisions (system |> World.getParticles))
+
+
+updateStates : Float -> World ParticleState -> World ParticleState
+updateStates dt system =
+    World.updateParticles (updateState dt) system
 
 
 
@@ -139,7 +144,7 @@ update msg model =
                 |> focusCamera
                 |> fixedUpdate
                     (\m ->
-                        { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }
+                        { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions >> updateStates model.stepTime }
                     )
                     (model.timeAccum + dt)
 

@@ -9,6 +9,7 @@ module Engine.Vector2 exposing
     , multiply
     , new
     , normalize
+    , random
     , scale
     , singleton
     , subtract
@@ -17,6 +18,8 @@ module Engine.Vector2 exposing
     , toString
     , zero
     )
+
+import Random
 
 
 type alias Vector2 =
@@ -134,3 +137,11 @@ dot v1 v2 =
 toString : Vector2 -> String
 toString vector =
     String.fromFloat vector.x ++ "," ++ String.fromFloat vector.y
+
+
+random : Random.Generator Vector2
+random =
+    Random.map2
+        (\x y -> new x y |> normalize)
+        (Random.float -1 1)
+        (Random.float -1 1)

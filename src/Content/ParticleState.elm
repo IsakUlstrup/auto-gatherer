@@ -1,4 +1,4 @@
-module Content.ParticleState exposing (ParticleState(..), particleForce)
+module Content.ParticleState exposing (ParticleState(..), particleForce, updateState)
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -12,6 +12,7 @@ type ParticleState
     | Idle
     | Avoid
     | FollowId Int
+    | Meander ( Float, Float )
 
 
 particleForce : List (Particle ParticleState) -> Particle ParticleState -> Particle ParticleState
@@ -50,3 +51,30 @@ particleForce particles particle =
 
         FollowId id ->
             Particle.moveToId 5 id particles particle
+
+        Meander ( cd, _ ) ->
+            let
+                setCooldown p =
+                    case p.state of
+                        Meander ( _, maxCd ) ->
+                            { p | state = Meander <| ( maxCd, maxCd ) }
+
+                        _ ->
+                            p
+            in
+            if cd <= 0 then
+                Particle.applyForce (Vector2.new 1 -1) particle
+                    |> setCooldown
+
+            else
+                particle
+
+
+updateState : Float -> Particle ParticleState -> Particle ParticleState
+updateState dt particle =
+    case particle.state of
+        Meander ( cd, maxCd ) ->
+            { particle | state = Meander <| ( max 0 (cd - dt), maxCd ) }
+
+        _ ->
+            particle

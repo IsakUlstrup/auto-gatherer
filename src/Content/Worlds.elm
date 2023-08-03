@@ -77,3 +77,4 @@ testWorld1 =
         |> addWall -527 20 92
         |> addWall -727 -197 92
         |> addWall -727 10 92
+        |> World.addDynamicParticle 0 200 50 0 (Meander ( 1000, 1000 ))

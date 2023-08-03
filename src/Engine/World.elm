@@ -11,6 +11,7 @@ module Engine.World exposing
     )
 
 import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
+import Random
 
 
 type World a
@@ -18,6 +19,7 @@ type World a
         { particles : List (Particle a)
         , player : Particle a
         , idCounter : Int
+        , seed : Random.Seed
         }
 
 
@@ -27,6 +29,7 @@ new playerState playerSpeed =
         { particles = []
         , player = Particle.new 0 0 30 (Dynamic <| Particle.newKinematics 400 playerSpeed) 0 playerState
         , idCounter = 1
+        , seed = Random.initialSeed 2
         }
 
 

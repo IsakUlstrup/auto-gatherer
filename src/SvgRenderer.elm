@@ -98,6 +98,9 @@ viewParticle showVectors particle =
                 FollowId _ ->
                     "follow-id"
 
+                Meander _ ->
+                    "meander"
+
         physicsTypeString : String
         physicsTypeString =
             case particle.physicsType of
