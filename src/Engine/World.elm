@@ -8,6 +8,7 @@ module Engine.World exposing
     , getPlayer
     , new
     , updateParticles
+    , updateParticlesWithSeed
     , updatePlayer
     )
 
@@ -64,6 +65,20 @@ addFixedParticle x y size state (World world) =
 updateParticles : (Particle a -> Particle a) -> World a -> World a
 updateParticles f (World world) =
     World { world | particles = List.map f world.particles, player = f world.player }
+
+
+updateParticlesWithSeed : (Random.Seed -> Particle a -> Particle a) -> World a -> World a
+updateParticlesWithSeed f (World world) =
+    let
+        ( seed, worldSeed ) =
+            Random.step Random.independentSeed world.seed
+    in
+    World
+        { world
+            | particles = List.map (f seed) world.particles
+            , player = f seed world.player
+            , seed = worldSeed
+        }
 
 
 updatePlayer : (Particle a -> Particle a) -> World a -> World a

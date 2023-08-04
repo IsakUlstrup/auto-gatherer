@@ -2,6 +2,7 @@ module Content.ParticleState exposing (ParticleState(..), particleForce)
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
+import Random
 
 
 type ParticleState
@@ -15,8 +16,20 @@ type ParticleState
     | Meander
 
 
-particleForce : Vector2 -> List (Particle ParticleState) -> Particle ParticleState -> Particle ParticleState
-particleForce randomVector particles particle =
+randomVector : Random.Seed -> Particle a -> Vector2
+randomVector seed particle =
+    let
+        randomInt =
+            Random.step (Random.int -10000 10000) seed |> Tuple.first
+
+        combinedSeed =
+            Random.initialSeed (randomInt + particle.id)
+    in
+    Random.step Vector2.random combinedSeed |> Tuple.first |> Vector2.scale 0.1
+
+
+particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
+particleForce particles seed particle =
     case particle.state of
         MoveToCenter ->
             Particle.moveToPosition 50 Vector2.zero particle
@@ -53,4 +66,4 @@ particleForce randomVector particles particle =
             Particle.moveToId 5 id particles particle
 
         Meander ->
-            Particle.applyForce (Vector2.scale 0.1 randomVector) particle
+            Particle.applyForce (randomVector seed particle) particle
