@@ -124,28 +124,36 @@ focusCamera model =
         model
 
 
-fixedUpdate : (Model -> Model) -> Float -> Model -> Model
-fixedUpdate f dt world =
-    if dt >= world.stepTime then
-        { world | timeAccum = dt - world.stepTime }
-            |> f
-            |> fixedUpdate f (dt - world.stepTime)
+fixedUpdate : Float -> Model -> Model
+fixedUpdate dt model =
+    if dt >= model.stepTime then
+        { model
+            | timeAccum = dt - model.stepTime
+            , particles =
+                model.particles
+                    |> forces
+                    |> movement model.stepTime
+                    |> resolveCollisions
+        }
+            |> fixedUpdate (dt - model.stepTime)
 
     else
-        { world | timeAccum = dt }
+        { model | timeAccum = dt }
+
+
+addDtHistory : Float -> Model -> Model
+addDtHistory dt model =
+    { model | deltaHistory = dt :: model.deltaHistory |> List.take 20 }
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick dt ->
-            { model | deltaHistory = dt :: model.deltaHistory |> List.take 20 }
+            model
+                |> addDtHistory dt
                 |> focusCamera
-                |> fixedUpdate
-                    (\m ->
-                        { m | particles = m.particles |> forces >> movement model.stepTime >> resolveCollisions }
-                    )
-                    (model.timeAccum + dt)
+                |> fixedUpdate (model.timeAccum + dt)
 
         ConsoleMsg cmsg ->
             let
