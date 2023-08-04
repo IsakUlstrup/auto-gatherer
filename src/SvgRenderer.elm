@@ -98,7 +98,7 @@ viewParticle showVectors particle =
                 FollowId _ ->
                     "follow-id"
 
-                Meander _ ->
+                Meander ->
                     "meander"
 
         physicsTypeString : String
