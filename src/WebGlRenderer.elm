@@ -23,15 +23,15 @@ viewParticle particle =
     WebGL.entity
         vertexShader
         fragmentShader
-        (mesh particle.radius)
+        (triangleFan particle.radius 50)
         { perspective = perspective particle.position.x particle.position.y }
 
 
 perspective : Float -> Float -> Mat4
 perspective x y =
     Mat4.mul
-        (Mat4.makePerspective 85 1 0.01 500)
-        (Mat4.makeLookAt (vec3 0 0 -500) (vec3 x y 0) (vec3 0 1 0))
+        (Mat4.makePerspective 65 1 0.01 800)
+        (Mat4.makeLookAt (vec3 0 0 -800) (vec3 x y 0) (vec3 0 1 0))
 
 
 
@@ -44,14 +44,23 @@ type alias Vertex =
     }
 
 
-mesh : Float -> Mesh Vertex
-mesh r =
-    WebGL.triangles
-        [ ( Vertex (vec3 0 0 0) (vec3 1 0 0)
-          , Vertex (vec3 r r 0) (vec3 0 1 0)
-          , Vertex (vec3 r -r 0) (vec3 0 0 1)
-          )
-        ]
+point2D : Float -> Float -> Vec3
+point2D x y =
+    vec3 x y 0
+
+
+triangleFan : Float -> Int -> Mesh Vertex
+triangleFan r segments =
+    let
+        p x y =
+            Vertex (point2D x y) (vec3 1 0 0)
+
+        point : Int -> Vertex
+        point i =
+            p (r * cos (toFloat i * 2 * pi / toFloat segments)) (r * sin (toFloat i * 2 * pi / toFloat segments))
+    in
+    WebGL.triangleFan
+        (p 0 0 :: (List.range 0 segments |> List.map point))
 
 
 
