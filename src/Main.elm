@@ -68,7 +68,6 @@ type alias Model =
     , console : Console Msg
     , stepTime : Float
     , timeAccum : Float
-    , renderDebug : Bool
     , deltaHistory : List Float
     , experimentalRender : Bool
     }
@@ -82,7 +81,6 @@ init _ =
         initConsole
         20
         0
-        False
         []
         False
     , Cmd.none
@@ -164,7 +162,7 @@ update msg model =
                     { model | console = newConsole }
 
         SetRenderDebug flag ->
-            { model | renderDebug = flag }
+            { model | renderConfig = SvgRenderer.withDebug flag model.renderConfig }
 
         SetDrawDistance dist ->
             { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }

@@ -1,4 +1,4 @@
-module SvgRenderer exposing (RenderConfig, initRenderConfig, viewSvg, withPosition, withRenderDistance, withZoom)
+module SvgRenderer exposing (RenderConfig, initRenderConfig, viewSvg, withDebug, withPosition, withRenderDistance, withZoom)
 
 import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
@@ -39,6 +39,11 @@ withRenderDistance distance config =
 withPosition : Vector2 -> RenderConfig -> RenderConfig
 withPosition position config =
     { config | position = position }
+
+
+withDebug : Bool -> RenderConfig -> RenderConfig
+withDebug flag config =
+    { config | debug = flag }
 
 
 {-| Set camera zoom

@@ -77,8 +77,11 @@ testWorld1 =
         |> addWall -527 20 92
         |> addWall -727 -197 92
         |> addWall -727 10 92
-        |> World.addDynamicParticle 0 200 20 0.1 Meander
-        |> World.addDynamicParticle 100 200 20 0.1 Meander
-        |> World.addDynamicParticle 200 200 20 0.1 Meander
-        |> World.addDynamicParticle 300 200 20 0.1 Meander
-        |> World.addDynamicParticle 400 200 20 0.1 Meander
+
+
+
+-- |> World.addDynamicParticle 0 200 20 0.1 Meander
+-- |> World.addDynamicParticle 100 200 20 0.1 Meander
+-- |> World.addDynamicParticle 200 200 20 0.1 Meander
+-- |> World.addDynamicParticle 300 200 20 0.1 Meander
+-- |> World.addDynamicParticle 400 200 20 0.1 Meander
