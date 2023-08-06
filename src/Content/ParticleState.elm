@@ -16,18 +16,6 @@ type ParticleState
     | Meander
 
 
-randomVector : Random.Seed -> Particle a -> Vector2
-randomVector seed particle =
-    let
-        randomInt =
-            Random.step (Random.int -10000 10000) seed |> Tuple.first
-
-        combinedSeed =
-            Random.initialSeed (randomInt + particle.id)
-    in
-    Random.step Vector2.random combinedSeed |> Tuple.first |> Vector2.scale 0.1
-
-
 particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
 particleForce particles seed particle =
     case particle.state of
@@ -66,4 +54,4 @@ particleForce particles seed particle =
             Particle.moveToId 5 id particles particle
 
         Meander ->
-            Particle.applyForce (randomVector seed particle) particle
+            Particle.applyForce (Random.step Vector2.random seed |> Tuple.first |> Vector2.scale 0.1) particle

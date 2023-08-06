@@ -67,16 +67,32 @@ updateParticles f (World world) =
     World { world | particles = List.map f world.particles, player = f world.player }
 
 
+
+-- randomVector : Random.Seed -> Particle a -> Vector2
+-- randomVector seed particle =
+--     let
+--         randomInt =
+--             Random.step (Random.int -10000 10000) seed |> Tuple.first
+--         combinedSeed =
+--             Random.initialSeed (randomInt + particle.id)
+--     in
+--     Random.step Vector2.random combinedSeed |> Tuple.first |> Vector2.scale 0.1
+
+
 updateParticlesWithSeed : (Random.Seed -> Particle a -> Particle a) -> World a -> World a
 updateParticlesWithSeed f (World world) =
     let
-        ( seed, worldSeed ) =
-            Random.step Random.independentSeed world.seed
+        ( randomInt, worldSeed ) =
+            Random.step (Random.int -10000 10000) world.seed
+
+        combinedSeed : Particle a -> Random.Seed
+        combinedSeed p =
+            Random.initialSeed (randomInt + p.id)
     in
     World
         { world
-            | particles = List.map (f seed) world.particles
-            , player = f seed world.player
+            | particles = List.map (\p -> f (combinedSeed p) p) world.particles
+            , player = f (combinedSeed world.player) world.player
             , seed = worldSeed
         }
 
