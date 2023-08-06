@@ -11,7 +11,6 @@ import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
 import SvgRenderer exposing (RenderConfig)
-import WebGlRenderer
 
 
 
@@ -46,11 +45,6 @@ initConsole =
                 SetRenderDebug
                 (Engine.Console.argBool "Debug enabled")
             )
-        |> Engine.Console.addMessage "Enable experimental renderer"
-            (Engine.Console.constructor1
-                SetExperimentalRender
-                (Engine.Console.argBool "Experimental")
-            )
         |> Engine.Console.addMessage "Set render distance"
             (Engine.Console.constructor1
                 SetDrawDistance
@@ -69,7 +63,6 @@ type alias Model =
     , stepTime : Float
     , timeAccum : Float
     , deltaHistory : List Float
-    , experimentalRender : Bool
     }
 
 
@@ -82,7 +75,6 @@ init _ =
         20
         0
         []
-        False
     , Cmd.none
     )
 
@@ -97,7 +89,6 @@ type Msg
     | SetRenderDebug Bool
     | SetDrawDistance Float
     | SetMoveTarget Vector2
-    | SetExperimentalRender Bool
 
 
 focusCamera : Model -> Model
@@ -180,9 +171,6 @@ update msg model =
             in
             { model | particles = World.updatePlayer helper model.particles }
 
-        SetExperimentalRender flag ->
-            { model | experimentalRender = flag }
-
 
 
 -- VIEW
@@ -211,11 +199,7 @@ view model =
     main_ []
         [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , if model.experimentalRender then
-            WebGlRenderer.viewWebGl 1000 1000 2 (World.getParticles model.particles)
-
-          else
-            SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig
+        , SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig
         ]
 
 
