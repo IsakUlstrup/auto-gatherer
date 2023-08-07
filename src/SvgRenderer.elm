@@ -16,8 +16,6 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World
 import Svg exposing (Svg)
 import Svg.Attributes
-import Svg.Events
-import Svg.Lazy
 
 
 
@@ -180,75 +178,70 @@ viewParticle showVectors particle =
         )
 
 
-rect2d : Int -> List (Svg.Attribute msg) -> Svg msg
-rect2d size attrs =
-    Svg.rect
-        (attrs
-            ++ [ Svg.Attributes.x <| String.fromInt -(size // 2)
-               , Svg.Attributes.y <| String.fromInt -(size // 2)
-               , Svg.Attributes.width <| String.fromInt size
-               , Svg.Attributes.height <| String.fromInt size
-               ]
-        )
-        []
+
+-- rect2d : Int -> List (Svg.Attribute msg) -> Svg msg
+-- rect2d size attrs =
+--     Svg.rect
+--         (attrs
+--             ++ [ Svg.Attributes.x <| String.fromInt -(size // 2)
+--                , Svg.Attributes.y <| String.fromInt -(size // 2)
+--                , Svg.Attributes.width <| String.fromInt size
+--                , Svg.Attributes.height <| String.fromInt size
+--                ]
+--         )
+--         []
+-- viewTile2D : (Vector2 -> msg) -> Float -> Vector2 -> Svg msg
+-- viewTile2D setMoveTarget size position =
+--     let
+--         isOdd : Int -> Bool
+--         isOdd n =
+--             modBy 2 n == 1
+--         fillSting : String
+--         fillSting =
+--             if isOdd <| round (position.x / size) + round (position.y / size) then
+--                 "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 20) ++ " 80% 90%)"
+--             else
+--                 "transparent"
+--     in
+--     rect2d (round size)
+--         [ Svg.Events.onClick <| setMoveTarget position
+--         , Svg.Attributes.class "tile"
+--         , Svg.Attributes.fill fillSting
+--         , Svg.Attributes.transform <| transformString position
+--         , Svg.Attributes.rx "3"
+--         ]
+-- viewMap : (Vector2 -> msg) -> RenderConfig -> Svg msg
+-- viewMap setMoveTarget config =
+--     let
+--         row : Int -> List Vector2
+--         row y =
+--             List.range -30 30
+--                 |> List.map (\x -> Vector2.new (toFloat x) (toFloat y))
+--         map : List Vector2
+--         map =
+--             List.range -30 30
+--                 |> List.reverse
+--                 |> List.concatMap row
+--                 |> List.map (Vector2.scale 50)
+--                 |> List.filter (\t -> Vector2.distance t config.position < config.renderDistance)
+--     in
+--     Svg.g [] (List.map (viewTile2D setMoveTarget 50) map)
 
 
-viewTile2D : (Vector2 -> msg) -> Float -> Vector2 -> Svg msg
-viewTile2D setMoveTarget size position =
-    let
-        isOdd : Int -> Bool
-        isOdd n =
-            modBy 2 n == 1
-
-        fillSting : String
-        fillSting =
-            if isOdd <| round (position.x / size) + round (position.y / size) then
-                "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 20) ++ " 80% 90%)"
-
-            else
-                "transparent"
-    in
-    rect2d (round size)
-        [ Svg.Events.onClick <| setMoveTarget position
-        , Svg.Attributes.class "tile"
-        , Svg.Attributes.fill fillSting
-        , Svg.Attributes.transform <| transformString position
-        , Svg.Attributes.rx "3"
-        ]
-
-
-viewMap : (Vector2 -> msg) -> RenderConfig -> Svg msg
-viewMap setMoveTarget config =
-    let
-        row : Int -> List Vector2
-        row y =
-            List.range -30 30
-                |> List.map (\x -> Vector2.new (toFloat x) (toFloat y))
-
-        map : List Vector2
-        map =
-            List.range -30 30
-                |> List.reverse
-                |> List.concatMap row
-                |> List.map (Vector2.scale 50)
-                |> List.filter (\t -> Vector2.distance t config.position < config.renderDistance)
-    in
-    Svg.g [] (List.map (viewTile2D setMoveTarget 50) map)
-
-
-viewSvg : (Vector2 -> msg) -> World.World ParticleState -> RenderConfig -> Svg msg
-viewSvg setMoveTarget particles config =
+viewSvg : List (Svg.Attribute msg) -> World.World ParticleState -> RenderConfig -> Svg msg
+viewSvg attrs particles config =
     Svg.svg
-        [ Svg.Attributes.class "game"
-        , Svg.Attributes.viewBox "-500 -500 1000 1000"
-        , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
-        ]
+        ([ Svg.Attributes.class "game"
+         , Svg.Attributes.viewBox "-500 -500 1000 1000"
+         , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
+         ]
+            ++ attrs
+        )
         [ Svg.g
             [ Svg.Attributes.class "camera"
             , cameraTransform <| (.position <| World.getPlayer particles)
             ]
-            [ Svg.Lazy.lazy2 viewMap setMoveTarget config
-            , Svg.g []
+            [ Svg.g []
                 (World.getParticles particles
                     |> List.filter (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
                     |> List.map (viewParticle config.debug)

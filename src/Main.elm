@@ -10,6 +10,8 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
+import Json.Decode as Decode exposing (Decoder)
+import Svg.Events exposing (on)
 import SvgRenderer exposing (RenderConfig)
 
 
@@ -90,6 +92,7 @@ type Msg
     | SetDrawDistance Float
     | SetMoveTarget Vector2
     | WindowResize Int Int
+    | GameClick Int Int
 
 
 focusCamera : Model -> Model
@@ -180,6 +183,13 @@ update msg model =
                         |> SvgRenderer.withHeight h
             }
 
+        GameClick x y ->
+            let
+                _ =
+                    Debug.log "click" ( toFloat x / toFloat model.renderConfig.windowWidth, toFloat y / toFloat model.renderConfig.windowHeight )
+            in
+            model
+
 
 
 -- VIEW
@@ -203,12 +213,19 @@ fpsString dts =
         |> Maybe.withDefault "-"
 
 
+clickDecoder : Decoder Msg
+clickDecoder =
+    Decode.map2 GameClick
+        (Decode.field "offsetX" Decode.int)
+        (Decode.field "offsetY" Decode.int)
+
+
 view : Model -> Html Msg
 view model =
     main_ []
         [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg SetMoveTarget model.particles model.renderConfig
+        , SvgRenderer.viewSvg [ on "click" clickDecoder ] model.particles model.renderConfig
         ]
 
 
