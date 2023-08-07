@@ -185,10 +185,21 @@ update msg model =
 
         GameClick x y ->
             let
-                _ =
-                    Debug.log "click" ( toFloat x / toFloat model.renderConfig.windowWidth, toFloat y / toFloat model.renderConfig.windowHeight )
+                helper : Particle.Particle ParticleState -> Particle.Particle ParticleState
+                helper p =
+                    case p.state of
+                        MoveToPosition _ ->
+                            { p | state = MoveToPosition force }
+
+                        _ ->
+                            p
+
+                force =
+                    Vector2.new (toFloat x - (toFloat model.renderConfig.windowWidth * 0.5))
+                        (toFloat y - (toFloat model.renderConfig.windowHeight * 0.5))
+                        |> Vector2.add (World.getPlayer model.particles).position
             in
-            model
+            { model | particles = World.updatePlayer helper model.particles }
 
 
 

@@ -10,6 +10,7 @@ module Engine.Particle exposing
     , getVelocity
     , move
     , moveAwayRange
+    , moveDirection
     , moveToId
     , moveToNearest
     , moveToPosition
@@ -508,6 +509,16 @@ moveToId maxDistance id targets particle =
 
         Nothing ->
             particle
+
+
+moveDirection : Vector2 -> Particle a -> Particle a
+moveDirection direction particle =
+    let
+        force : Vector2
+        force =
+            direction |> Vector2.normalize |> Vector2.scale (getSpeed particle)
+    in
+    applyForce force particle
 
 
 {-| Apply force away from nearest target in range
