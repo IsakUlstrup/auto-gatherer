@@ -199,20 +199,27 @@ fpsString dts =
         |> Maybe.withDefault "-"
 
 
+view : Model -> Html Msg
+view model =
+    main_ []
+        [ Html.div [ Html.Attributes.class "render-stats" ]
+            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
+            , Html.div [] [ Html.text <| "window size: " ++ String.fromInt model.renderConfig.windowWidth ++ "x" ++ String.fromInt model.renderConfig.windowHeight ]
+            ]
+        , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        , SvgRenderer.viewSvg [ on "click" clickDecoder ] model.particles model.renderConfig
+        ]
+
+
+
+-- DECODERS
+
+
 clickDecoder : Decoder Msg
 clickDecoder =
     Decode.map2 GameClick
         (Decode.field "offsetX" Decode.int)
         (Decode.field "offsetY" Decode.int)
-
-
-view : Model -> Html Msg
-view model =
-    main_ []
-        [ Html.div [ Html.Attributes.class "fps-display" ] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
-        , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg [ on "click" clickDecoder ] model.particles model.renderConfig
-        ]
 
 
 
