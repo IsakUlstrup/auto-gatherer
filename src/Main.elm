@@ -68,11 +68,19 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+type alias Flags =
+    { width : Int, height : Int }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     ( Model
         Content.Worlds.testWorld1
-        (SvgRenderer.initRenderConfig |> SvgRenderer.withRenderDistance 600)
+        (SvgRenderer.initRenderConfig
+            |> SvgRenderer.withRenderDistance 600
+            |> SvgRenderer.withWidth flags.width
+            |> SvgRenderer.withHeight flags.height
+        )
         initConsole
         20
         0
@@ -223,7 +231,7 @@ subscriptions _ =
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.element
         { init = init
