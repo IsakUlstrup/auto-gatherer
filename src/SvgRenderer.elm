@@ -228,6 +228,21 @@ viewParticle showVectors particle =
 --     Svg.g [] (List.map (viewTile2D setMoveTarget 50) map)
 
 
+viewPlayerTarget : Particle.Particle ParticleState -> Svg msg
+viewPlayerTarget player =
+    case player.state of
+        MoveToPosition p ->
+            Svg.circle
+                [ Svg.Attributes.transform <| transformString p
+                , Svg.Attributes.r "20"
+                , Svg.Attributes.class "player-target"
+                ]
+                []
+
+        _ ->
+            Svg.circle [] []
+
+
 viewSvg : List (Svg.Attribute msg) -> World.World ParticleState -> RenderConfig -> Svg msg
 viewSvg attrs particles config =
     Svg.svg
@@ -242,9 +257,11 @@ viewSvg attrs particles config =
             , cameraTransform <| (.position <| World.getPlayer particles)
             ]
             [ Svg.g []
-                (World.getParticles particles
-                    |> List.filter (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
-                    |> List.map (viewParticle config.debug)
+                (viewPlayerTarget (World.getPlayer particles)
+                    :: (World.getParticles particles
+                            |> List.filter (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
+                            |> List.map (viewParticle config.debug)
+                       )
                 )
             ]
         ]
