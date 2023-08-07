@@ -529,25 +529,19 @@ If none are present, do nothing
 moveAwayRange : Float -> List (Particle b) -> Particle a -> Particle a
 moveAwayRange range targets particle =
     let
-        nearest : Maybe Vector2
-        nearest =
+        inRange : List Vector2
+        inRange =
             targets
                 |> List.filter (\t -> t.id /= particle.id)
                 |> List.filter (\t -> distance t particle < range)
                 |> List.map .position
-                |> List.sortBy (Vector2.distance particle.position)
-                |> List.head
 
-        force : Vector2 -> Vector2
-        force target =
-            Vector2.direction particle.position target |> Vector2.scale -(getSpeed particle)
+        force : Vector2
+        force =
+            List.foldl (\t v -> Vector2.direction t particle.position |> Vector2.add v) Vector2.zero inRange
+                |> Vector2.scale (getSpeed particle)
     in
-    case nearest of
-        Just target ->
-            applyForce (force target) particle
-
-        Nothing ->
-            particle
+    applyForce force particle
 
 
 {-| Apply force towards target position if particle is more than limitDistance units away
