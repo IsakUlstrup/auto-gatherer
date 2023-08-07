@@ -4,7 +4,6 @@ module SvgRenderer exposing
     , viewSvg
     , withDebug
     , withHeight
-    , withPosition
     , withRenderDistance
     , withWidth
     , withZoom
@@ -12,7 +11,7 @@ module SvgRenderer exposing
 
 import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
-import Engine.Vector2 as Vector2 exposing (Vector2)
+import Engine.Vector2 exposing (Vector2)
 import Engine.World as World
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -25,8 +24,7 @@ import Svg.Attributes
 {-| Holds renderer config values
 -}
 type alias RenderConfig =
-    { position : Vector2
-    , zoom : Float
+    { zoom : Float
     , renderDistance : Float
     , debug : Bool
     , windowWidth : Int
@@ -38,17 +36,12 @@ type alias RenderConfig =
 -}
 initRenderConfig : RenderConfig
 initRenderConfig =
-    RenderConfig Vector2.zero 1 100 False 1000 1000
+    RenderConfig 1 100 False 1000 1000
 
 
 withRenderDistance : Float -> RenderConfig -> RenderConfig
 withRenderDistance distance config =
     { config | renderDistance = distance }
-
-
-withPosition : Vector2 -> RenderConfig -> RenderConfig
-withPosition position config =
-    { config | position = position }
 
 
 withDebug : Bool -> RenderConfig -> RenderConfig

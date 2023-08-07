@@ -6,7 +6,7 @@ import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
-import Engine.Vector2 as Vector2 exposing (Vector2)
+import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
@@ -90,27 +90,8 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
-    | SetMoveTarget Vector2
     | WindowResize Int Int
     | GameClick Int Int
-
-
-focusCamera : Model -> Model
-focusCamera model =
-    let
-        playerPos : Vector2
-        playerPos =
-            model.particles |> World.getPlayer |> .position
-
-        cameraDist : Float
-        cameraDist =
-            Vector2.distance playerPos model.renderConfig.position
-    in
-    if cameraDist > 100 then
-        { model | renderConfig = SvgRenderer.withPosition playerPos model.renderConfig }
-
-    else
-        model
 
 
 fixedUpdate : Float -> Model -> Model
@@ -141,7 +122,6 @@ update msg model =
         Tick dt ->
             model
                 |> addDtHistory dt
-                |> focusCamera
                 |> fixedUpdate (model.timeAccum + dt)
 
         ConsoleMsg cmsg ->
@@ -161,19 +141,6 @@ update msg model =
 
         SetDrawDistance dist ->
             { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }
-
-        SetMoveTarget target ->
-            let
-                helper : Particle.Particle ParticleState -> Particle.Particle ParticleState
-                helper p =
-                    case p.state of
-                        MoveToPosition _ ->
-                            { p | state = MoveToPosition target }
-
-                        _ ->
-                            p
-            in
-            { model | particles = World.updatePlayer helper model.particles }
 
         WindowResize w h ->
             { model
