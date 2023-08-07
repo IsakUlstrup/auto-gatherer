@@ -13,7 +13,7 @@ import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.Vector2 exposing (Vector2)
 import Engine.World as World
-import Svg exposing (Svg)
+import Svg exposing (Attribute, Svg)
 import Svg.Attributes
 
 
@@ -236,11 +236,25 @@ viewPlayerTarget player =
             Svg.circle [] []
 
 
+viewBox : Int -> Int -> Attribute msg
+viewBox width height =
+    Svg.Attributes.viewBox <|
+        String.fromInt -(width // 2)
+            ++ " "
+            ++ String.fromInt -(height // 2)
+            ++ " "
+            ++ String.fromInt width
+            ++ " "
+            ++ String.fromInt height
+
+
 viewSvg : List (Svg.Attribute msg) -> World.World ParticleState -> RenderConfig -> Svg msg
 viewSvg attrs particles config =
     Svg.svg
         ([ Svg.Attributes.class "game"
-         , Svg.Attributes.viewBox "-500 -500 1000 1000"
+
+         --  , Svg.Attributes.viewBox "-500 -500 1000 1000"
+         , viewBox config.windowWidth config.windowHeight
          , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
          ]
             ++ attrs
