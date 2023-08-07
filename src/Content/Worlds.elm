@@ -22,11 +22,12 @@ addWall x y r =
 testWorld1 : World ParticleState
 testWorld1 =
     World.new (MoveToPosition <| Vector2.zero) 0.15
-        |> World.addStaticParticle 200 20 15 0.1 (FollowId 0)
-        |> World.addStaticParticle 220 30 15 0.1 (FollowId 1)
-        |> World.addStaticParticle 220 35 15 0.1 (FollowId 2)
-        |> World.addStaticParticle 190 35 15 0.1 (FollowId 3)
-        |> World.addStaticParticle 190 15 15 0.1 (FollowId 4)
+        |> World.addDynamicParticle 0 80 50 0 Idle
+        |> World.addStaticParticle 200 20 15 0.1 (FollowId 1)
+        |> World.addStaticParticle 220 30 15 0.1 (FollowId 2)
+        |> World.addStaticParticle 220 35 15 0.1 (FollowId 3)
+        |> World.addStaticParticle 190 35 15 0.1 (FollowId 4)
+        |> World.addStaticParticle 190 15 15 0.1 (FollowId 5)
         -- |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
         -- |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
         |> World.addDynamicParticle -300 200 55 0 Idle
@@ -38,13 +39,12 @@ testWorld1 =
         -- |> World.addDynamicParticle -150 20 20 MoveToClosest
         -- |> World.addDynamicParticle -150 50 20 MoveToClosest
         -- |> World.addDynamicParticle 150 20 12 0.08 MoveToClosest
-        |> World.addDynamicParticle 0 80 50 0 Idle
-        |> addTree 200 0 500 -73
-        |> World.addStaticParticle -100 -100 20 0.05 (MoveToPosition <| Vector2.new 460 -80)
-        |> World.addStaticParticle 100 100 20 0.05 (MoveToPosition <| Vector2.new 450 -75)
-        |> World.addStaticParticle 300 -100 20 0.05 (MoveToPosition <| Vector2.new 440 -65)
-        |> World.addStaticParticle 350 -120 20 0.05 (MoveToPosition <| Vector2.new 455 -55)
-        |> World.addStaticParticle 350 120 20 0.05 (MoveToPosition <| Vector2.new 440 -35)
+        -- |> addTree 200 0 500 -73
+        -- |> World.addStaticParticle -100 -100 20 0.05 (MoveToPosition <| Vector2.new 460 -80)
+        -- |> World.addStaticParticle 100 100 20 0.05 (MoveToPosition <| Vector2.new 450 -75)
+        -- |> World.addStaticParticle 300 -100 20 0.05 (MoveToPosition <| Vector2.new 440 -65)
+        -- |> World.addStaticParticle 350 -120 20 0.05 (MoveToPosition <| Vector2.new 455 -55)
+        -- |> World.addStaticParticle 350 120 20 0.05 (MoveToPosition <| Vector2.new 440 -35)
         |> World.addStaticParticle 180 100 15 0.1 (FollowMoveToPosition 150)
         |> World.addStaticParticle 140 -107 14 0.1 (FollowMoveToPosition 150)
         |> World.addStaticParticle -107 12 13 0.1 (FollowMoveToPosition 150)
@@ -70,6 +70,7 @@ testWorld1 =
         |> World.addStaticParticle 385 -117 12 0.05 Idle
         |> World.addStaticParticle 396 -77 12 0.07 Idle
         |> World.addStaticParticle 307 -107 12 0.05 Idle
+        |> World.addFixedParticle 23 -400 58 Idle
         |> addWall 527 -207 102
         |> addWall 587 -307 82
         |> addWall 627 -407 72
