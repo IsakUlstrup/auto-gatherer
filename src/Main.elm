@@ -89,6 +89,7 @@ type Msg
     | SetRenderDebug Bool
     | SetDrawDistance Float
     | SetMoveTarget Vector2
+    | WindowResize Int Int
 
 
 focusCamera : Model -> Model
@@ -171,6 +172,14 @@ update msg model =
             in
             { model | particles = World.updatePlayer helper model.particles }
 
+        WindowResize w h ->
+            { model
+                | renderConfig =
+                    model.renderConfig
+                        |> SvgRenderer.withWidth w
+                        |> SvgRenderer.withHeight h
+            }
+
 
 
 -- VIEW
@@ -209,7 +218,10 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onAnimationFrameDelta (min 10000 >> Tick)
+    Sub.batch
+        [ Browser.Events.onAnimationFrameDelta (min 10000 >> Tick)
+        , Browser.Events.onResize WindowResize
+        ]
 
 
 

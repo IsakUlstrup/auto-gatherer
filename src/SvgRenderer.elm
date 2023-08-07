@@ -1,4 +1,14 @@
-module SvgRenderer exposing (RenderConfig, initRenderConfig, viewSvg, withDebug, withPosition, withRenderDistance, withZoom)
+module SvgRenderer exposing
+    ( RenderConfig
+    , initRenderConfig
+    , viewSvg
+    , withDebug
+    , withHeight
+    , withPosition
+    , withRenderDistance
+    , withWidth
+    , withZoom
+    )
 
 import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
@@ -21,6 +31,8 @@ type alias RenderConfig =
     , zoom : Float
     , renderDistance : Float
     , debug : Bool
+    , windowWidth : Int
+    , windowHeight : Int
     }
 
 
@@ -28,7 +40,7 @@ type alias RenderConfig =
 -}
 initRenderConfig : RenderConfig
 initRenderConfig =
-    RenderConfig Vector2.zero 1 100 False
+    RenderConfig Vector2.zero 1 100 False 1000 1000
 
 
 withRenderDistance : Float -> RenderConfig -> RenderConfig
@@ -51,6 +63,20 @@ withDebug flag config =
 withZoom : Float -> RenderConfig -> RenderConfig
 withZoom zoom config =
     { config | zoom = zoom }
+
+
+{-| Set window width
+-}
+withWidth : Int -> RenderConfig -> RenderConfig
+withWidth width config =
+    { config | windowWidth = width }
+
+
+{-| Set window height
+-}
+withHeight : Int -> RenderConfig -> RenderConfig
+withHeight height config =
+    { config | windowHeight = height }
 
 
 
