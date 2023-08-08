@@ -12,6 +12,7 @@ import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World
+import Json.Decode as Decode
 import Svg exposing (Attribute, Svg)
 import Svg.Attributes
 import Svg.Events
@@ -221,6 +222,9 @@ viewNavSlices toggleMoveEvent hoverEvent sliceCount =
                 [ Svg.Events.onMouseOver <| hoverEvent (i * sliceSize)
                 , Svg.Events.onMouseDown <| toggleMoveEvent True
                 , Svg.Events.onMouseUp <| toggleMoveEvent False
+                , Svg.Events.on "touchstart" (Decode.succeed <| toggleMoveEvent True)
+                , Svg.Events.on "touchend" (Decode.succeed <| toggleMoveEvent False)
+                , Svg.Events.on "ontouchmove" (Decode.succeed <| hoverEvent (i * sliceSize))
                 ]
                 (i * sliceSize)
                 sliceSize
