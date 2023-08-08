@@ -106,6 +106,9 @@ viewParticle showVectors particle =
                 Meander ->
                     "meander"
 
+                MoveAtAngle _ ->
+                    "move-at-angle"
+
         physicsTypeString : String
         physicsTypeString =
             case particle.physicsType of
@@ -182,7 +185,7 @@ viewNavSlice attrs startAngle size =
 
         pointPair : Vector2 -> String
         pointPair p =
-            String.fromFloat p.x ++ "," ++ String.fromFloat p.y
+            String.fromInt (round p.x) ++ "," ++ String.fromInt (round p.y)
 
         points : String
         points =

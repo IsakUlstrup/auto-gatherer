@@ -6,7 +6,6 @@ import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
-import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
@@ -143,19 +142,10 @@ update msg model =
 
         HoverNavSlice angle ->
             let
-                toRadians a =
-                    a * (pi / 180)
-
-                vector =
-                    Vector2.new (cos (toRadians angle)) (sin (toRadians angle)) |> Vector2.normalize
-
-                _ =
-                    Debug.log "hover" vector
-
-                movePlayer p =
-                    Particle.applyForce (vector |> Vector2.scale -0.3) p
+                setAngle p =
+                    { p | state = MoveAtAngle angle }
             in
-            { model | particles = World.updatePlayer movePlayer model.particles }
+            { model | particles = World.updatePlayer setAngle model.particles }
 
 
 
