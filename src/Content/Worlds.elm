@@ -21,7 +21,7 @@ addWall x y r =
 
 testWorld1 : World ParticleState
 testWorld1 =
-    World.new (MoveToPosition <| Vector2.zero) 0.15
+    World.new Idle 0.15
         |> World.addDynamicParticle 0 80 50 0 Idle
         |> World.addStaticParticle 200 20 15 0.1 (FollowId 1)
         |> World.addStaticParticle 220 30 15 0.1 (FollowId 2)

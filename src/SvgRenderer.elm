@@ -9,10 +9,11 @@ module SvgRenderer exposing
 
 import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
-import Engine.Vector2 exposing (Vector2)
+import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World
-import Svg exposing (Svg)
+import Svg exposing (Attribute, Svg)
 import Svg.Attributes
+import Svg.Events
 
 
 
@@ -153,56 +154,6 @@ viewParticle showVectors particle =
         )
 
 
-
--- rect2d : Int -> List (Svg.Attribute msg) -> Svg msg
--- rect2d size attrs =
---     Svg.rect
---         (attrs
---             ++ [ Svg.Attributes.x <| String.fromInt -(size // 2)
---                , Svg.Attributes.y <| String.fromInt -(size // 2)
---                , Svg.Attributes.width <| String.fromInt size
---                , Svg.Attributes.height <| String.fromInt size
---                ]
---         )
---         []
--- viewTile2D : (Vector2 -> msg) -> Float -> Vector2 -> Svg msg
--- viewTile2D setMoveTarget size position =
---     let
---         isOdd : Int -> Bool
---         isOdd n =
---             modBy 2 n == 1
---         fillSting : String
---         fillSting =
---             if isOdd <| round (position.x / size) + round (position.y / size) then
---                 "hsl(" ++ (String.fromFloat <| Vector2.distance position Vector2.zero / 20) ++ " 80% 90%)"
---             else
---                 "transparent"
---     in
---     rect2d (round size)
---         [ Svg.Events.onClick <| setMoveTarget position
---         , Svg.Attributes.class "tile"
---         , Svg.Attributes.fill fillSting
---         , Svg.Attributes.transform <| transformString position
---         , Svg.Attributes.rx "3"
---         ]
--- viewMap : (Vector2 -> msg) -> RenderConfig -> Svg msg
--- viewMap setMoveTarget config =
---     let
---         row : Int -> List Vector2
---         row y =
---             List.range -30 30
---                 |> List.map (\x -> Vector2.new (toFloat x) (toFloat y))
---         map : List Vector2
---         map =
---             List.range -30 30
---                 |> List.reverse
---                 |> List.concatMap row
---                 |> List.map (Vector2.scale 50)
---                 |> List.filter (\t -> Vector2.distance t config.position < config.renderDistance)
---     in
---     Svg.g [] (List.map (viewTile2D setMoveTarget 50) map)
-
-
 viewPlayerTarget : Particle.Particle ParticleState -> Svg msg
 viewPlayerTarget player =
     case player.state of
@@ -218,8 +169,58 @@ viewPlayerTarget player =
             Svg.circle [] []
 
 
-viewSvg : List (Svg.Attribute msg) -> World.World ParticleState -> RenderConfig -> Svg msg
-viewSvg attrs particles config =
+viewNavSlice : List (Attribute msg) -> Float -> Float -> Svg msg
+viewNavSlice attrs startAngle size =
+    let
+        radius : Float
+        radius =
+            50
+
+        point : Float -> Float -> Vector2
+        point a r =
+            Vector2.new (cos (a * (pi / 180)) * r) (sin (a * (pi / 180)) * r)
+
+        pointPair : Vector2 -> String
+        pointPair p =
+            String.fromFloat p.x ++ "," ++ String.fromFloat p.y
+
+        points : String
+        points =
+            [ point (radians startAngle) radius
+            , point (radians startAngle) (radius * 20)
+            , point (radians (startAngle + size)) (radius * 20)
+            , point (radians (startAngle + size)) radius
+            ]
+                |> List.map pointPair
+                |> List.intersperse " "
+                |> String.concat
+    in
+    Svg.polygon
+        ([ Svg.Attributes.class "nav-slice"
+         , Svg.Attributes.points points
+         ]
+            ++ attrs
+        )
+        []
+
+
+viewNavSlices : (Float -> msg) -> Int -> Svg msg
+viewNavSlices hoverEvent sliceCount =
+    let
+        sliceSize : Float
+        sliceSize =
+            360 / toFloat sliceCount
+
+        slice : Float -> Svg msg
+        slice i =
+            viewNavSlice [ Svg.Events.onClick <| hoverEvent (i * sliceSize) ] (i * sliceSize) sliceSize
+    in
+    Svg.g []
+        (List.range 1 sliceCount |> List.map toFloat |> List.map slice)
+
+
+viewSvg : List (Svg.Attribute msg) -> (Float -> msg) -> World.World ParticleState -> RenderConfig -> Svg msg
+viewSvg attrs hoverEvent particles config =
     Svg.svg
         ([ Svg.Attributes.class "game"
          , Svg.Attributes.viewBox "-500 -500 1000 1000"
@@ -239,4 +240,5 @@ viewSvg attrs particles config =
                        )
                 )
             ]
+        , viewNavSlices hoverEvent 32
         ]

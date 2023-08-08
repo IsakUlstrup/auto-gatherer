@@ -6,6 +6,7 @@ import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
+import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
@@ -89,6 +90,7 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
+    | HoverNavSlice Float
 
 
 fixedUpdate : Float -> Model -> Model
@@ -139,6 +141,22 @@ update msg model =
         SetDrawDistance dist ->
             { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }
 
+        HoverNavSlice angle ->
+            let
+                toRadians a =
+                    a * (pi / 180)
+
+                vector =
+                    Vector2.new (cos (toRadians angle)) (sin (toRadians angle)) |> Vector2.normalize
+
+                _ =
+                    Debug.log "hover" vector
+
+                movePlayer p =
+                    Particle.applyForce (vector |> Vector2.scale -0.3) p
+            in
+            { model | particles = World.updatePlayer movePlayer model.particles }
+
 
 
 -- VIEW
@@ -168,7 +186,7 @@ view model =
         [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ] ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg [] model.particles model.renderConfig
+        , SvgRenderer.viewSvg [] HoverNavSlice model.particles model.renderConfig
         ]
 
 
