@@ -1,15 +1,7 @@
 module Content.Worlds exposing (testWorld1)
 
 import Content.ParticleState exposing (ParticleState(..))
-import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
-
-
-{-| A tree is a static particle that slowly returns to target position if pushed
--}
-addTree : Float -> Float -> Float -> Float -> World ParticleState -> World ParticleState
-addTree x y tx ty =
-    World.addStaticParticle x y 20 0.05 (MoveToPosition <| Vector2.new tx ty)
 
 
 {-| A wall is an immoveable particle with no movement ai
@@ -21,7 +13,7 @@ addWall x y r =
 
 testWorld1 : World ParticleState
 testWorld1 =
-    World.new (MoveAtAngle 0) 0.15
+    World.new (MoveAwayAngle False 0) 0.15
         |> World.addDynamicParticle 0 80 50 0 Idle
         |> World.addStaticParticle 200 20 15 0.1 (FollowId 1)
         |> World.addStaticParticle 220 30 15 0.1 (FollowId 2)

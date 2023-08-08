@@ -9,7 +9,7 @@ module Engine.Particle exposing
     , getImpulse
     , getVelocity
     , move
-    , moveAngle
+    , moveAwayAngle
     , moveAwayRange
     , moveDirection
     , moveToId
@@ -561,13 +561,15 @@ moveToPosition limitDistance position particle =
     applyForce force particle
 
 
-moveAngle : Float -> Particle a -> Particle a
-moveAngle angle particle =
+{-| Move away from given angle
+-}
+moveAwayAngle : Float -> Particle a -> Particle a
+moveAwayAngle angle particle =
     let
         toRadians a =
             a * (pi / 180)
 
         force =
-            Vector2.new (cos (toRadians angle)) (sin (toRadians angle)) |> Vector2.normalize |> Vector2.scale (getSpeed particle)
+            Vector2.new (cos (toRadians angle)) (sin (toRadians angle)) |> Vector2.scale -1 |> Vector2.normalize |> Vector2.scale (getSpeed particle)
     in
     applyForce force particle

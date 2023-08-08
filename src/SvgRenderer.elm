@@ -1,6 +1,7 @@
 module SvgRenderer exposing
     ( RenderConfig
     , initRenderConfig
+    , viewNavSlices
     , viewSvg
     , withDebug
     , withRenderDistance
@@ -106,8 +107,8 @@ viewParticle showVectors particle =
                 Meander ->
                     "meander"
 
-                MoveAtAngle _ ->
-                    "move-at-angle"
+                MoveAwayAngle _ _ ->
+                    "move-away-angle"
 
         physicsTypeString : String
         physicsTypeString =
@@ -177,7 +178,7 @@ viewNavSlice attrs startAngle size =
     let
         radius : Float
         radius =
-            50
+            600
 
         point : Float -> Float -> Vector2
         point a r =
@@ -189,10 +190,10 @@ viewNavSlice attrs startAngle size =
 
         points : String
         points =
-            [ point (radians startAngle) radius
-            , point (radians startAngle) (radius * 20)
-            , point (radians (startAngle + size)) (radius * 20)
+            [ point (radians startAngle) 0
+            , point (radians startAngle) radius
             , point (radians (startAngle + size)) radius
+            , point (radians (startAngle + size)) 0
             ]
                 |> List.map pointPair
                 |> List.intersperse " "
@@ -207,8 +208,8 @@ viewNavSlice attrs startAngle size =
         []
 
 
-viewNavSlices : (Float -> msg) -> Int -> Svg msg
-viewNavSlices hoverEvent sliceCount =
+viewNavSlices : (Bool -> msg) -> (Float -> msg) -> Int -> Svg msg
+viewNavSlices toggleMoveEvent hoverEvent sliceCount =
     let
         sliceSize : Float
         sliceSize =
@@ -216,14 +217,20 @@ viewNavSlices hoverEvent sliceCount =
 
         slice : Float -> Svg msg
         slice i =
-            viewNavSlice [ Svg.Events.onClick <| hoverEvent (i * sliceSize) ] (i * sliceSize) sliceSize
+            viewNavSlice
+                [ Svg.Events.onMouseOver <| hoverEvent (i * sliceSize)
+                , Svg.Events.onMouseDown <| toggleMoveEvent True
+                , Svg.Events.onMouseUp <| toggleMoveEvent False
+                ]
+                (i * sliceSize)
+                sliceSize
     in
     Svg.g []
         (List.range 1 sliceCount |> List.map toFloat |> List.map slice)
 
 
-viewSvg : List (Svg.Attribute msg) -> (Float -> msg) -> World.World ParticleState -> RenderConfig -> Svg msg
-viewSvg attrs hoverEvent particles config =
+viewSvg : List (Svg.Attribute msg) -> List (Svg msg) -> World.World ParticleState -> RenderConfig -> Svg msg
+viewSvg attrs children particles config =
     Svg.svg
         ([ Svg.Attributes.class "game"
          , Svg.Attributes.viewBox "-500 -500 1000 1000"
@@ -231,7 +238,7 @@ viewSvg attrs hoverEvent particles config =
          ]
             ++ attrs
         )
-        [ Svg.g
+        (Svg.g
             [ Svg.Attributes.class "camera"
             , cameraTransform <| (.position <| World.getPlayer particles)
             ]
@@ -243,5 +250,5 @@ viewSvg attrs hoverEvent particles config =
                        )
                 )
             ]
-        , viewNavSlices hoverEvent 32
-        ]
+            :: children
+        )

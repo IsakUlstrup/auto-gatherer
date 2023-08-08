@@ -14,7 +14,7 @@ type ParticleState
     | Avoid
     | FollowId Int
     | Meander
-    | MoveAtAngle Float
+    | MoveAwayAngle Bool Float
 
 
 particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
@@ -57,5 +57,9 @@ particleForce particles seed particle =
         Meander ->
             Particle.applyForce (Random.step Vector2.random seed |> Tuple.first |> Vector2.scale 0.1) particle
 
-        MoveAtAngle angle ->
-            Particle.moveAngle angle particle
+        MoveAwayAngle moveFlag angle ->
+            if moveFlag then
+                Particle.moveAwayAngle angle particle
+
+            else
+                particle

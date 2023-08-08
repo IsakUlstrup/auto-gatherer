@@ -90,6 +90,7 @@ type Msg
     | SetRenderDebug Bool
     | SetDrawDistance Float
     | HoverNavSlice Float
+    | PlayerMove Bool
 
 
 fixedUpdate : Float -> Model -> Model
@@ -143,9 +144,26 @@ update msg model =
         HoverNavSlice angle ->
             let
                 setAngle p =
-                    { p | state = MoveAtAngle angle }
+                    case p.state of
+                        MoveAwayAngle f _ ->
+                            { p | state = MoveAwayAngle f angle }
+
+                        _ ->
+                            p
             in
             { model | particles = World.updatePlayer setAngle model.particles }
+
+        PlayerMove flag ->
+            let
+                setmove p =
+                    case p.state of
+                        MoveAwayAngle _ a ->
+                            { p | state = MoveAwayAngle flag a }
+
+                        _ ->
+                            p
+            in
+            { model | particles = World.updatePlayer setmove model.particles }
 
 
 
@@ -176,7 +194,7 @@ view model =
         [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ] ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg [] HoverNavSlice model.particles model.renderConfig
+        , SvgRenderer.viewSvg [] [ SvgRenderer.viewNavSlices PlayerMove HoverNavSlice 32 ] model.particles model.renderConfig
         ]
 
 
