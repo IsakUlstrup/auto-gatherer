@@ -6,12 +6,9 @@ import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
-import Engine.Vector2 as Vector2
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
-import Json.Decode as Decode exposing (Decoder)
-import Svg.Events exposing (on)
 import SvgRenderer exposing (RenderConfig)
 
 
@@ -68,18 +65,12 @@ type alias Model =
     }
 
 
-type alias Flags =
-    { width : Int, height : Int }
-
-
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( Model
         Content.Worlds.testWorld1
         (SvgRenderer.initRenderConfig
             |> SvgRenderer.withRenderDistance 600
-            |> SvgRenderer.withWidth flags.width
-            |> SvgRenderer.withHeight flags.height
         )
         initConsole
         20
@@ -98,8 +89,6 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
-    | WindowResize Int Int
-    | GameClick Int Int
 
 
 fixedUpdate : Float -> Model -> Model
@@ -150,32 +139,6 @@ update msg model =
         SetDrawDistance dist ->
             { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }
 
-        WindowResize w h ->
-            { model
-                | renderConfig =
-                    model.renderConfig
-                        |> SvgRenderer.withWidth w
-                        |> SvgRenderer.withHeight h
-            }
-
-        GameClick x y ->
-            let
-                helper : Particle.Particle ParticleState -> Particle.Particle ParticleState
-                helper p =
-                    case p.state of
-                        MoveToPosition _ ->
-                            { p | state = MoveToPosition force }
-
-                        _ ->
-                            p
-
-                force =
-                    Vector2.new (toFloat x - (toFloat model.renderConfig.windowWidth * 0.5))
-                        (toFloat y - (toFloat model.renderConfig.windowHeight * 0.5))
-                        |> Vector2.add (World.getPlayer model.particles).position
-            in
-            { model | particles = World.updatePlayer helper model.particles }
-
 
 
 -- VIEW
@@ -203,23 +166,10 @@ view : Model -> Html Msg
 view model =
     main_ []
         [ Html.div [ Html.Attributes.class "render-stats" ]
-            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
-            , Html.div [] [ Html.text <| "window size: " ++ String.fromInt model.renderConfig.windowWidth ++ "x" ++ String.fromInt model.renderConfig.windowHeight ]
-            ]
+            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ] ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg [ on "click" clickDecoder ] model.particles model.renderConfig
+        , SvgRenderer.viewSvg [] model.particles model.renderConfig
         ]
-
-
-
--- DECODERS
-
-
-clickDecoder : Decoder Msg
-clickDecoder =
-    Decode.map2 GameClick
-        (Decode.field "offsetX" Decode.int)
-        (Decode.field "offsetY" Decode.int)
 
 
 
@@ -230,7 +180,6 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrameDelta (min 10000 >> Tick)
-        , Browser.Events.onResize WindowResize
         ]
 
 
@@ -238,7 +187,7 @@ subscriptions _ =
 -- MAIN
 
 
-main : Program Flags Model Msg
+main : Program () Model Msg
 main =
     Browser.element
         { init = init

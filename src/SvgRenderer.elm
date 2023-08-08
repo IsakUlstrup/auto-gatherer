@@ -3,9 +3,7 @@ module SvgRenderer exposing
     , initRenderConfig
     , viewSvg
     , withDebug
-    , withHeight
     , withRenderDistance
-    , withWidth
     , withZoom
     )
 
@@ -13,7 +11,7 @@ import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.Vector2 exposing (Vector2)
 import Engine.World as World
-import Svg exposing (Attribute, Svg)
+import Svg exposing (Svg)
 import Svg.Attributes
 
 
@@ -27,8 +25,6 @@ type alias RenderConfig =
     { zoom : Float
     , renderDistance : Float
     , debug : Bool
-    , windowWidth : Int
-    , windowHeight : Int
     }
 
 
@@ -36,7 +32,7 @@ type alias RenderConfig =
 -}
 initRenderConfig : RenderConfig
 initRenderConfig =
-    RenderConfig 1 100 False 1000 1000
+    RenderConfig 1 100 False
 
 
 withRenderDistance : Float -> RenderConfig -> RenderConfig
@@ -54,20 +50,6 @@ withDebug flag config =
 withZoom : Float -> RenderConfig -> RenderConfig
 withZoom zoom config =
     { config | zoom = zoom }
-
-
-{-| Set window width
--}
-withWidth : Int -> RenderConfig -> RenderConfig
-withWidth width config =
-    { config | windowWidth = width }
-
-
-{-| Set window height
--}
-withHeight : Int -> RenderConfig -> RenderConfig
-withHeight height config =
-    { config | windowHeight = height }
 
 
 
@@ -236,25 +218,11 @@ viewPlayerTarget player =
             Svg.circle [] []
 
 
-viewBox : Int -> Int -> Attribute msg
-viewBox width height =
-    Svg.Attributes.viewBox <|
-        String.fromInt -(width // 2)
-            ++ " "
-            ++ String.fromInt -(height // 2)
-            ++ " "
-            ++ String.fromInt width
-            ++ " "
-            ++ String.fromInt height
-
-
 viewSvg : List (Svg.Attribute msg) -> World.World ParticleState -> RenderConfig -> Svg msg
 viewSvg attrs particles config =
     Svg.svg
         ([ Svg.Attributes.class "game"
-
-         --  , Svg.Attributes.viewBox "-500 -500 1000 1000"
-         , viewBox config.windowWidth config.windowHeight
+         , Svg.Attributes.viewBox "-500 -500 1000 1000"
          , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
          ]
             ++ attrs
