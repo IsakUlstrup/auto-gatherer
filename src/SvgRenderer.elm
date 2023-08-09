@@ -1,6 +1,7 @@
 module SvgRenderer exposing
     ( RenderConfig
     , initRenderConfig
+    , screenToWorldCoords
     , transformString
     , viewNavSlices
     , viewSvg
@@ -176,6 +177,22 @@ viewParticle showVectors particle =
                     []
                )
         )
+
+
+screenToWorldCoords : Float -> Float -> Float -> Float -> Vector2
+screenToWorldCoords x y screenWidth screenHeight =
+    let
+        ratio =
+            if screenWidth > screenHeight then
+                1000 / screenWidth
+
+            else
+                1000 / screenHeight
+    in
+    Vector2.new
+        (x - (screenWidth / 2))
+        (y - (screenHeight / 2))
+        |> Vector2.scale ratio
 
 
 viewNavSlice : List (Attribute msg) -> Float -> Float -> Svg msg

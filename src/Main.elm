@@ -166,18 +166,12 @@ update msg model =
 
         SetCursorPosition x y ->
             let
-                ratio =
-                    if model.renderConfig.screenWidth > model.renderConfig.screenHeight then
-                        1000 / toFloat model.renderConfig.screenWidth
-
-                    else
-                        1000 / toFloat model.renderConfig.screenHeight
-
                 pos =
-                    Vector2.new
-                        (x - (toFloat model.renderConfig.screenWidth / 2))
-                        (y - (toFloat model.renderConfig.screenHeight / 2))
-                        |> Vector2.scale ratio
+                    SvgRenderer.screenToWorldCoords
+                        x
+                        y
+                        (toFloat model.renderConfig.screenWidth)
+                        (toFloat model.renderConfig.screenHeight)
             in
             ( { model | cursor = Cursor pos model.cursor.pressed }, Cmd.none )
 
