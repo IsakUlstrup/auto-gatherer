@@ -1,10 +1,13 @@
 module SvgRenderer exposing
     ( RenderConfig
     , initRenderConfig
+    , transformString
     , viewNavSlices
     , viewSvg
     , withDebug
+    , withHeight
     , withRenderDistance
+    , withWidth
     , withZoom
     )
 
@@ -28,6 +31,8 @@ type alias RenderConfig =
     { zoom : Float
     , renderDistance : Float
     , debug : Bool
+    , screenWidth : Int
+    , screenHeight : Int
     }
 
 
@@ -35,7 +40,7 @@ type alias RenderConfig =
 -}
 initRenderConfig : RenderConfig
 initRenderConfig =
-    RenderConfig 1 100 False
+    RenderConfig 1 100 False 1000 1000
 
 
 withRenderDistance : Float -> RenderConfig -> RenderConfig
@@ -53,6 +58,20 @@ withDebug flag config =
 withZoom : Float -> RenderConfig -> RenderConfig
 withZoom zoom config =
     { config | zoom = zoom }
+
+
+{-| Set window width
+-}
+withWidth : Int -> RenderConfig -> RenderConfig
+withWidth width config =
+    { config | screenWidth = width }
+
+
+{-| Set window height
+-}
+withHeight : Int -> RenderConfig -> RenderConfig
+withHeight height config =
+    { config | screenHeight = height }
 
 
 

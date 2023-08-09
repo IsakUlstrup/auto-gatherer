@@ -1,4 +1,6 @@
 import { Elm } from "./src/Main.elm";
 
-Elm.Main.init({ node: document.getElementById("app") });
+const screenSize = { width: window.innerWidth, height: window.innerHeight }
+
+Elm.Main.init({ node: document.getElementById("app"), flags: screenSize });
 

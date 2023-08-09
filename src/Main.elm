@@ -6,9 +6,14 @@ import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
+import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
+import Json.Decode as Decode exposing (Decoder)
+import Svg
+import Svg.Attributes
+import Svg.Events
 import SvgRenderer exposing (RenderConfig)
 
 
@@ -62,20 +67,28 @@ type alias Model =
     , stepTime : Float
     , timeAccum : Float
     , deltaHistory : List Float
+    , clickLocation : Vector2
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+type alias Flags =
+    { width : Int, height : Int }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     ( Model
         Content.Worlds.testWorld1
         (SvgRenderer.initRenderConfig
             |> SvgRenderer.withRenderDistance 600
+            |> SvgRenderer.withWidth flags.width
+            |> SvgRenderer.withHeight flags.height
         )
         initConsole
         20
         0
         []
+        Vector2.zero
     , Cmd.none
     )
 
@@ -91,6 +104,8 @@ type Msg
     | SetDrawDistance Float
     | HoverNavSlice Float
     | PlayerMove Bool
+    | GameClick Float Float
+    | WindowResize Int Int
 
 
 fixedUpdate : Float -> Model -> Model
@@ -165,6 +180,19 @@ update msg model =
             in
             { model | particles = World.updatePlayer setmove model.particles }
 
+        GameClick x y ->
+            let
+                ax =
+                    x - (toFloat model.renderConfig.screenWidth / 2)
+
+                ay =
+                    y - (toFloat model.renderConfig.screenHeight / 2)
+            in
+            { model | clickLocation = Vector2.new ax ay }
+
+        WindowResize w h ->
+            { model | renderConfig = model.renderConfig |> SvgRenderer.withWidth w |> SvgRenderer.withHeight h }
+
 
 
 -- VIEW
@@ -194,8 +222,15 @@ view model =
         [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ] ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg [] [ SvgRenderer.viewNavSlices PlayerMove HoverNavSlice 32 ] model.particles model.renderConfig
+        , SvgRenderer.viewSvg [ Svg.Events.on "click" clickDecoder ] [ Svg.circle [ Svg.Attributes.transform <| SvgRenderer.transformString model.clickLocation, Svg.Attributes.r "20" ] [] ] model.particles model.renderConfig
         ]
+
+
+clickDecoder : Decoder Msg
+clickDecoder =
+    Decode.map2 GameClick
+        (Decode.field "offsetX" Decode.float)
+        (Decode.field "offsetY" Decode.float)
 
 
 
@@ -206,6 +241,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrameDelta (min 10000 >> Tick)
+        , Browser.Events.onResize WindowResize
         ]
 
 
@@ -213,7 +249,7 @@ subscriptions _ =
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.element
         { init = init
