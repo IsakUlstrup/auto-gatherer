@@ -74,7 +74,7 @@ type alias Model =
 
 
 type alias Flags =
-    { width : Int, height : Int }
+    ()
 
 
 type alias Cursor =
@@ -84,20 +84,18 @@ type alias Cursor =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init flags =
+init _ =
     ( Model
         Content.Worlds.testWorld1
         (SvgRenderer.initRenderConfig
             |> SvgRenderer.withRenderDistance 600
-            |> SvgRenderer.withWidth flags.width
-            |> SvgRenderer.withHeight flags.height
         )
         initConsole
         20
         0
         []
         (Cursor Vector2.zero False)
-    , Cmd.none
+    , gameResize
     )
 
 
