@@ -226,6 +226,11 @@ fpsString dts =
         |> Maybe.withDefault "-"
 
 
+screenSizeString : Int -> Int -> String
+screenSizeString width height =
+    "screen: " ++ String.fromInt width ++ "x" ++ String.fromInt height
+
+
 viewCursor : Cursor -> Svg msg
 viewCursor cursor =
     let
@@ -249,7 +254,9 @@ view : Model -> Html Msg
 view model =
     main_ []
         [ Html.div [ Html.Attributes.class "render-stats" ]
-            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ] ]
+            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
+            , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
+            ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
         , SvgRenderer.viewSvg
             [ Svg.Events.on "mousemove" clickDecoder
