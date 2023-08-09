@@ -178,21 +178,6 @@ viewParticle showVectors particle =
         )
 
 
-viewPlayerTarget : Particle.Particle ParticleState -> Svg msg
-viewPlayerTarget player =
-    case player.state of
-        MoveToPosition p ->
-            Svg.circle
-                [ Svg.Attributes.transform <| transformString p
-                , Svg.Attributes.r "20"
-                , Svg.Attributes.class "player-target"
-                ]
-                []
-
-        _ ->
-            Svg.circle [] []
-
-
 viewNavSlice : List (Attribute msg) -> Float -> Float -> Svg msg
 viewNavSlice attrs startAngle size =
     let
@@ -266,11 +251,9 @@ viewSvg attrs children particles config =
             , cameraTransform <| (.position <| World.getPlayer particles)
             ]
             [ Svg.g []
-                (viewPlayerTarget (World.getPlayer particles)
-                    :: (World.getParticles particles
-                            |> List.filter (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
-                            |> List.map (viewParticle config.debug)
-                       )
+                (World.getParticles particles
+                    |> List.filter (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
+                    |> List.map (viewParticle config.debug)
                 )
             ]
             :: children
