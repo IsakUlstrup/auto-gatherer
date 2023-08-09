@@ -1,6 +1,7 @@
 module Main exposing (Model, Msg, main)
 
 import Browser
+import Browser.Dom
 import Browser.Events
 import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
@@ -15,6 +16,7 @@ import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
 import SvgRenderer exposing (RenderConfig)
+import Task
 
 
 
@@ -112,7 +114,8 @@ type Msg
     | PlayerMove Bool
     | SetCursorPosition Float Float
     | SetCursorPressed Bool
-    | WindowResize Int Int
+    | WindowResize
+    | GameResize (Result Browser.Dom.Error Browser.Dom.Viewport)
 
 
 fixedUpdate : Float -> Model -> Model
@@ -137,13 +140,15 @@ addDtHistory dt model =
     { model | deltaHistory = dt :: model.deltaHistory |> List.take 20 }
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick dt ->
-            model
+            ( model
                 |> addDtHistory dt
                 |> fixedUpdate (model.timeAccum + dt)
+            , Cmd.none
+            )
 
         ConsoleMsg cmsg ->
             let
@@ -155,13 +160,13 @@ update msg model =
                     { model | console = newConsole } |> update m
 
                 Nothing ->
-                    { model | console = newConsole }
+                    ( { model | console = newConsole }, Cmd.none )
 
         SetRenderDebug flag ->
-            { model | renderConfig = SvgRenderer.withDebug flag model.renderConfig }
+            ( { model | renderConfig = SvgRenderer.withDebug flag model.renderConfig }, Cmd.none )
 
         SetDrawDistance dist ->
-            { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }
+            ( { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }, Cmd.none )
 
         HoverNavSlice angle ->
             let
@@ -173,7 +178,7 @@ update msg model =
                         _ ->
                             p
             in
-            { model | particles = World.updatePlayer setAngle model.particles }
+            ( { model | particles = World.updatePlayer setAngle model.particles }, Cmd.none )
 
         PlayerMove flag ->
             let
@@ -185,7 +190,7 @@ update msg model =
                         _ ->
                             p
             in
-            { model | particles = World.updatePlayer setmove model.particles }
+            ( { model | particles = World.updatePlayer setmove model.particles }, Cmd.none )
 
         SetCursorPosition x y ->
             let
@@ -202,13 +207,30 @@ update msg model =
                         (y - (toFloat model.renderConfig.screenHeight / 2))
                         |> Vector2.scale ratio
             in
-            { model | cursor = Cursor pos model.cursor.pressed }
+            ( { model | cursor = Cursor pos model.cursor.pressed }, Cmd.none )
 
         SetCursorPressed pressed ->
-            { model | cursor = Cursor model.cursor.position pressed }
+            ( { model | cursor = Cursor model.cursor.position pressed }, Cmd.none )
 
-        WindowResize w h ->
-            { model | renderConfig = model.renderConfig |> SvgRenderer.withWidth w |> SvgRenderer.withHeight h }
+        WindowResize ->
+            ( model, gameResize )
+
+        GameResize result ->
+            let
+                gameSize =
+                    case result of
+                        Ok vp ->
+                            Just ( round vp.viewport.width, round vp.viewport.height )
+
+                        Err _ ->
+                            Nothing
+            in
+            case gameSize of
+                Just ( w, h ) ->
+                    ( { model | renderConfig = model.renderConfig |> SvgRenderer.withWidth w |> SvgRenderer.withHeight h }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 
@@ -266,7 +288,8 @@ view model =
             ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
         , SvgRenderer.viewSvg
-            [ Svg.Events.on "mousemove" clickDecoder
+            [ Svg.Attributes.id "game-view"
+            , Svg.Events.on "mousemove" clickDecoder
             , Svg.Events.onMouseDown <| SetCursorPressed True
             , Svg.Events.onMouseUp <| SetCursorPressed False
             ]
@@ -287,11 +310,16 @@ clickDecoder =
 -- SUBSCRIPTIONS
 
 
+gameResize : Cmd Msg
+gameResize =
+    Task.attempt GameResize (Browser.Dom.getViewportOf "game-view")
+
+
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Browser.Events.onAnimationFrameDelta (min 10000 >> Tick)
-        , Browser.Events.onResize WindowResize
+        , Browser.Events.onResize (\_ _ -> WindowResize)
         ]
 
 
@@ -304,6 +332,6 @@ main =
     Browser.element
         { init = init
         , view = view
-        , update = \msg model -> ( update msg model, Cmd.none )
+        , update = update
         , subscriptions = subscriptions
         }
