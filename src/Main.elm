@@ -108,12 +108,10 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
-    | HoverNavSlice Float
-    | PlayerMove Bool
     | SetCursorPosition Float Float
     | SetCursorPressed Bool
     | WindowResize
-    | GameResize (Result Browser.Dom.Error Browser.Dom.Viewport)
+    | GameResize (Result Browser.Dom.Error Browser.Dom.Element)
 
 
 fixedUpdate : Float -> Model -> Model
@@ -166,30 +164,6 @@ update msg model =
         SetDrawDistance dist ->
             ( { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }, Cmd.none )
 
-        HoverNavSlice angle ->
-            let
-                setAngle p =
-                    case p.state of
-                        MoveAwayAngle f _ ->
-                            { p | state = MoveAwayAngle f angle }
-
-                        _ ->
-                            p
-            in
-            ( { model | particles = World.updatePlayer setAngle model.particles }, Cmd.none )
-
-        PlayerMove flag ->
-            let
-                setmove p =
-                    case p.state of
-                        MoveAwayAngle _ a ->
-                            { p | state = MoveAwayAngle flag a }
-
-                        _ ->
-                            p
-            in
-            ( { model | particles = World.updatePlayer setmove model.particles }, Cmd.none )
-
         SetCursorPosition x y ->
             let
                 ratio =
@@ -213,22 +187,18 @@ update msg model =
         WindowResize ->
             ( model, gameResize )
 
-        GameResize result ->
-            let
-                gameSize =
-                    case result of
-                        Ok vp ->
-                            Just ( round vp.viewport.width, round vp.viewport.height )
+        GameResize (Ok element) ->
+            ( { model
+                | renderConfig =
+                    model.renderConfig
+                        |> SvgRenderer.withWidth (round element.element.width)
+                        |> SvgRenderer.withHeight (round element.element.height)
+              }
+            , Cmd.none
+            )
 
-                        Err _ ->
-                            Nothing
-            in
-            case gameSize of
-                Just ( w, h ) ->
-                    ( { model | renderConfig = model.renderConfig |> SvgRenderer.withWidth w |> SvgRenderer.withHeight h }, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+        GameResize (Err _) ->
+            ( model, Cmd.none )
 
 
 
@@ -280,12 +250,8 @@ viewCursor cursor =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.div [ Html.Attributes.class "render-stats" ]
-            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
-            , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
-            ]
-        , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg
+        [ -- , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+          SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
             , Svg.Events.on "mousemove" clickDecoder
             , Svg.Events.onMouseDown <| SetCursorPressed True
@@ -294,6 +260,10 @@ view model =
             [ viewCursor model.cursor ]
             model.particles
             model.renderConfig
+        , Html.div [ Html.Attributes.class "render-stats" ]
+            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
+            , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
+            ]
         ]
 
 
@@ -310,7 +280,8 @@ clickDecoder =
 
 gameResize : Cmd Msg
 gameResize =
-    Task.attempt GameResize (Browser.Dom.getViewportOf "game-view")
+    -- Task.attempt GameResize (Browser.Dom.getViewportOf "game-view")
+    Browser.Dom.getElement "game-view" |> Task.attempt GameResize
 
 
 subscriptions : Model -> Sub Msg
