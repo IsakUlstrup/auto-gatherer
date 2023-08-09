@@ -111,7 +111,7 @@ type Msg
     | SetCursorPosition Float Float
     | SetCursorPressed Bool
     | WindowResize
-    | GameResize (Result Browser.Dom.Error Browser.Dom.Element)
+    | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
 
 
 fixedUpdate : Float -> Model -> Model
@@ -187,7 +187,7 @@ update msg model =
         WindowResize ->
             ( model, gameResize )
 
-        GameResize (Ok element) ->
+        GetGameElement (Ok element) ->
             ( { model
                 | renderConfig =
                     model.renderConfig
@@ -197,7 +197,7 @@ update msg model =
             , Cmd.none
             )
 
-        GameResize (Err _) ->
+        GetGameElement (Err _) ->
             ( model, Cmd.none )
 
 
@@ -280,8 +280,7 @@ clickDecoder =
 
 gameResize : Cmd Msg
 gameResize =
-    -- Task.attempt GameResize (Browser.Dom.getViewportOf "game-view")
-    Browser.Dom.getElement "game-view" |> Task.attempt GameResize
+    Browser.Dom.getElement "game-view" |> Task.attempt GetGameElement
 
 
 subscriptions : Model -> Sub Msg
