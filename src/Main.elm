@@ -189,13 +189,20 @@ update msg model =
 
         SetCursorPosition x y ->
             let
-                ax =
-                    x - (toFloat model.renderConfig.screenWidth / 2)
+                ratio =
+                    if model.renderConfig.screenWidth > model.renderConfig.screenHeight then
+                        1000 / toFloat model.renderConfig.screenWidth
 
-                ay =
-                    y - (toFloat model.renderConfig.screenHeight / 2)
+                    else
+                        1000 / toFloat model.renderConfig.screenHeight
+
+                pos =
+                    Vector2.new
+                        (x - (toFloat model.renderConfig.screenWidth / 2))
+                        (y - (toFloat model.renderConfig.screenHeight / 2))
+                        |> Vector2.scale ratio
             in
-            { model | cursor = Cursor (Vector2.new ax ay) model.cursor.pressed }
+            { model | cursor = Cursor pos model.cursor.pressed }
 
         SetCursorPressed pressed ->
             { model | cursor = Cursor model.cursor.position pressed }
