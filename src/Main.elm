@@ -11,7 +11,7 @@ import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
-import Svg
+import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
 import SvgRenderer exposing (RenderConfig)
@@ -67,12 +67,18 @@ type alias Model =
     , stepTime : Float
     , timeAccum : Float
     , deltaHistory : List Float
-    , clickLocation : Vector2
+    , cursor : Cursor
     }
 
 
 type alias Flags =
     { width : Int, height : Int }
+
+
+type alias Cursor =
+    { position : Vector2
+    , pressed : Bool
+    }
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -88,7 +94,7 @@ init flags =
         20
         0
         []
-        Vector2.zero
+        (Cursor Vector2.zero False)
     , Cmd.none
     )
 
@@ -104,7 +110,8 @@ type Msg
     | SetDrawDistance Float
     | HoverNavSlice Float
     | PlayerMove Bool
-    | GameClick Float Float
+    | SetCursorPosition Float Float
+    | SetCursorPressed Bool
     | WindowResize Int Int
 
 
@@ -180,7 +187,7 @@ update msg model =
             in
             { model | particles = World.updatePlayer setmove model.particles }
 
-        GameClick x y ->
+        SetCursorPosition x y ->
             let
                 ax =
                     x - (toFloat model.renderConfig.screenWidth / 2)
@@ -188,7 +195,10 @@ update msg model =
                 ay =
                     y - (toFloat model.renderConfig.screenHeight / 2)
             in
-            { model | clickLocation = Vector2.new ax ay }
+            { model | cursor = Cursor (Vector2.new ax ay) model.cursor.pressed }
+
+        SetCursorPressed pressed ->
+            { model | cursor = Cursor model.cursor.position pressed }
 
         WindowResize w h ->
             { model | renderConfig = model.renderConfig |> SvgRenderer.withWidth w |> SvgRenderer.withHeight h }
@@ -216,19 +226,45 @@ fpsString dts =
         |> Maybe.withDefault "-"
 
 
+viewCursor : Cursor -> Svg msg
+viewCursor cursor =
+    let
+        pressedClass =
+            if cursor.pressed then
+                "pressed"
+
+            else
+                "not-pressed"
+    in
+    Svg.circle
+        [ Svg.Attributes.transform <| SvgRenderer.transformString cursor.position
+        , Svg.Attributes.r "20"
+        , Svg.Attributes.class "cursor"
+        , Svg.Attributes.class pressedClass
+        ]
+        []
+
+
 view : Model -> Html Msg
 view model =
     main_ []
         [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ] ]
         , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , SvgRenderer.viewSvg [ Svg.Events.on "click" clickDecoder ] [ Svg.circle [ Svg.Attributes.transform <| SvgRenderer.transformString model.clickLocation, Svg.Attributes.r "20" ] [] ] model.particles model.renderConfig
+        , SvgRenderer.viewSvg
+            [ Svg.Events.on "mousemove" clickDecoder
+            , Svg.Events.onMouseDown <| SetCursorPressed True
+            , Svg.Events.onMouseUp <| SetCursorPressed False
+            ]
+            [ viewCursor model.cursor ]
+            model.particles
+            model.renderConfig
         ]
 
 
 clickDecoder : Decoder Msg
 clickDecoder =
-    Decode.map2 GameClick
+    Decode.map2 SetCursorPosition
         (Decode.field "offsetX" Decode.float)
         (Decode.field "offsetY" Decode.float)
 
