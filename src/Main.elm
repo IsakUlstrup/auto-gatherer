@@ -254,8 +254,8 @@ viewCursor cursor =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ -- , Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-          SvgRenderer.viewSvg
+        [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        , SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
             , Svg.Events.on "mousemove" clickDecoder
             , Svg.Events.onMouseDown <| SetCursorPressed True

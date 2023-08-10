@@ -412,8 +412,7 @@ type alias Selector =
 selectors : List Selector
 selectors =
     [ ( ".console"
-      , [ ( "padding", "0.5rem" )
-        , ( "display", "flex" )
+      , [ ( "display", "flex" )
         , ( "gap", "0.5rem" )
         , ( "font-family", "monospace" )
         , ( "font-size", "14px" )
@@ -445,9 +444,9 @@ selectors =
       )
     , ( ".console .message-presets"
       , [ ( "position", "absolute" )
-        , ( "top", "3rem" )
-        , ( "left", "0.5rem" )
-        , ( "right", "0.5rem" )
+        , ( "top", "2.5rem" )
+        , ( "left", "0rem" )
+        , ( "right", "0rem" )
         , ( "list-style", "none" )
         , ( "background-color", "rgba(200, 200, 200, 0.5)" )
         ]
@@ -489,10 +488,7 @@ viewConsole : Console msg -> Html (ConsoleMsg msg)
 viewConsole console =
     aside
         [ class "console-container"
-        , style "position" "absolute"
-        , style "left" "0.5rem"
-        , style "right" "0.5rem"
-        , style "top" "0.5rem"
+        , style "position" "relative"
         ]
         [ styleNode selectors
         , case console.input of
