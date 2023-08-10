@@ -23,9 +23,19 @@ import Task
 -- SYSTEM
 
 
-forces : World ParticleState -> World ParticleState
-forces world =
-    World.updateParticlesWithSeed (particleForce (World.getParticles world)) world
+forces : Cursor -> World ParticleState -> World ParticleState
+forces cursor world =
+    let
+        cursorForce =
+            if cursor.pressed then
+                Vector2.direction Vector2.zero cursor.position |> Vector2.scale -0.3
+
+            else
+                Vector2.zero
+    in
+    world
+        |> World.updateParticlesWithSeed (particleForce (World.getParticles world))
+        |> World.updatePlayer (Particle.applyForce cursorForce)
 
 
 movement : Float -> World ParticleState -> World ParticleState
@@ -121,7 +131,7 @@ fixedUpdate dt model =
             | timeAccum = dt - model.stepTime
             , particles =
                 model.particles
-                    |> forces
+                    |> forces model.cursor
                     |> movement model.stepTime
                     |> resolveCollisions
         }
