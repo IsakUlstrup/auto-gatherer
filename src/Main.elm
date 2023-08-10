@@ -255,6 +255,10 @@ view : Model -> Html Msg
 view model =
     main_ []
         [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
+        , Html.div [ Html.Attributes.class "render-stats" ]
+            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
+            , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
+            ]
         , SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
             , Svg.Events.on "mousemove" clickDecoder
@@ -264,10 +268,6 @@ view model =
             [ viewCursor model.cursor ]
             model.particles
             model.renderConfig
-        , Html.div [ Html.Attributes.class "render-stats" ]
-            [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
-            , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
-            ]
         ]
 
 
