@@ -118,8 +118,7 @@ type Msg
     | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
-    | SetCursorPosition Float Float
-    | SetCursorPressed Bool
+    | SetCursor Float Float Bool
     | WindowResize
     | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
 
@@ -174,7 +173,7 @@ update msg model =
         SetDrawDistance dist ->
             ( { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }, Cmd.none )
 
-        SetCursorPosition x y ->
+        SetCursor x y pressed ->
             let
                 pos =
                     SvgRenderer.screenToWorldCoords
@@ -183,10 +182,7 @@ update msg model =
                         (toFloat model.renderConfig.screenWidth)
                         (toFloat model.renderConfig.screenHeight)
             in
-            ( { model | cursor = Cursor pos model.cursor.pressed }, Cmd.none )
-
-        SetCursorPressed pressed ->
-            ( { model | cursor = Cursor model.cursor.position pressed }, Cmd.none )
+            ( { model | cursor = Cursor pos pressed }, Cmd.none )
 
         WindowResize ->
             ( model, gameResize )
@@ -261,9 +257,10 @@ view model =
             ]
         , SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
-            , Svg.Events.on "mousemove" clickDecoder
-            , Svg.Events.onMouseDown <| SetCursorPressed True
-            , Svg.Events.onMouseUp <| SetCursorPressed False
+            , Svg.Events.on "pointermove" pointerDecoder
+            , Svg.Events.on "pointerdown" pointerDecoder
+            , Svg.Events.on "pointerup" pointerDecoder
+            , Svg.Events.on "pointercancel" pointerDecoder
             ]
             [ viewCursor model.cursor ]
             model.particles
@@ -271,11 +268,18 @@ view model =
         ]
 
 
-clickDecoder : Decoder Msg
-clickDecoder =
-    Decode.map2 SetCursorPosition
+pressedDecoder : Decoder Bool
+pressedDecoder =
+    Decode.field "buttons" Decode.float
+        |> Decode.map (\p -> p > 0)
+
+
+pointerDecoder : Decoder Msg
+pointerDecoder =
+    Decode.map3 SetCursor
         (Decode.field "offsetX" Decode.float)
         (Decode.field "offsetY" Decode.float)
+        pressedDecoder
 
 
 
