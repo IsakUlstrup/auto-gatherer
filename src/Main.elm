@@ -27,7 +27,8 @@ forces : Cursor -> World ParticleState -> World ParticleState
 forces cursor world =
     let
         cursorSpeedMultiplier =
-            Vector2.distance Vector2.zero cursor.position / 500
+            -- (Vector2.distance Vector2.zero cursor.position + 100) / 500
+            (500 - Vector2.distance Vector2.zero cursor.position) / 500
 
         cursorForce =
             if cursor.pressed then
