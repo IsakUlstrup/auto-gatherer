@@ -26,10 +26,13 @@ import Task
 forces : Cursor -> World ParticleState -> World ParticleState
 forces cursor world =
     let
+        cursorSpeedMultiplier =
+            Vector2.distance Vector2.zero cursor.position / 500
+
         cursorForce =
             if cursor.pressed then
                 Vector2.direction Vector2.zero cursor.position
-                    |> Vector2.scale (Vector2.distance Vector2.zero cursor.position / 500)
+                    |> Vector2.scale cursorSpeedMultiplier
 
             else
                 Vector2.zero
