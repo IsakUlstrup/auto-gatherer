@@ -3,7 +3,6 @@ module SvgRenderer exposing
     , initRenderConfig
     , screenToWorldCoords
     , transformString
-    , viewNavSlices
     , viewSvg
     , withDebug
     , withHeight
@@ -16,10 +15,8 @@ import Content.ParticleState exposing (ParticleState(..))
 import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World
-import Json.Decode as Decode
-import Svg exposing (Attribute, Svg)
+import Svg exposing (Svg)
 import Svg.Attributes
-import Svg.Events
 
 
 
@@ -193,65 +190,6 @@ screenToWorldCoords x y screenWidth screenHeight =
         (x - (screenWidth / 2))
         (y - (screenHeight / 2))
         |> Vector2.scale ratio
-
-
-viewNavSlice : List (Attribute msg) -> Float -> Float -> Svg msg
-viewNavSlice attrs startAngle size =
-    let
-        radius : Float
-        radius =
-            600
-
-        point : Float -> Float -> Vector2
-        point a r =
-            Vector2.new (cos (a * (pi / 180)) * r) (sin (a * (pi / 180)) * r)
-
-        pointPair : Vector2 -> String
-        pointPair p =
-            String.fromInt (round p.x) ++ "," ++ String.fromInt (round p.y)
-
-        points : String
-        points =
-            [ point (radians startAngle) 0
-            , point (radians startAngle) radius
-            , point (radians (startAngle + size)) radius
-            , point (radians (startAngle + size)) 0
-            ]
-                |> List.map pointPair
-                |> List.intersperse " "
-                |> String.concat
-    in
-    Svg.polygon
-        ([ Svg.Attributes.class "nav-slice"
-         , Svg.Attributes.points points
-         ]
-            ++ attrs
-        )
-        []
-
-
-viewNavSlices : (Bool -> msg) -> (Float -> msg) -> Int -> Svg msg
-viewNavSlices toggleMoveEvent hoverEvent sliceCount =
-    let
-        sliceSize : Float
-        sliceSize =
-            360 / toFloat sliceCount
-
-        slice : Float -> Svg msg
-        slice i =
-            viewNavSlice
-                [ Svg.Events.onMouseOver <| hoverEvent (i * sliceSize)
-                , Svg.Events.onMouseDown <| toggleMoveEvent True
-                , Svg.Events.onMouseUp <| toggleMoveEvent False
-                , Svg.Events.on "touchstart" (Decode.succeed <| toggleMoveEvent True)
-                , Svg.Events.on "touchend" (Decode.succeed <| toggleMoveEvent False)
-                , Svg.Events.on "ontouchmove" (Decode.succeed <| hoverEvent (i * sliceSize))
-                ]
-                (i * sliceSize)
-                sliceSize
-    in
-    Svg.g []
-        (List.range 1 sliceCount |> List.map toFloat |> List.map slice)
 
 
 viewSvg : List (Svg.Attribute msg) -> List (Svg msg) -> World.World ParticleState -> RenderConfig -> Svg msg
