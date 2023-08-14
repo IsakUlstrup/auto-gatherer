@@ -13,7 +13,7 @@ addWall x y r =
 
 testWorld1 : World ParticleState
 testWorld1 =
-    World.new (MoveAwayAngle False 0) 0.15
+    World.new (MoveAwayAngle False 0) 0.2
         |> World.addDynamicParticle 0 80 50 0 Idle
         |> World.addStaticParticle 200 20 15 0.1 (FollowId 1)
         |> World.addStaticParticle 220 30 15 0.1 (FollowId 2)

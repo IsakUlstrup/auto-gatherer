@@ -30,14 +30,13 @@ forces cursor world =
             if cursor.pressed then
                 Vector2.direction Vector2.zero cursor.position
                     |> Vector2.scale (Vector2.distance Vector2.zero cursor.position / 500)
-                    |> Vector2.scale -0.2
 
             else
                 Vector2.zero
     in
     world
         |> World.updateParticlesWithSeed (particleForce (World.getParticles world))
-        |> World.updatePlayer (Particle.applyForce cursorForce)
+        |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -(Particle.getSpeed p) cursorForce) p)
 
 
 movement : Float -> World ParticleState -> World ParticleState
