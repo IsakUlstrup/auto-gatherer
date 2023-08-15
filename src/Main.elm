@@ -5,7 +5,6 @@ import Browser.Dom
 import Browser.Events
 import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
-import Engine.Console exposing (Console, ConsoleMsg)
 import Engine.Particle as Particle
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
@@ -55,32 +54,12 @@ resolveCollisions system =
 
 
 
--- CONSOLE
-
-
-initConsole : Console Msg
-initConsole =
-    Engine.Console.new
-        |> Engine.Console.addMessage "Set render debug mode"
-            (Engine.Console.constructor1
-                SetRenderDebug
-                (Engine.Console.argBool "Debug enabled")
-            )
-        |> Engine.Console.addMessage "Set render distance"
-            (Engine.Console.constructor1
-                SetDrawDistance
-                (Engine.Console.argFloat "Distance")
-            )
-
-
-
 -- MODEL
 
 
 type alias Model =
     { particles : World ParticleState
     , renderConfig : RenderConfig
-    , console : Console Msg
     , stepTime : Float
     , timeAccum : Float
     , deltaHistory : List Float
@@ -105,7 +84,6 @@ init _ =
         (SvgRenderer.initRenderConfig
             |> SvgRenderer.withRenderDistance 600
         )
-        initConsole
         20
         0
         []
@@ -120,7 +98,6 @@ init _ =
 
 type Msg
     = Tick Float
-    | ConsoleMsg (ConsoleMsg Msg)
     | SetRenderDebug Bool
     | SetDrawDistance Float
     | SetCursor Float Float Bool
@@ -159,18 +136,6 @@ update msg model =
                 |> fixedUpdate (model.timeAccum + dt)
             , Cmd.none
             )
-
-        ConsoleMsg cmsg ->
-            let
-                ( newConsole, mmsg ) =
-                    Engine.Console.update cmsg model.console
-            in
-            case mmsg of
-                Just m ->
-                    { model | console = newConsole } |> update m
-
-                Nothing ->
-                    ( { model | console = newConsole }, Cmd.none )
 
         SetRenderDebug flag ->
             ( { model | renderConfig = SvgRenderer.withDebug flag model.renderConfig }, Cmd.none )
@@ -255,8 +220,7 @@ viewCursor cursor =
 view : Model -> Html Msg
 view model =
     main_ []
-        [ Html.map ConsoleMsg (Engine.Console.viewConsole model.console)
-        , Html.div [ Html.Attributes.class "render-stats" ]
+        [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
             , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
             ]
