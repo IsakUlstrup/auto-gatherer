@@ -26,7 +26,7 @@ testWorld1 =
         |> World.addStaticParticle 220 35 15 0.1 (FollowId 3)
         |> World.addStaticParticle 190 35 15 0.1 (FollowId 4)
         |> World.addStaticParticle 190 15 15 0.1 (FollowId 5)
-        -- |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
+        |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
         -- |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
         |> World.addDynamicParticle -300 200 55 0 Idle
         |> World.addDynamicParticle -100 20 20 0.1 MoveToCenter

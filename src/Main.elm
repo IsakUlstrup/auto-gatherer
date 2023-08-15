@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg, main)
+module Main exposing (Cursor, Flags, Model, Msg, main)
 
 import Browser
 import Browser.Dom
@@ -25,14 +25,11 @@ import Task
 forces : Cursor -> World ParticleState -> World ParticleState
 forces cursor world =
     let
-        cursorSpeedMultiplier =
-            -- (Vector2.distance Vector2.zero cursor.position + 100) / 500
-            (500 - Vector2.distance Vector2.zero cursor.position) / 500
-
+        cursorForce : Vector2
         cursorForce =
             if cursor.pressed then
                 Vector2.direction Vector2.zero cursor.position
-                    |> Vector2.scale cursorSpeedMultiplier
+                    |> Vector2.scale ((500 - Vector2.distance Vector2.zero cursor.position) / 500)
 
             else
                 Vector2.zero
@@ -99,7 +96,6 @@ init _ =
 type Msg
     = Tick Float
     | SetRenderDebug Bool
-    | SetDrawDistance Float
     | SetCursor Float Float Bool
     | WindowResize
     | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -140,11 +136,9 @@ update msg model =
         SetRenderDebug flag ->
             ( { model | renderConfig = Engine.SvgRenderer.withDebug flag model.renderConfig }, Cmd.none )
 
-        SetDrawDistance dist ->
-            ( { model | renderConfig = Engine.SvgRenderer.withRenderDistance dist model.renderConfig }, Cmd.none )
-
         SetCursor x y pressed ->
             let
+                pos : Vector2
                 pos =
                     Engine.SvgRenderer.screenToWorldCoords
                         x
@@ -228,9 +222,6 @@ viewParticle showVectors particle =
                 Meander ->
                     "meander"
 
-                MoveAwayAngle _ _ ->
-                    "move-away-angle"
-
         physicsTypeString : String
         physicsTypeString =
             case particle.physicsType of
@@ -282,6 +273,7 @@ viewParticle showVectors particle =
 viewCursor : Cursor -> Svg msg
 viewCursor cursor =
     let
+        pressedClass : String
         pressedClass =
             if cursor.pressed then
                 "pressed"
