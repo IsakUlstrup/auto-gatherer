@@ -5,7 +5,8 @@ import Browser.Dom
 import Browser.Events
 import Content.ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
-import Engine.Particle as Particle
+import Engine.Particle as Particle exposing (PhysicsType(..))
+import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
@@ -14,7 +15,6 @@ import Json.Decode as Decode exposing (Decoder)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
-import SvgRenderer exposing (RenderConfig)
 import Task
 
 
@@ -81,8 +81,8 @@ init : Flags -> ( Model, Cmd Msg )
 init _ =
     ( Model
         Content.Worlds.testWorld1
-        (SvgRenderer.initRenderConfig
-            |> SvgRenderer.withRenderDistance 600
+        (Engine.SvgRenderer.initRenderConfig
+            |> Engine.SvgRenderer.withRenderDistance 600
         )
         20
         0
@@ -138,15 +138,15 @@ update msg model =
             )
 
         SetRenderDebug flag ->
-            ( { model | renderConfig = SvgRenderer.withDebug flag model.renderConfig }, Cmd.none )
+            ( { model | renderConfig = Engine.SvgRenderer.withDebug flag model.renderConfig }, Cmd.none )
 
         SetDrawDistance dist ->
-            ( { model | renderConfig = SvgRenderer.withRenderDistance dist model.renderConfig }, Cmd.none )
+            ( { model | renderConfig = Engine.SvgRenderer.withRenderDistance dist model.renderConfig }, Cmd.none )
 
         SetCursor x y pressed ->
             let
                 pos =
-                    SvgRenderer.screenToWorldCoords
+                    Engine.SvgRenderer.screenToWorldCoords
                         x
                         y
                         (toFloat model.renderConfig.screenWidth)
@@ -161,8 +161,8 @@ update msg model =
             ( { model
                 | renderConfig =
                     model.renderConfig
-                        |> SvgRenderer.withWidth (round element.element.width)
-                        |> SvgRenderer.withHeight (round element.element.height)
+                        |> Engine.SvgRenderer.withWidth (round element.element.width)
+                        |> Engine.SvgRenderer.withHeight (round element.element.height)
               }
             , Cmd.none
             )
@@ -198,6 +198,87 @@ screenSizeString width height =
     "screen: " ++ String.fromInt width ++ "x" ++ String.fromInt height
 
 
+viewParticle : Bool -> Particle.Particle ParticleState -> Svg msg
+viewParticle showVectors particle =
+    let
+        typeString : String
+        typeString =
+            case particle.state of
+                MoveToCenter ->
+                    "move-center"
+
+                MoveToPosition _ ->
+                    "move-to"
+
+                FollowMoveToPosition _ ->
+                    "follow-move-to"
+
+                MoveToClosest ->
+                    "move-closest"
+
+                Idle ->
+                    "idle"
+
+                Avoid ->
+                    "avoid"
+
+                FollowId _ ->
+                    "follow-id"
+
+                Meander ->
+                    "meander"
+
+                MoveAwayAngle _ _ ->
+                    "move-away-angle"
+
+        physicsTypeString : String
+        physicsTypeString =
+            case particle.physicsType of
+                Fixed ->
+                    "fixed"
+
+                Static _ ->
+                    "static"
+
+                Dynamic _ ->
+                    "dynamic"
+    in
+    Svg.g
+        [ Engine.SvgRenderer.transformAttr particle.position
+        , Svg.Attributes.class "particle"
+        , Svg.Attributes.class typeString
+        , Svg.Attributes.class physicsTypeString
+        ]
+        (Svg.circle
+            [ Svg.Attributes.r <| String.fromInt (round particle.radius)
+            , Svg.Attributes.class "body"
+            ]
+            []
+            :: (if showVectors then
+                    [ Svg.line
+                        [ Svg.Attributes.x1 "0"
+                        , Svg.Attributes.y1 "0"
+                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getVelocity particle).x * 300))
+                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getVelocity particle).y * 300))
+                        , Svg.Attributes.class "velocity"
+                        ]
+                        []
+                    , Svg.line
+                        [ Svg.Attributes.x1 "0"
+                        , Svg.Attributes.y1 "0"
+                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getImpulse particle).x * 300))
+                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getImpulse particle).y * 300))
+                        , Svg.Attributes.class "impulse"
+                        ]
+                        []
+                    ]
+
+                else
+                    []
+               )
+        )
+
+
 viewCursor : Cursor -> Svg msg
 viewCursor cursor =
     let
@@ -209,7 +290,7 @@ viewCursor cursor =
                 "not-pressed"
     in
     Svg.circle
-        [ SvgRenderer.transformAttr cursor.position
+        [ Engine.SvgRenderer.transformAttr cursor.position
         , Svg.Attributes.r "20"
         , Svg.Attributes.class "cursor"
         , Svg.Attributes.class pressedClass
@@ -224,7 +305,7 @@ view model =
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
             , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
             ]
-        , SvgRenderer.viewSvg
+        , Engine.SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
             , Svg.Events.on "pointermove" pointerDecoder
             , Svg.Events.on "pointerdown" pointerDecoder
@@ -232,6 +313,7 @@ view model =
             , Svg.Events.on "pointercancel" pointerDecoder
             ]
             [ viewCursor model.cursor ]
+            (viewParticle model.renderConfig.debug)
             model.particles
             model.renderConfig
         ]
