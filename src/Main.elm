@@ -209,7 +209,7 @@ viewCursor cursor =
                 "not-pressed"
     in
     Svg.circle
-        [ Svg.Attributes.transform <| SvgRenderer.transformString cursor.position
+        [ SvgRenderer.transformAttr cursor.position
         , Svg.Attributes.r "20"
         , Svg.Attributes.class "cursor"
         , Svg.Attributes.class pressedClass

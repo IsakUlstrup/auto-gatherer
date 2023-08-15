@@ -2,7 +2,7 @@ module SvgRenderer exposing
     ( RenderConfig
     , initRenderConfig
     , screenToWorldCoords
-    , transformString
+    , transformAttr
     , viewSvg
     , withDebug
     , withHeight
@@ -76,23 +76,14 @@ withHeight height config =
 -- VIEW
 
 
-transformString : Vector2 -> String
-transformString position =
-    "translate("
-        ++ String.fromInt (round position.x)
-        ++ ", "
-        ++ String.fromInt (round position.y)
-        ++ ")"
-
-
-cameraTransform : Vector2 -> Svg.Attribute msg
-cameraTransform position =
+transformAttr : Vector2 -> Svg.Attribute msg
+transformAttr position =
     Svg.Attributes.style <|
-        "transform: translate("
-            ++ String.fromInt (round -position.x)
-            ++ "px, "
-            ++ String.fromInt (round -position.y)
-            ++ "px)"
+        "translate("
+            ++ String.fromInt (round position.x)
+            ++ ", "
+            ++ String.fromInt (round position.y)
+            ++ ")"
 
 
 viewParticle : Bool -> Particle.Particle ParticleState -> Svg msg
@@ -141,7 +132,7 @@ viewParticle showVectors particle =
                     "dynamic"
     in
     Svg.g
-        [ Svg.Attributes.transform <| transformString particle.position
+        [ transformAttr particle.position
         , Svg.Attributes.class "particle"
         , Svg.Attributes.class typeString
         , Svg.Attributes.class physicsTypeString
@@ -203,7 +194,7 @@ viewSvg attrs children particles config =
         )
         (Svg.g
             [ Svg.Attributes.class "camera"
-            , cameraTransform <| (.position <| World.getPlayer particles)
+            , transformAttr <| Vector2.scale -1 <| (.position <| World.getPlayer particles)
             ]
             [ Svg.g []
                 (World.getParticles particles
