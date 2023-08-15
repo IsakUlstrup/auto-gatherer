@@ -1,4 +1,4 @@
-module Content.ParticleState exposing (ParticleState(..), particleForce)
+module Content.ParticleState exposing (ParticleState(..), particleForce, toString)
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -56,3 +56,31 @@ particleForce particles seed particle =
 
         Meander ->
             Particle.applyForce (Random.step Vector2.random seed |> Tuple.first |> Vector2.scale 0.1) particle
+
+
+toString : ParticleState -> String
+toString particle =
+    case particle of
+        MoveToCenter ->
+            "move-center"
+
+        MoveToPosition _ ->
+            "move-to"
+
+        FollowMoveToPosition _ ->
+            "follow-move-to"
+
+        MoveToClosest ->
+            "move-closest"
+
+        Idle ->
+            "idle"
+
+        Avoid ->
+            "avoid"
+
+        FollowId _ ->
+            "follow-id"
+
+        Meander ->
+            "meander"

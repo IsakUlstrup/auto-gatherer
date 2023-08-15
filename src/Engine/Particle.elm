@@ -17,6 +17,7 @@ module Engine.Particle exposing
     , moveToPosition
     , new
     , newKinematics
+    , physicsTypeString
     , resolveCollisions
     , stopIfSlow
     )
@@ -114,6 +115,19 @@ type PhysicsType
     = Fixed
     | Static Kinematics
     | Dynamic Kinematics
+
+
+physicsTypeString : Particle a -> String
+physicsTypeString particle =
+    case particle.physicsType of
+        Fixed ->
+            "fixed"
+
+        Static _ ->
+            "static"
+
+        Dynamic _ ->
+            "dynamic"
 
 
 type alias Particle a =

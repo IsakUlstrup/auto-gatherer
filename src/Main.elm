@@ -3,7 +3,7 @@ module Main exposing (Cursor, Flags, Model, Msg, main)
 import Browser
 import Browser.Dom
 import Browser.Events
-import Content.ParticleState exposing (ParticleState(..), particleForce)
+import Content.ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.SvgRenderer exposing (RenderConfig)
@@ -195,51 +195,11 @@ screenSizeString width height =
 
 viewParticle : Bool -> Particle.Particle ParticleState -> Svg msg
 viewParticle showVectors particle =
-    let
-        typeString : String
-        typeString =
-            case particle.state of
-                MoveToCenter ->
-                    "move-center"
-
-                MoveToPosition _ ->
-                    "move-to"
-
-                FollowMoveToPosition _ ->
-                    "follow-move-to"
-
-                MoveToClosest ->
-                    "move-closest"
-
-                Idle ->
-                    "idle"
-
-                Avoid ->
-                    "avoid"
-
-                FollowId _ ->
-                    "follow-id"
-
-                Meander ->
-                    "meander"
-
-        physicsTypeString : String
-        physicsTypeString =
-            case particle.physicsType of
-                Fixed ->
-                    "fixed"
-
-                Static _ ->
-                    "static"
-
-                Dynamic _ ->
-                    "dynamic"
-    in
     Svg.g
         [ Engine.SvgRenderer.transformAttr particle.position
         , Svg.Attributes.class "particle"
-        , Svg.Attributes.class typeString
-        , Svg.Attributes.class physicsTypeString
+        , Svg.Attributes.class <| ParticleState.toString particle.state
+        , Svg.Attributes.class <| Particle.physicsTypeString particle
         ]
         (Svg.circle
             [ Svg.Attributes.r <| String.fromInt (round particle.radius)
