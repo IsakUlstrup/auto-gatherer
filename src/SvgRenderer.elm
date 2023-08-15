@@ -78,7 +78,7 @@ withHeight height config =
 
 transformAttr : Vector2 -> Svg.Attribute msg
 transformAttr position =
-    Svg.Attributes.style <|
+    Svg.Attributes.transform <|
         "translate("
             ++ String.fromInt (round position.x)
             ++ ", "
