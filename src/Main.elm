@@ -11,6 +11,7 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
+import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -95,7 +96,7 @@ init _ =
 
 type Msg
     = Tick Float
-    | SetRenderDebug Bool
+    | ToggleRenderDebug
     | SetCursor Float Float Bool
     | WindowResize
     | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -133,8 +134,8 @@ update msg model =
             , Cmd.none
             )
 
-        SetRenderDebug flag ->
-            ( { model | renderConfig = Engine.SvgRenderer.withDebug flag model.renderConfig }, Cmd.none )
+        ToggleRenderDebug ->
+            ( { model | renderConfig = Engine.SvgRenderer.withDebug (not model.renderConfig.debug) model.renderConfig }, Cmd.none )
 
         SetCursor x y pressed ->
             let
@@ -296,6 +297,7 @@ view model =
         [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
             , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
+            , Html.button [ Html.Events.onClick ToggleRenderDebug ] [ Html.text "debug" ]
             ]
         , Engine.SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
