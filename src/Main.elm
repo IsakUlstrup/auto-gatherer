@@ -6,9 +6,9 @@ import Browser.Events
 import Content.ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Particle as Particle exposing (PhysicsType(..))
+import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
-import Engine.World as World exposing (World)
 import Html exposing (Html, main_)
 import Html.Attributes
 import Html.Events
@@ -23,7 +23,7 @@ import Task
 -- SYSTEM
 
 
-forces : Cursor -> World ParticleState -> World ParticleState
+forces : Cursor -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 forces cursor world =
     let
         cursorForce : Vector2
@@ -40,12 +40,12 @@ forces cursor world =
         |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -(Particle.getSpeed p) cursorForce) p)
 
 
-movement : Float -> World ParticleState -> World ParticleState
+movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
-resolveCollisions : World ParticleState -> World ParticleState
+resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
 resolveCollisions system =
     system
         |> World.updateParticles (Particle.resolveCollisions (system |> World.getParticles))
@@ -56,7 +56,7 @@ resolveCollisions system =
 
 
 type alias Model =
-    { particles : World ParticleState
+    { particles : ParticleSystem ParticleState
     , renderConfig : RenderConfig
     , stepTime : Float
     , timeAccum : Float

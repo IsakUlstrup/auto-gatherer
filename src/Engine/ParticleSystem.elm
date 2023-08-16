@@ -1,5 +1,5 @@
-module Engine.World exposing
-    ( World
+module Engine.ParticleSystem exposing
+    ( ParticleSystem
     , addDynamicParticle
     , addFixedParticle
     , addStaticParticle
@@ -15,8 +15,8 @@ import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
 import Random
 
 
-type World a
-    = World
+type ParticleSystem a
+    = ParticleSystem
         { particles : List (Particle a)
         , player : Particle a
         , idCounter : Int
@@ -24,9 +24,9 @@ type World a
         }
 
 
-new : a -> Float -> World a
+new : a -> Float -> ParticleSystem a
 new playerState playerSpeed =
-    World
+    ParticleSystem
         { particles = []
         , player = Particle.new 0 0 30 (Dynamic <| Particle.newKinematics 400 playerSpeed) 0 playerState
         , idCounter = 1
@@ -34,40 +34,40 @@ new playerState playerSpeed =
         }
 
 
-addDynamicParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
-addDynamicParticle x y size speed state (World world) =
-    World
+addDynamicParticle : Float -> Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
+addDynamicParticle x y size speed state (ParticleSystem world) =
+    ParticleSystem
         { world
             | particles = Particle.new x y size (Dynamic <| Particle.newKinematics (size * 10) speed) world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
 
-addStaticParticle : Float -> Float -> Float -> Float -> a -> World a -> World a
-addStaticParticle x y size speed state (World world) =
-    World
+addStaticParticle : Float -> Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
+addStaticParticle x y size speed state (ParticleSystem world) =
+    ParticleSystem
         { world
             | particles = Particle.new x y size (Static <| Particle.newKinematics (size * 10) speed) world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
 
-addFixedParticle : Float -> Float -> Float -> a -> World a -> World a
-addFixedParticle x y size state (World world) =
-    World
+addFixedParticle : Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
+addFixedParticle x y size state (ParticleSystem world) =
+    ParticleSystem
         { world
             | particles = Particle.new x y size Fixed world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
 
-updateParticles : (Particle a -> Particle a) -> World a -> World a
-updateParticles f (World world) =
-    World { world | particles = List.map f world.particles, player = f world.player }
+updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
+updateParticles f (ParticleSystem world) =
+    ParticleSystem { world | particles = List.map f world.particles, player = f world.player }
 
 
-updateParticlesWithSeed : (Random.Seed -> Particle a -> Particle a) -> World a -> World a
-updateParticlesWithSeed f (World world) =
+updateParticlesWithSeed : (Random.Seed -> Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
+updateParticlesWithSeed f (ParticleSystem world) =
     let
         ( randomInt, worldSeed ) =
             Random.step (Random.int -10000 10000) world.seed
@@ -76,7 +76,7 @@ updateParticlesWithSeed f (World world) =
         combinedSeed p =
             Random.initialSeed (randomInt + p.id)
     in
-    World
+    ParticleSystem
         { world
             | particles = List.map (\p -> f (combinedSeed p) p) world.particles
             , player = f (combinedSeed world.player) world.player
@@ -84,16 +84,16 @@ updateParticlesWithSeed f (World world) =
         }
 
 
-updatePlayer : (Particle a -> Particle a) -> World a -> World a
-updatePlayer f (World world) =
-    World { world | player = f world.player }
+updatePlayer : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
+updatePlayer f (ParticleSystem world) =
+    ParticleSystem { world | player = f world.player }
 
 
-getParticles : World a -> List (Particle a)
-getParticles (World world) =
+getParticles : ParticleSystem a -> List (Particle a)
+getParticles (ParticleSystem world) =
     world.player :: world.particles
 
 
-getPlayer : World a -> Particle a
-getPlayer (World world) =
+getPlayer : ParticleSystem a -> Particle a
+getPlayer (ParticleSystem world) =
     world.player

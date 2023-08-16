@@ -1,23 +1,23 @@
 module Content.Worlds exposing (testWorld1)
 
 import Content.ParticleState exposing (ParticleState(..))
+import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2
-import Engine.World as World exposing (World)
 
 
 {-| A wall is an immoveable particle with no movement ai
 -}
-addWall : Float -> Float -> Float -> World ParticleState -> World ParticleState
+addWall : Float -> Float -> Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 addWall x y r =
     World.addFixedParticle x y r Idle
 
 
-addMoveToPosition : Float -> Float -> World ParticleState -> World ParticleState
+addMoveToPosition : Float -> Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 addMoveToPosition x y =
     World.addStaticParticle x y 20 0.05 (MoveToPosition <| Vector2.new x y)
 
 
-testWorld1 : World ParticleState
+testWorld1 : ParticleSystem ParticleState
 testWorld1 =
     World.new Idle 0.2
         |> World.addDynamicParticle 0 80 50 0 Idle

@@ -12,8 +12,8 @@ module Engine.SvgRenderer exposing
     )
 
 import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
+import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2 exposing (Vector2)
-import Engine.World as World
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -101,7 +101,7 @@ screenToWorldCoords x y screenWidth screenHeight =
         |> Vector2.scale ratio
 
 
-viewSvg : List (Svg.Attribute msg) -> List (Svg msg) -> (Particle a -> Svg msg) -> World.World a -> RenderConfig -> Svg msg
+viewSvg : List (Svg.Attribute msg) -> List (Svg msg) -> (Particle a -> Svg msg) -> ParticleSystem a -> RenderConfig -> Svg msg
 viewSvg attrs children viewParticle particles config =
     Svg.svg
         ([ Svg.Attributes.class "game"
