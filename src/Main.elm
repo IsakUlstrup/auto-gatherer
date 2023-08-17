@@ -63,7 +63,7 @@ spawn system =
 
         spawnPosition p =
             p.position
-                |> Vector2.add (Vector2.new 15 -15)
+                |> Vector2.add (Vector2.new 30 -30)
 
         ready : List ( Vector2, ParticleState )
         ready =
