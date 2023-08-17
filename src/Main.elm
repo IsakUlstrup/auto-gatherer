@@ -63,14 +63,14 @@ spawn system =
 
         spawnPosition p =
             p.position
-                |> Vector2.add (Vector2.new 30 -30)
+                |> Vector2.add (Vector2.new 35 -35)
 
         ready : List ( Vector2, ParticleState )
         ready =
             World.getParticles system
                 |> List.filter readySummoner
                 |> List.map
-                    (\p -> ( spawnPosition p, DieCooldown 3000 ))
+                    (\p -> ( spawnPosition p, DieCooldown 600 ))
     in
     World.addParticles ready system
 
