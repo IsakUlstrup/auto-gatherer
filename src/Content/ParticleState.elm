@@ -14,6 +14,7 @@ type ParticleState
     | Avoid
     | FollowId Int
     | Meander
+    | DestroyOnHit
 
 
 particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
@@ -57,6 +58,9 @@ particleForce particles seed particle =
         Meander ->
             Particle.applyForce (Random.step Vector2.random seed |> Tuple.first |> Vector2.scale 0.1) particle
 
+        DestroyOnHit ->
+            particle
+
 
 toString : ParticleState -> String
 toString particle =
@@ -84,3 +88,6 @@ toString particle =
 
         Meander ->
             "meander"
+
+        DestroyOnHit ->
+            "destroy-on-hit"

@@ -45,10 +45,23 @@ movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
+collisionInteraction : ParticleSystem ParticleState -> ParticleSystem ParticleState
+collisionInteraction system =
+    let
+        shouldKeep targets p =
+            case ( List.filter (Particle.isColliding p) targets |> List.head, p.state ) of
+                ( Just _, DestroyOnHit ) ->
+                    False
+
+                _ ->
+                    True
+    in
+    World.filterParticles (shouldKeep <| World.getParticles system) system
+
+
 resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
 resolveCollisions system =
-    system
-        |> World.updateParticles (Particle.resolveCollisions (system |> World.getParticles))
+    World.updateParticles (Particle.resolveCollisions (system |> World.getParticles)) system
 
 
 
@@ -111,6 +124,7 @@ fixedUpdate dt model =
                 model.particles
                     |> forces model.cursor
                     |> movement model.stepTime
+                    |> collisionInteraction
                     |> resolveCollisions
         }
             |> fixedUpdate (dt - model.stepTime)

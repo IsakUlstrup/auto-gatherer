@@ -3,6 +3,7 @@ module Engine.ParticleSystem exposing
     , addDynamicParticle
     , addFixedParticle
     , addStaticParticle
+    , filterParticles
     , getParticles
     , getPlayer
     , new
@@ -64,6 +65,11 @@ addFixedParticle x y size state (ParticleSystem world) =
 updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
 updateParticles f (ParticleSystem world) =
     ParticleSystem { world | particles = List.map f world.particles, player = f world.player }
+
+
+filterParticles : (Particle a -> Bool) -> ParticleSystem a -> ParticleSystem a
+filterParticles pred (ParticleSystem system) =
+    ParticleSystem { system | particles = List.filter pred system.particles }
 
 
 updateParticlesWithSeed : (Random.Seed -> Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a

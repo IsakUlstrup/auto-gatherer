@@ -9,6 +9,7 @@ module Engine.Particle exposing
     , getImpulse
     , getSpeed
     , getVelocity
+    , isColliding
     , move
     , moveAwayRange
     , moveDirection

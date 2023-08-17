@@ -87,3 +87,9 @@ testWorld1 =
         |> World.addDynamicParticle 200 200 20 0.1 Meander
         |> World.addDynamicParticle 300 200 20 0.1 Meander
         |> World.addDynamicParticle 400 200 20 0.1 Meander
+        |> World.addDynamicParticle -400 -400 10 0.1 DestroyOnHit
+        |> World.addDynamicParticle -350 -430 10 0.1 DestroyOnHit
+        |> World.addDynamicParticle -420 -420 10 0.1 DestroyOnHit
+        |> World.addDynamicParticle -440 -390 10 0.1 DestroyOnHit
+        |> World.addDynamicParticle -440 -460 10 0.1 DestroyOnHit
+        |> World.addDynamicParticle -460 -450 10 0.1 DestroyOnHit
