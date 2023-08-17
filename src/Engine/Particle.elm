@@ -226,7 +226,7 @@ move dt particle =
     let
         velocity : Kinematics -> Kinematics
         velocity k =
-            { k | velocity = Vector2.add k.velocity (Vector2.scale dt k.acceleration) }
+            { k | velocity = Vector2.add k.velocity (Vector2.scale dt k.acceleration) |> Vector2.add (Vector2.scale 0.05 k.impulse) }
 
         impulse : Particle a -> Particle a
         impulse p =
