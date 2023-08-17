@@ -5,7 +5,7 @@ import Browser.Dom
 import Browser.Events
 import Content.ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
-import Engine.Particle as Particle exposing (PhysicsType(..))
+import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -43,6 +43,35 @@ forces cursor world =
 movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
+
+
+state : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
+state dt system =
+    World.updateParticles (ParticleState.stateUpdate dt) system
+
+
+spawn : ParticleSystem ParticleState -> ParticleSystem ParticleState
+spawn system =
+    let
+        readySummoner p =
+            case p.state of
+                Summon cd ->
+                    if cd <= 0 then
+                        True
+
+                    else
+                        False
+
+                _ ->
+                    False
+
+        ready : List ( Vector2, ParticleState )
+        ready =
+            World.getParticles system
+                |> List.filter readySummoner
+                |> List.map (\p -> ( Vector2.add (Vector2.new (p.radius + 20) 0) p.position, Idle ))
+    in
+    World.addParticles ready system
 
 
 collisionInteraction : ParticleSystem ParticleState -> ParticleSystem ParticleState
@@ -122,6 +151,8 @@ fixedUpdate dt model =
             | timeAccum = dt - model.stepTime
             , particles =
                 model.particles
+                    |> state model.stepTime
+                    |> spawn
                     |> forces model.cursor
                     |> movement model.stepTime
                     |> collisionInteraction

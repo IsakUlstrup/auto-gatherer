@@ -2,6 +2,7 @@ module Engine.ParticleSystem exposing
     ( ParticleSystem
     , addDynamicParticle
     , addFixedParticle
+    , addParticles
     , addStaticParticle
     , filterParticles
     , getParticles
@@ -13,6 +14,7 @@ module Engine.ParticleSystem exposing
     )
 
 import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
+import Engine.Vector2 exposing (Vector2)
 import Random
 
 
@@ -60,6 +62,15 @@ addFixedParticle x y size state (ParticleSystem world) =
             | particles = Particle.new x y size Fixed world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
+
+
+addParticles : List ( Vector2, a ) -> ParticleSystem a -> ParticleSystem a
+addParticles particles system =
+    let
+        addHelper ( pos, state ) s =
+            addDynamicParticle pos.x pos.y 20 0.1 state s
+    in
+    List.foldl addHelper system particles
 
 
 updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a

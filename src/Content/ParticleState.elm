@@ -1,4 +1,4 @@
-module Content.ParticleState exposing (ParticleState(..), particleForce, toString)
+module Content.ParticleState exposing (ParticleState(..), particleForce, stateUpdate, toString)
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -15,6 +15,7 @@ type ParticleState
     | FollowId Int
     | Meander
     | DestroyOnHit
+    | Summon Float
 
 
 particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
@@ -61,6 +62,23 @@ particleForce particles seed particle =
         DestroyOnHit ->
             particle
 
+        Summon _ ->
+            particle
+
+
+stateUpdate : Float -> Particle ParticleState -> Particle ParticleState
+stateUpdate dt particle =
+    case particle.state of
+        Summon cd ->
+            if cd <= 0 then
+                { particle | state = Summon 5000 }
+
+            else
+                { particle | state = Summon <| max 0 (cd - dt) }
+
+        _ ->
+            particle
+
 
 toString : ParticleState -> String
 toString particle =
@@ -91,3 +109,6 @@ toString particle =
 
         DestroyOnHit ->
             "destroy-on-hit"
+
+        Summon _ ->
+            "summon"
