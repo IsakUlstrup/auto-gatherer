@@ -55,37 +55,48 @@ spawn system =
     let
         readySummoner p =
             case p.state of
-                Summon cd ->
-                    if cd <= 0 then
-                        True
-
-                    else
-                        False
+                Summon cd _ ->
+                    cd <= 0
 
                 _ ->
                     False
+
+        spawnPosition p =
+            p.position
+                |> Vector2.add (Vector2.new 15 -15)
 
         ready : List ( Vector2, ParticleState )
         ready =
             World.getParticles system
                 |> List.filter readySummoner
-                |> List.map (\p -> ( Vector2.add (Vector2.new (p.radius + 20) 0) p.position, Idle ))
+                |> List.map
+                    (\p -> ( spawnPosition p, DieCooldown 3000 ))
     in
     World.addParticles ready system
 
 
-collisionInteraction : ParticleSystem ParticleState -> ParticleSystem ParticleState
-collisionInteraction system =
+cull : ParticleSystem ParticleState -> ParticleSystem ParticleState
+cull system =
     let
-        shouldKeep targets p =
+        shouldKeepColliding targets p =
             case ( List.filter (Particle.isColliding p) targets |> List.head, p.state ) of
                 ( Just _, DestroyOnHit ) ->
                     False
 
                 _ ->
                     True
+
+        shoudKeepCooldown p =
+            case p.state of
+                DieCooldown cd ->
+                    cd > 0
+
+                _ ->
+                    True
     in
-    World.filterParticles (shouldKeep <| World.getParticles system) system
+    system
+        |> World.filterParticles (shouldKeepColliding <| World.getParticles system)
+        |> World.filterParticles shoudKeepCooldown
 
 
 resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
@@ -155,7 +166,7 @@ fixedUpdate dt model =
                     |> spawn
                     |> forces model.cursor
                     |> movement model.stepTime
-                    |> collisionInteraction
+                    |> cull
                     |> resolveCollisions
         }
             |> fixedUpdate (dt - model.stepTime)

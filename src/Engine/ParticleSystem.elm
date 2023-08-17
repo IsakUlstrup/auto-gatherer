@@ -68,7 +68,7 @@ addParticles : List ( Vector2, a ) -> ParticleSystem a -> ParticleSystem a
 addParticles particles system =
     let
         addHelper ( pos, state ) s =
-            addDynamicParticle pos.x pos.y 20 0.1 state s
+            addStaticParticle pos.x pos.y 20 0.1 state s
     in
     List.foldl addHelper system particles
 

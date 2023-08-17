@@ -15,7 +15,8 @@ type ParticleState
     | FollowId Int
     | Meander
     | DestroyOnHit
-    | Summon Float
+    | Summon Float Float
+    | DieCooldown Float
 
 
 particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
@@ -62,19 +63,25 @@ particleForce particles seed particle =
         DestroyOnHit ->
             particle
 
-        Summon _ ->
+        Summon _ _ ->
+            particle
+
+        DieCooldown _ ->
             particle
 
 
 stateUpdate : Float -> Particle ParticleState -> Particle ParticleState
 stateUpdate dt particle =
     case particle.state of
-        Summon cd ->
+        Summon cd maxCd ->
             if cd <= 0 then
-                { particle | state = Summon 5000 }
+                { particle | state = Summon maxCd maxCd }
 
             else
-                { particle | state = Summon <| max 0 (cd - dt) }
+                { particle | state = Summon (max 0 (cd - dt)) maxCd }
+
+        DieCooldown cd ->
+            { particle | state = DieCooldown <| max 0 (cd - dt) }
 
         _ ->
             particle
@@ -110,5 +117,8 @@ toString particle =
         DestroyOnHit ->
             "destroy-on-hit"
 
-        Summon _ ->
+        Summon _ _ ->
             "summon"
+
+        DieCooldown _ ->
+            "die-cooldown"

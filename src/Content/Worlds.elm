@@ -93,4 +93,4 @@ testWorld1 =
         |> World.addDynamicParticle -440 -390 10 0.1 DestroyOnHit
         |> World.addDynamicParticle -440 -460 10 0.1 DestroyOnHit
         |> World.addDynamicParticle -460 -450 10 0.1 DestroyOnHit
-        |> World.addDynamicParticle 560 -550 30 0.1 (Summon 5000)
+        |> World.addDynamicParticle 560 -550 30 0.1 (Summon 100 100)
