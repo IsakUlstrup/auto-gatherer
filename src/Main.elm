@@ -5,7 +5,7 @@ import Browser.Dom
 import Browser.Events
 import Content.ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
-import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
+import Engine.Particle as Particle exposing (PhysicsType(..))
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -302,6 +302,7 @@ view model =
         [ Html.div [ Html.Attributes.class "render-stats" ]
             [ Html.div [] [ Html.text <| "fps: " ++ fpsString model.deltaHistory ]
             , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
+            , Html.div [] [ Html.text <| "particle count: " ++ (World.getParticles model.particles |> List.length |> String.fromInt) ]
             , Html.button [ Html.Events.onClick ToggleRenderDebug ] [ Html.text "debug" ]
             ]
         , Engine.SvgRenderer.viewSvg
