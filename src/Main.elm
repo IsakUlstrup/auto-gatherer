@@ -150,6 +150,7 @@ init _ =
 type Msg
     = Tick Float
     | ToggleRenderDebug
+    | Reset
     | SetCursor Float Float Bool
     | WindowResize
     | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
@@ -192,6 +193,9 @@ update msg model =
 
         ToggleRenderDebug ->
             ( { model | renderConfig = Engine.SvgRenderer.withDebug (not model.renderConfig.debug) model.renderConfig }, Cmd.none )
+
+        Reset ->
+            init ()
 
         SetCursor x y pressed ->
             let
@@ -315,6 +319,7 @@ view model =
             , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
             , Html.div [] [ Html.text <| "particle count: " ++ (World.getParticles model.particles |> List.length |> String.fromInt) ]
             , Html.button [ Html.Events.onClick ToggleRenderDebug ] [ Html.text "debug" ]
+            , Html.button [ Html.Events.onClick Reset ] [ Html.text "reset" ]
             ]
         , Engine.SvgRenderer.viewSvg
             [ Svg.Attributes.id "game-view"
