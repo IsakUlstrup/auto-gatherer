@@ -1,9 +1,7 @@
 module Engine.ParticleSystem exposing
     ( ParticleSystem
     , addDynamicParticle
-    , addFixedParticle
     , addParticles
-    , addStaticParticle
     , filterParticles
     , getParticles
     , getPlayer
@@ -13,7 +11,7 @@ module Engine.ParticleSystem exposing
     , updatePlayer
     )
 
-import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
+import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 exposing (Vector2)
 import Random
 
@@ -31,7 +29,7 @@ new : a -> Float -> ParticleSystem a
 new playerState playerSpeed =
     ParticleSystem
         { particles = []
-        , player = Particle.new 0 0 30 (Dynamic <| Particle.newKinematics 400 playerSpeed) 0 playerState
+        , player = Particle.new 0 0 30 playerSpeed 0 playerState
         , idCounter = 1
         , seed = Random.initialSeed 2
         }
@@ -41,25 +39,7 @@ addDynamicParticle : Float -> Float -> Float -> Float -> a -> ParticleSystem a -
 addDynamicParticle x y size speed state (ParticleSystem world) =
     ParticleSystem
         { world
-            | particles = Particle.new x y size (Dynamic <| Particle.newKinematics (size * 10) speed) world.idCounter state :: world.particles
-            , idCounter = world.idCounter + 1
-        }
-
-
-addStaticParticle : Float -> Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
-addStaticParticle x y size speed state (ParticleSystem world) =
-    ParticleSystem
-        { world
-            | particles = Particle.new x y size (Static <| Particle.newKinematics (size * 10) speed) world.idCounter state :: world.particles
-            , idCounter = world.idCounter + 1
-        }
-
-
-addFixedParticle : Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
-addFixedParticle x y size state (ParticleSystem world) =
-    ParticleSystem
-        { world
-            | particles = Particle.new x y size Fixed world.idCounter state :: world.particles
+            | particles = Particle.new x y size speed world.idCounter state :: world.particles
             , idCounter = world.idCounter + 1
         }
 
@@ -68,7 +48,7 @@ addParticles : List ( Vector2, a ) -> ParticleSystem a -> ParticleSystem a
 addParticles particles system =
     let
         addHelper ( pos, state ) s =
-            addStaticParticle pos.x pos.y 20 0.1 state s
+            addDynamicParticle pos.x pos.y 20 0.1 state s
     in
     List.foldl addHelper system particles
 

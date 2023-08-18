@@ -11,7 +11,7 @@ module Engine.SvgRenderer exposing
     , withZoom
     )
 
-import Engine.Particle as Particle exposing (Particle, PhysicsType(..))
+import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Svg exposing (Svg)

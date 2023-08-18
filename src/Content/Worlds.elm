@@ -9,23 +9,23 @@ import Engine.Vector2 as Vector2
 -}
 addWall : Float -> Float -> Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 addWall x y r =
-    World.addFixedParticle x y r Idle
+    World.addDynamicParticle x y r 0 Idle
 
 
 addMoveToPosition : Float -> Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 addMoveToPosition x y =
-    World.addStaticParticle x y 20 0.05 (MoveToPosition <| Vector2.new x y)
+    World.addDynamicParticle x y 20 0.05 (MoveToPosition <| Vector2.new x y)
 
 
 testWorld1 : ParticleSystem ParticleState
 testWorld1 =
-    World.new Idle 0.2
+    World.new Idle 0.1
         |> World.addDynamicParticle 0 80 50 0 Idle
-        |> World.addStaticParticle 200 20 15 0.1 (FollowId 1)
-        |> World.addStaticParticle 220 30 15 0.1 (FollowId 2)
-        |> World.addStaticParticle 220 35 15 0.1 (FollowId 3)
-        |> World.addStaticParticle 190 35 15 0.1 (FollowId 4)
-        |> World.addStaticParticle 190 15 15 0.1 (FollowId 5)
+        |> World.addDynamicParticle 200 20 15 0.1 (FollowId 1)
+        |> World.addDynamicParticle 220 30 15 0.1 (FollowId 2)
+        |> World.addDynamicParticle 220 35 15 0.1 (FollowId 3)
+        |> World.addDynamicParticle 190 35 15 0.1 (FollowId 4)
+        |> World.addDynamicParticle 190 15 15 0.1 (FollowId 5)
         |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
         -- |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
         |> World.addDynamicParticle -300 200 55 0 Idle
@@ -63,18 +63,18 @@ testWorld1 =
         -- |> World.addStaticParticle -248 -107 12 FollowMoveToPosition
         |> World.addDynamicParticle -340 -107 23 0.06 Avoid
         |> World.addDynamicParticle 240 -17 18 0.05 Avoid
-        |> World.addFixedParticle 23 -400 108 Idle
-        |> World.addFixedParticle 170 -420 88 Idle
-        |> World.addFixedParticle 250 -390 103 Idle
-        |> World.addFixedParticle 350 -450 133 Idle
-        |> World.addStaticParticle 341 -97 12 0.08 Idle
-        |> World.addStaticParticle 352 -117 12 0.08 Idle
-        |> World.addStaticParticle 363 -137 12 0.07 Idle
-        |> World.addStaticParticle 374 -87 12 0.06 Idle
-        |> World.addStaticParticle 385 -117 12 0.05 Idle
-        |> World.addStaticParticle 396 -77 12 0.07 Idle
-        |> World.addStaticParticle 307 -107 12 0.05 Idle
-        |> World.addFixedParticle 23 -400 58 Idle
+        |> World.addDynamicParticle 23 -400 108 0.1 Idle
+        |> World.addDynamicParticle 170 -420 88 0.1 Idle
+        |> World.addDynamicParticle 250 -390 103 0.1 Idle
+        |> World.addDynamicParticle 350 -450 133 0.1 Idle
+        |> World.addDynamicParticle 341 -97 12 0.08 Idle
+        |> World.addDynamicParticle 352 -117 12 0.08 Idle
+        |> World.addDynamicParticle 363 -137 12 0.07 Idle
+        |> World.addDynamicParticle 374 -87 12 0.06 Idle
+        |> World.addDynamicParticle 385 -117 12 0.05 Idle
+        |> World.addDynamicParticle 396 -77 12 0.07 Idle
+        |> World.addDynamicParticle 307 -107 12 0.05 Idle
+        |> World.addDynamicParticle 23 -400 58 0.1 Idle
         |> addWall 527 -207 102
         |> addWall 587 -307 82
         |> addWall 627 -407 72

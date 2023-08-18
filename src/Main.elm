@@ -5,7 +5,7 @@ import Browser.Dom
 import Browser.Events
 import Content.ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
-import Engine.Particle as Particle exposing (PhysicsType(..))
+import Engine.Particle as Particle
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -37,12 +37,12 @@ forces cursor world =
     in
     world
         |> World.updateParticlesWithSeed (particleForce (World.getParticles world))
-        |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -(Particle.getSpeed p) cursorForce) p)
+        |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -p.speed cursorForce) p)
 
 
 movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 movement dt system =
-    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
+    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.15 >> Particle.stopIfSlow 0.0001) system
 
 
 state : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
@@ -259,7 +259,6 @@ viewParticle showVectors particle =
         [ Engine.SvgRenderer.transformAttr particle.position
         , Svg.Attributes.class "particle"
         , Svg.Attributes.class <| ParticleState.toString particle.state
-        , Svg.Attributes.class <| Particle.physicsTypeString particle
         ]
         (Svg.circle
             [ Svg.Attributes.r <| String.fromInt (round particle.radius)
@@ -270,16 +269,16 @@ viewParticle showVectors particle =
                     [ Svg.line
                         [ Svg.Attributes.x1 "0"
                         , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getVelocity particle).x * 300))
-                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getVelocity particle).y * 300))
+                        , Svg.Attributes.x2 <| String.fromInt (round (particle.velocity.x * 300))
+                        , Svg.Attributes.y2 <| String.fromInt (round (particle.velocity.y * 300))
                         , Svg.Attributes.class "velocity"
                         ]
                         []
                     , Svg.line
                         [ Svg.Attributes.x1 "0"
                         , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round ((Particle.getImpulse particle).x * 300 / 20))
-                        , Svg.Attributes.y2 <| String.fromInt (round ((Particle.getImpulse particle).y * 300 / 20))
+                        , Svg.Attributes.x2 <| String.fromInt (round (particle.impulse.x * 300 / 20))
+                        , Svg.Attributes.y2 <| String.fromInt (round (particle.impulse.y * 300 / 20))
                         , Svg.Attributes.class "impulse"
                         ]
                         []
