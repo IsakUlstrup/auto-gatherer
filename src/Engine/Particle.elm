@@ -2,17 +2,15 @@ module Engine.Particle exposing
     ( Particle
     , applyForce
     , applyFriciton
-    , collisionAction
+    , applyImpulse
     , distance
-    , isColliding
     , move
     , moveAwayRange
     , moveDirection
-    , moveToId
     , moveToNearest
     , moveToPosition
     , new
-    , resolveCollisions
+    , setVelocity
     , stopIfSlow
     )
 
@@ -20,8 +18,7 @@ import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
 type alias Particle a =
-    { id : Int
-    , position : Vector2
+    { position : Vector2
     , velocity : Vector2
     , acceleration : Vector2
     , impulse : Vector2
@@ -34,10 +31,9 @@ type alias Particle a =
 
 {-| Particle constructor
 -}
-new : Float -> Float -> Float -> Float -> Int -> a -> Particle a
-new x y size speed id state =
+new : Float -> Float -> Float -> Float -> a -> Particle a
+new x y size speed state =
     Particle
-        id
         (Vector2.new x y)
         Vector2.zero
         Vector2.zero
@@ -147,117 +143,6 @@ distance p1 p2 =
     Vector2.distance p1.position p2.position - (p1.radius + p2.radius)
 
 
-isNotEqual : Particle a -> Particle b -> Bool
-isNotEqual p1 p2 =
-    p1.id /= p2.id
-
-
-
----- COLLISION ----
-
-
-{-| Check if two particles are colliding
-
-A collision occurs when the distance between to particles with collisions enabled is less than their combine radii
-
--}
-isColliding : Particle a -> Particle b -> Bool
-isColliding particle target =
-    if particle.id /= target.id then
-        let
-            dist : Vector2
-            dist =
-                Vector2.subtract particle.position target.position
-        in
-        (dist |> Vector2.multiply dist |> Vector2.sum) <= (particle.radius + target.radius) ^ 2
-
-    else
-        False
-
-
-{-| if particle is colliding with target, run function f on particle and return
--}
-collisionAction : (Particle b -> Particle a -> Particle a) -> List (Particle b) -> Particle a -> Particle a
-collisionAction f targets particle =
-    let
-        collisions : List (Particle b)
-        collisions =
-            List.filter (isColliding particle) targets
-
-        helper : Particle b -> Particle a -> Particle a
-        helper target obj =
-            f target obj
-    in
-    List.foldl helper particle collisions
-
-
-{-| calculate how much each particle should move based on the diference in mass
-
-        When resolving collision between a light and a heavy particle, the light one moves more
-
--}
-overlapModifier : Particle b -> Particle a -> Float
-overlapModifier target particle =
-    let
-        ratio x y =
-            (((x - y) / (x + y)) + 1) * 0.5
-    in
-    ratio target.mass particle.mass
-
-
-{-| Resolve collision between two particles
--}
-resolveDynamicCollision : Particle b -> Particle a -> Particle a
-resolveDynamicCollision target particle =
-    let
-        dist : Float
-        dist =
-            Vector2.distance particle.position target.position
-
-        overlap : Float
-        overlap =
-            (dist - particle.radius - target.radius) * overlapModifier target particle
-
-        normal : Vector2
-        normal =
-            Vector2.direction particle.position target.position
-
-        impulse : Vector2
-        impulse =
-            Vector2.direction particle.position target.position |> Vector2.scale overlap
-
-        k : Vector2
-        k =
-            Vector2.subtract particle.velocity target.velocity
-
-        p : Float
-        p =
-            2 * (normal.x * k.x + normal.y * k.y) / (particle.mass + target.mass)
-
-        v : Vector2
-        v =
-            Vector2.new (particle.velocity.x - p * target.mass * normal.x)
-                (particle.velocity.y - p * target.mass * normal.y)
-    in
-    particle
-        |> applyImpulse impulse
-        |> setVelocity v
-
-
-{-| Detect and react to collisions
--}
-resolveCollisions : List (Particle b) -> Particle a -> Particle a
-resolveCollisions targets particle =
-    let
-        resolve : Particle b -> Particle a -> Particle a
-        resolve res e =
-            resolveDynamicCollision res e
-    in
-    targets
-        |> List.filter (isColliding particle)
-        |> List.foldl resolve particle
-
-
 
 -- AI
 
@@ -273,35 +158,10 @@ moveToNearest maxDistance targets particle =
         nearest : Maybe Vector2
         nearest =
             targets
-                |> List.filter (isNotEqual particle)
+                -- |> List.filter (isNotEqual particle)
                 |> List.filter (\t -> distance t particle > maxDistance)
                 |> List.map .position
                 |> List.sortBy (Vector2.distance particle.position)
-                |> List.head
-
-        force : Vector2 -> Vector2
-        force target =
-            Vector2.direction particle.position target |> Vector2.scale particle.speed
-    in
-    case nearest of
-        Just target ->
-            applyForce (force target) particle
-
-        Nothing ->
-            particle
-
-
-{-| Move towards particle with a given id
--}
-moveToId : Float -> Int -> List (Particle b) -> Particle a -> Particle a
-moveToId maxDistance id targets particle =
-    let
-        nearest : Maybe Vector2
-        nearest =
-            targets
-                |> List.filter (isNotEqual particle)
-                |> List.filter (\t -> distance t particle > maxDistance && t.id == id)
-                |> List.map .position
                 |> List.head
 
         force : Vector2 -> Vector2
@@ -337,7 +197,7 @@ moveAwayRange range targets particle =
         inRange : List Vector2
         inRange =
             targets
-                |> List.filter (\t -> t.id /= particle.id)
+                -- |> List.filter (\t -> t.id /= particle.id)
                 |> List.filter (\t -> distance t particle < range)
                 |> List.map .position
 

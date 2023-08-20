@@ -21,11 +21,11 @@ testWorld1 : ParticleSystem ParticleState
 testWorld1 =
     World.new Idle 0.1
         |> World.addDynamicParticle 0 80 50 0 Idle
-        |> World.addDynamicParticle 200 20 15 0.1 (FollowId 1)
-        |> World.addDynamicParticle 220 30 15 0.1 (FollowId 2)
-        |> World.addDynamicParticle 220 35 15 0.1 (FollowId 3)
-        |> World.addDynamicParticle 190 35 15 0.1 (FollowId 4)
-        |> World.addDynamicParticle 190 15 15 0.1 (FollowId 5)
+        -- |> World.addDynamicParticle 200 20 15 0.1 (FollowId 1)
+        -- |> World.addDynamicParticle 220 30 15 0.1 (FollowId 2)
+        -- |> World.addDynamicParticle 220 35 15 0.1 (FollowId 3)
+        -- |> World.addDynamicParticle 190 35 15 0.1 (FollowId 4)
+        -- |> World.addDynamicParticle 190 15 15 0.1 (FollowId 5)
         |> World.addDynamicParticle -97 20 15 0.08 MoveToClosest
         -- |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
         |> World.addDynamicParticle -300 200 55 0 Idle

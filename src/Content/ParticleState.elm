@@ -2,7 +2,6 @@ module Content.ParticleState exposing (ParticleState(..), particleForce, stateUp
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
-import Random
 
 
 type ParticleState
@@ -12,15 +11,14 @@ type ParticleState
     | MoveToClosest
     | Idle
     | Avoid
-    | FollowId Int
     | Meander
     | DestroyOnHit
     | Summon Float Float
     | DieCooldown Float
 
 
-particleForce : List (Particle ParticleState) -> Random.Seed -> Particle ParticleState -> Particle ParticleState
-particleForce particles seed particle =
+particleForce : List (Particle ParticleState) -> Particle ParticleState -> Particle ParticleState
+particleForce particles particle =
     case particle.state of
         MoveToCenter ->
             Particle.moveToPosition 50 Vector2.zero particle
@@ -54,11 +52,8 @@ particleForce particles seed particle =
         Avoid ->
             Particle.moveAwayRange 100 particles particle
 
-        FollowId id ->
-            Particle.moveToId 5 id particles particle
-
         Meander ->
-            Particle.applyForce (Random.step Vector2.random seed |> Tuple.first |> Vector2.scale 0.1) particle
+            Particle.applyForce Vector2.zero particle
 
         DestroyOnHit ->
             particle
@@ -107,9 +102,6 @@ toString particle =
 
         Avoid ->
             "avoid"
-
-        FollowId _ ->
-            "follow-id"
 
         Meander ->
             "meander"

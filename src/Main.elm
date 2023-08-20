@@ -36,7 +36,7 @@ forces cursor world =
                 Vector2.zero
     in
     world
-        |> World.updateParticlesWithSeed (particleForce (World.getParticles world))
+        |> World.updateParticlesWithTargets particleForce
         |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -p.speed cursorForce) p)
 
 
@@ -78,14 +78,6 @@ spawn system =
 cull : ParticleSystem ParticleState -> ParticleSystem ParticleState
 cull system =
     let
-        shouldKeepColliding targets p =
-            case ( List.filter (Particle.isColliding p) targets |> List.head, p.state ) of
-                ( Just _, DestroyOnHit ) ->
-                    False
-
-                _ ->
-                    True
-
         shoudKeepCooldown p =
             case p.state of
                 DieCooldown cd ->
@@ -95,16 +87,13 @@ cull system =
                     True
     in
     system
-        |> World.filterParticles (shouldKeepColliding <| World.getParticles system)
         |> World.filterParticles shoudKeepCooldown
 
 
-resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
-resolveCollisions system =
-    World.updateParticles (Particle.resolveCollisions (system |> World.getParticles)) system
 
-
-
+-- resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
+-- resolveCollisions system =
+--     World.collisions system
 -- MODEL
 
 
@@ -167,8 +156,8 @@ fixedUpdate dt model =
                     |> spawn
                     |> forces model.cursor
                     |> movement model.stepTime
+                    |> World.collisions
                     |> cull
-                    |> resolveCollisions
         }
             |> fixedUpdate (dt - model.stepTime)
 
