@@ -24,15 +24,14 @@ type alias Particle a =
     , impulse : Vector2
     , mass : Float
     , radius : Float
-    , speed : Float
     , state : a
     }
 
 
 {-| Particle constructor
 -}
-new : Float -> Float -> Float -> Float -> a -> Particle a
-new x y size speed state =
+new : Float -> Float -> Float -> a -> Particle a
+new x y size state =
     Particle
         (Vector2.new x y)
         Vector2.zero
@@ -40,7 +39,6 @@ new x y size speed state =
         Vector2.zero
         (clamp 1 562949953421311 size)
         (clamp 1 562949953421311 size)
-        speed
         state
 
 
@@ -152,8 +150,8 @@ distance p1 p2 =
 If none are present, do nothing
 
 -}
-moveToNearest : Float -> List (Particle b) -> Particle a -> Particle a
-moveToNearest maxDistance targets particle =
+moveToNearest : Float -> Float -> List (Particle b) -> Particle a -> Particle a
+moveToNearest speed maxDistance targets particle =
     let
         nearest : Maybe Vector2
         nearest =
@@ -166,7 +164,7 @@ moveToNearest maxDistance targets particle =
 
         force : Vector2 -> Vector2
         force target =
-            Vector2.direction particle.position target |> Vector2.scale particle.speed
+            Vector2.direction particle.position target |> Vector2.scale speed
     in
     case nearest of
         Just target ->
@@ -176,12 +174,12 @@ moveToNearest maxDistance targets particle =
             particle
 
 
-moveDirection : Vector2 -> Particle a -> Particle a
-moveDirection direction particle =
+moveDirection : Float -> Vector2 -> Particle a -> Particle a
+moveDirection speed direction particle =
     let
         force : Vector2
         force =
-            direction |> Vector2.normalize |> Vector2.scale particle.speed
+            direction |> Vector2.normalize |> Vector2.scale speed
     in
     applyForce force particle
 
@@ -191,8 +189,8 @@ moveDirection direction particle =
 If none are present, do nothing
 
 -}
-moveAwayRange : Float -> List (Particle b) -> Particle a -> Particle a
-moveAwayRange range targets particle =
+moveAwayRange : Float -> Float -> List (Particle b) -> Particle a -> Particle a
+moveAwayRange speed range targets particle =
     let
         inRange : List Vector2
         inRange =
@@ -204,15 +202,15 @@ moveAwayRange range targets particle =
         force : Vector2
         force =
             List.foldl (\t v -> Vector2.direction t particle.position |> Vector2.add v) Vector2.zero inRange
-                |> Vector2.scale particle.speed
+                |> Vector2.scale speed
     in
     applyForce force particle
 
 
 {-| Apply force towards target position if particle is more than limitDistance units away
 -}
-moveToPosition : Float -> Vector2 -> Particle a -> Particle a
-moveToPosition limitDistance position particle =
+moveToPosition : Float -> Float -> Vector2 -> Particle a -> Particle a
+moveToPosition speed limitDistance position particle =
     let
         force : Vector2
         force =
@@ -220,6 +218,6 @@ moveToPosition limitDistance position particle =
                 Vector2.zero
 
             else
-                Vector2.direction particle.position position |> Vector2.scale particle.speed
+                Vector2.direction particle.position position |> Vector2.scale speed
     in
     applyForce force particle

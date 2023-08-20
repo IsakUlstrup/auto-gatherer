@@ -21,10 +21,10 @@ particleForce : List (Particle ParticleState) -> Particle ParticleState -> Parti
 particleForce particles particle =
     case particle.state of
         MoveToCenter ->
-            Particle.moveToPosition 50 Vector2.zero particle
+            Particle.moveToPosition 0.1 50 Vector2.zero particle
 
         MoveToPosition p ->
-            Particle.moveToPosition 50 p particle
+            Particle.moveToPosition 0.1 50 p particle
 
         FollowMoveToPosition range ->
             let
@@ -41,16 +41,16 @@ particleForce particles particle =
                 isInRange p =
                     Particle.distance p particle < range
             in
-            Particle.moveToNearest 50 (particles |> List.filter followTarget |> List.filter isInRange) particle
+            Particle.moveToNearest 0.1 50 (particles |> List.filter followTarget |> List.filter isInRange) particle
 
         MoveToClosest ->
-            Particle.moveToNearest 50 particles particle
+            Particle.moveToNearest 0.1 50 particles particle
 
         Idle ->
             particle
 
         Avoid ->
-            Particle.moveAwayRange 100 particles particle
+            Particle.moveAwayRange 0.1 100 particles particle
 
         Meander ->
             Particle.applyForce Vector2.zero particle

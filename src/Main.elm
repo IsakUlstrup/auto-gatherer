@@ -37,7 +37,7 @@ forces cursor world =
     in
     world
         |> World.updateParticlesWithTargets particleForce
-        |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -p.speed cursorForce) p)
+        |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -0.1 cursorForce) p)
 
 
 movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState

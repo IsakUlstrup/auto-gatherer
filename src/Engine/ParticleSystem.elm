@@ -26,21 +26,21 @@ type ParticleSystem a
         }
 
 
-new : a -> Float -> ParticleSystem a
-new playerState playerSpeed =
+new : a -> ParticleSystem a
+new playerState =
     ParticleSystem
         { particles = []
-        , player = ( 0, Particle.new 0 0 30 playerSpeed playerState )
+        , player = ( 0, Particle.new 0 0 30 playerState )
         , idCounter = 1
         , seed = Random.initialSeed 2
         }
 
 
-addDynamicParticle : Float -> Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
-addDynamicParticle x y size speed state (ParticleSystem world) =
+addDynamicParticle : Float -> Float -> Float -> a -> ParticleSystem a -> ParticleSystem a
+addDynamicParticle x y size state (ParticleSystem world) =
     ParticleSystem
         { world
-            | particles = ( world.idCounter, Particle.new x y size speed state ) :: world.particles
+            | particles = ( world.idCounter, Particle.new x y size state ) :: world.particles
             , idCounter = world.idCounter + 1
         }
 
@@ -49,7 +49,7 @@ addParticles : List ( Vector2, a ) -> ParticleSystem a -> ParticleSystem a
 addParticles particles system =
     let
         addHelper ( pos, state ) s =
-            addDynamicParticle pos.x pos.y 20 0.1 state s
+            addDynamicParticle pos.x pos.y 20 state s
     in
     List.foldl addHelper system particles
 
