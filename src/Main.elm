@@ -3,7 +3,6 @@ module Main exposing (Cursor, Flags, Model, Msg, main)
 import Browser
 import Browser.Dom
 import Browser.Events
-import Content.ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Content.Worlds
 import Engine.Particle as Particle
 import Engine.ParticleSystem as World exposing (ParticleSystem)
@@ -13,6 +12,7 @@ import Html exposing (Html, main_)
 import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
+import ParticleState as ParticleState exposing (ParticleState(..), particleForce)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events

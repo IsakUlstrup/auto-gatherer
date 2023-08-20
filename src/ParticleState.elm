@@ -1,4 +1,4 @@
-module Content.ParticleState exposing (ParticleState(..), particleForce, stateUpdate, toString)
+module ParticleState exposing (ParticleState(..), particleForce, stateUpdate, toString)
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)

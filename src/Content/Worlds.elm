@@ -1,8 +1,8 @@
 module Content.Worlds exposing (testWorld1)
 
-import Content.ParticleState exposing (ParticleState(..))
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2
+import ParticleState exposing (ParticleState(..))
 
 
 {-| A wall is an immoveable particle with no movement ai
