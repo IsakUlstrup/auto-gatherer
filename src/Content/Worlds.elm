@@ -1,96 +1,18 @@
 module Content.Worlds exposing (testWorld1)
 
+import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2
 import ParticleState exposing (ParticleState(..))
 
 
-{-| A wall is an immoveable particle with no movement ai
--}
-addWall : Float -> Float -> Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
-addWall x y r =
-    World.addDynamicParticle x y r Idle
-
-
-addMoveToPosition : Float -> Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
-addMoveToPosition x y =
-    World.addDynamicParticle x y 20 (MoveToPosition <| Vector2.new x y)
+wallParticle : Float -> Float -> Particle ParticleState
+wallParticle x y =
+    Particle.new (Vector2.new x y) 50 10000 Idle
 
 
 testWorld1 : ParticleSystem ParticleState
 testWorld1 =
-    World.new Idle
-        |> World.addDynamicParticle 0 80 50 Idle
-        -- |> World.addDynamicParticle 200 20 15 0.1 (FollowId 1)
-        -- |> World.addDynamicParticle 220 30 15 0.1 (FollowId 2)
-        -- |> World.addDynamicParticle 220 35 15 0.1 (FollowId 3)
-        -- |> World.addDynamicParticle 190 35 15 0.1 (FollowId 4)
-        -- |> World.addDynamicParticle 190 15 15 0.1 (FollowId 5)
-        |> World.addDynamicParticle -97 20 15 MoveToClosest
-        -- |> World.addDynamicParticle 200 20 40 0.08 MoveToCenter
-        |> World.addDynamicParticle -300 200 55 Idle
-        |> World.addDynamicParticle -100 20 20 MoveToCenter
-        |> World.addDynamicParticle -101 20 20 MoveToCenter
-        |> World.addDynamicParticle -102 20 20 MoveToCenter
-        |> World.addDynamicParticle -103 20 20 MoveToCenter
-        |> World.addDynamicParticle -104 20 20 MoveToCenter
-        -- |> World.addDynamicParticle -150 20 20 MoveToClosest
-        -- |> World.addDynamicParticle -150 50 20 MoveToClosest
-        -- |> World.addDynamicParticle 150 20 12 0.08 MoveToClosest
-        |> addMoveToPosition 310 -100
-        |> addMoveToPosition 300 -120
-        |> addMoveToPosition 300 -100
-        |> addMoveToPosition 350 -120
-        |> addMoveToPosition 350 -120
-        |> addMoveToPosition 340 -114
-        |> addMoveToPosition 330 -100
-        |> addMoveToPosition 328 -124
-        |> addMoveToPosition 298 -99
-        |> addMoveToPosition 288 -103
-        |> addMoveToPosition 278 -113
-        |> addMoveToPosition 268 -93
-        -- |> World.addStaticParticle 180 100 15 0.1 (FollowMoveToPosition 150)
-        -- |> World.addStaticParticle 140 -107 14 0.1 (FollowMoveToPosition 150)
-        -- |> World.addStaticParticle -107 12 13 0.1 (FollowMoveToPosition 150)
-        -- |> World.addStaticParticle -240 -107 12 0.09 (FollowMoveToPosition 150)
-        -- |> World.addStaticParticle -241 -97 12 0.08 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -252 -117 12 0.08 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -263 -137 12 0.07 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -274 -87 12 0.06 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -285 -117 12 0.05 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -296 -77 12 0.07 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -207 -107 12 0.05 (FollowMoveToPosition 100)
-        -- |> World.addStaticParticle -248 -107 12 FollowMoveToPosition
-        |> World.addDynamicParticle -340 -107 23 Avoid
-        |> World.addDynamicParticle 240 -17 18 Avoid
-        |> World.addDynamicParticle 23 -400 108 Idle
-        |> World.addDynamicParticle 170 -420 88 Idle
-        |> World.addDynamicParticle 250 -390 103 Idle
-        |> World.addDynamicParticle 350 -450 133 Idle
-        |> World.addDynamicParticle 341 -97 12 Idle
-        |> World.addDynamicParticle 352 -117 12 Idle
-        |> World.addDynamicParticle 363 -137 12 Idle
-        |> World.addDynamicParticle 374 -87 12 Idle
-        |> World.addDynamicParticle 385 -117 12 Idle
-        |> World.addDynamicParticle 396 -77 12 Idle
-        |> World.addDynamicParticle 307 -107 12 Idle
-        |> World.addDynamicParticle 23 -400 58 Idle
-        |> addWall 527 -207 102
-        |> addWall 587 -307 82
-        |> addWall 627 -407 72
-        |> addWall -527 -207 92
-        |> addWall -527 20 92
-        |> addWall -727 -197 92
-        |> addWall -727 10 92
-        |> World.addDynamicParticle 0 200 20 Meander
-        |> World.addDynamicParticle 100 200 20 Meander
-        |> World.addDynamicParticle 200 200 20 Meander
-        |> World.addDynamicParticle 300 200 20 Meander
-        |> World.addDynamicParticle 400 200 20 Meander
-        |> World.addDynamicParticle -400 -400 10 DestroyOnHit
-        |> World.addDynamicParticle -350 -430 10 DestroyOnHit
-        |> World.addDynamicParticle -420 -420 10 DestroyOnHit
-        |> World.addDynamicParticle -440 -390 10 DestroyOnHit
-        |> World.addDynamicParticle -440 -460 10 DestroyOnHit
-        |> World.addDynamicParticle -460 -450 10 DestroyOnHit
-        |> World.addDynamicParticle 560 -550 30 (Summon 100 100)
+    World.new (Particle.new Vector2.zero 20 50 Idle)
+        |> World.addParticle (wallParticle 200 100)
+        |> World.addParticle (wallParticle 300 100)

@@ -30,14 +30,14 @@ type alias Particle a =
 
 {-| Particle constructor
 -}
-new : Float -> Float -> Float -> a -> Particle a
-new x y size state =
+new : Vector2 -> Float -> Float -> a -> Particle a
+new position size mass state =
     Particle
-        (Vector2.new x y)
+        position
         Vector2.zero
         Vector2.zero
         Vector2.zero
-        (clamp 1 562949953421311 size)
+        (clamp 1 562949953421311 mass)
         (clamp 1 562949953421311 size)
         state
 

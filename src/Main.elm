@@ -4,7 +4,7 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Content.Worlds
-import Engine.Particle as Particle
+import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -65,12 +65,12 @@ spawn system =
             p.position
                 |> Vector2.add (Vector2.new 35 -35)
 
-        ready : List ( Vector2, ParticleState )
+        ready : List (Particle ParticleState)
         ready =
             World.getParticles system
                 |> List.filter readySummoner
                 |> List.map
-                    (\p -> ( spawnPosition p, DieCooldown 600 ))
+                    (\p -> Particle.new (spawnPosition p) 20 10 (DieCooldown 600))
     in
     World.addParticles ready system
 
