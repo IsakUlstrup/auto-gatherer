@@ -214,7 +214,7 @@ moveToPosition speed limitDistance position particle =
     let
         force : Vector2
         force =
-            if Vector2.distance particle.position position - particle.radius < limitDistance then
+            if Vector2.distance particle.position position < limitDistance then
                 Vector2.zero
 
             else

@@ -24,7 +24,7 @@ particleForce particles particle =
             Particle.moveToPosition 0.1 50 Vector2.zero particle
 
         MoveToPosition p ->
-            Particle.moveToPosition 0.1 10 p particle
+            Particle.moveToPosition 0.1 2 p particle
 
         FollowMoveToPosition range ->
             let
