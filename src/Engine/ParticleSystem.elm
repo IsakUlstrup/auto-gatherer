@@ -18,8 +18,8 @@ import Random
 
 type ParticleSystem a
     = ParticleSystem
-        { particles : List (Particle a)
-        , player : Particle a
+        { particles : List ( Int, Particle a )
+        , player : ( Int, Particle a )
         , idCounter : Int
         , seed : Random.Seed
         }
@@ -29,7 +29,7 @@ new : a -> Float -> ParticleSystem a
 new playerState playerSpeed =
     ParticleSystem
         { particles = []
-        , player = Particle.new 0 0 30 playerSpeed 0 playerState
+        , player = ( 0, Particle.new 0 0 30 playerSpeed 0 playerState )
         , idCounter = 1
         , seed = Random.initialSeed 2
         }
@@ -39,7 +39,7 @@ addDynamicParticle : Float -> Float -> Float -> Float -> a -> ParticleSystem a -
 addDynamicParticle x y size speed state (ParticleSystem world) =
     ParticleSystem
         { world
-            | particles = Particle.new x y size speed world.idCounter state :: world.particles
+            | particles = ( world.idCounter, Particle.new x y size speed world.idCounter state ) :: world.particles
             , idCounter = world.idCounter + 1
         }
 
@@ -55,12 +55,17 @@ addParticles particles system =
 
 updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
 updateParticles f (ParticleSystem world) =
-    ParticleSystem { world | particles = List.map f world.particles, player = f world.player }
+    ParticleSystem { world | particles = List.map (Tuple.mapSecond f) world.particles, player = Tuple.mapSecond f world.player }
+
+
+updatePlayer : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
+updatePlayer f (ParticleSystem world) =
+    ParticleSystem { world | player = Tuple.mapSecond f world.player }
 
 
 filterParticles : (Particle a -> Bool) -> ParticleSystem a -> ParticleSystem a
 filterParticles pred (ParticleSystem system) =
-    ParticleSystem { system | particles = List.filter pred system.particles }
+    ParticleSystem { system | particles = List.filter (\p -> pred (Tuple.second p)) system.particles }
 
 
 updateParticlesWithSeed : (Random.Seed -> Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
@@ -69,28 +74,24 @@ updateParticlesWithSeed f (ParticleSystem world) =
         ( randomInt, worldSeed ) =
             Random.step (Random.int -10000 10000) world.seed
 
-        combinedSeed : Particle a -> Random.Seed
-        combinedSeed p =
-            Random.initialSeed (randomInt + p.id)
+        helper ( id, p ) =
+            ( id, f (Random.initialSeed (randomInt + id)) p )
     in
     ParticleSystem
         { world
-            | particles = List.map (\p -> f (combinedSeed p) p) world.particles
-            , player = f (combinedSeed world.player) world.player
+            | particles = List.map helper world.particles
+            , player = helper world.player
             , seed = worldSeed
         }
 
 
-updatePlayer : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
-updatePlayer f (ParticleSystem world) =
-    ParticleSystem { world | player = f world.player }
-
-
 getParticles : ParticleSystem a -> List (Particle a)
 getParticles (ParticleSystem world) =
-    world.player :: world.particles
+    world.player
+        :: world.particles
+        |> List.map Tuple.second
 
 
 getPlayer : ParticleSystem a -> Particle a
 getPlayer (ParticleSystem world) =
-    world.player
+    Tuple.second world.player
