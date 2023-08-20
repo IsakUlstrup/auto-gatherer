@@ -42,7 +42,7 @@ forces cursor world =
 
 movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
 movement dt system =
-    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.15 >> Particle.stopIfSlow 0.0001) system
+    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
 state : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState

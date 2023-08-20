@@ -8,7 +8,7 @@ import ParticleState exposing (ParticleState(..))
 
 wallParticle : Float -> Float -> Particle ParticleState
 wallParticle x y =
-    Particle.new (Vector2.new x y) 50 100 (MoveToPosition <| Vector2.new x y)
+    Particle.new (Vector2.new x y) 50 1000 (MoveToPosition <| Vector2.new x y)
 
 
 testWorld1 : ParticleSystem ParticleState

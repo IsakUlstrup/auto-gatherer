@@ -175,6 +175,10 @@ overlapModifier target particle =
 resolveDynamicCollision : Particle b -> Particle a -> Particle a
 resolveDynamicCollision target particle =
     let
+        elasticity : Float
+        elasticity =
+            0.5
+
         dist : Float
         dist =
             Vector2.distance particle.position target.position
@@ -197,7 +201,8 @@ resolveDynamicCollision target particle =
 
         p : Float
         p =
-            2 * (normal.x * k.x + normal.y * k.y) / (particle.mass + target.mass)
+            (2 * (normal.x * k.x + normal.y * k.y) / (particle.mass + target.mass))
+                * elasticity
 
         v : Vector2
         v =
