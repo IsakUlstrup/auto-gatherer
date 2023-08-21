@@ -9,11 +9,11 @@ import Engine.Particle as Particle
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
+import GameParticle exposing (Component(..), GameParticle, particleForce)
 import Html exposing (Html, main_)
 import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
-import ParticleState exposing (Component(..), GameParticle, particleForce)
 import Pointer exposing (Pointer)
 import Svg exposing (Svg)
 import Svg.Attributes

@@ -2,7 +2,7 @@ module Content.Worlds exposing (testWorld1)
 
 import Content.Particles as Particles
 import Engine.ParticleSystem as World exposing (ParticleSystem)
-import ParticleState exposing (GameParticle)
+import GameParticle exposing (GameParticle)
 
 
 testWorld1 : ParticleSystem GameParticle

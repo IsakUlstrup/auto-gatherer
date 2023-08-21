@@ -1,4 +1,4 @@
-module ParticleState exposing
+module GameParticle exposing
     ( Component(..)
     , GameParticle
     , particleForce
@@ -17,12 +17,7 @@ type alias GameParticle =
 type Component
     = MoveToPosition Vector2
     | FollowPointer
-      -- | FollowMoveToPosition Float
-      -- | MoveToClosest
     | Avoid
-      -- | DestroyOnHit
-      -- | Summon Float Float
-      -- | DieCooldown Float
     | Color Color
 
 
@@ -42,7 +37,7 @@ componentForce pointer particles particle component =
         Avoid ->
             Particle.moveAwayRange 0.1 100 particles particle
 
-        _ ->
+        Color _ ->
             Vector2.zero
 
 

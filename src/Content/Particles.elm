@@ -3,7 +3,7 @@ module Content.Particles exposing (player, wall)
 import Color
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2
-import ParticleState exposing (Component(..), GameParticle)
+import GameParticle exposing (Component(..), GameParticle)
 
 
 player : Particle GameParticle
