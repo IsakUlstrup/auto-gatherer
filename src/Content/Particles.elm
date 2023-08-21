@@ -1,4 +1,4 @@
-module Content.Particles exposing (player, wall)
+module Content.Particles exposing (followPointer, wall)
 
 import Color
 import Engine.Particle as Particle exposing (Particle)
@@ -6,9 +6,9 @@ import Engine.Vector2 as Vector2
 import GameParticle exposing (Component(..), GameParticle)
 
 
-player : Particle GameParticle
-player =
-    Particle.new Vector2.zero 20 50 [ Color <| Color.new 100 50 50, FollowPointer ]
+followPointer : Float -> Float -> Particle GameParticle
+followPointer x y =
+    Particle.new (Vector2.new x y) 20 50 [ Color <| Color.new 100 50 50, FollowPointer ]
 
 
 wall : Float -> Float -> Particle GameParticle

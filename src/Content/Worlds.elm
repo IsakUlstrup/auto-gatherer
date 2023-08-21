@@ -7,7 +7,8 @@ import GameParticle exposing (GameParticle)
 
 testWorld1 : ParticleSystem GameParticle
 testWorld1 =
-    World.new Particles.player
+    World.new (Particles.followPointer 0 0)
         |> World.addParticle (Particles.wall 200 100)
         |> World.addParticle (Particles.wall 300 100)
         |> World.addParticle (Particles.wall 250 190)
+        |> World.addParticle (Particles.followPointer -100 50)
