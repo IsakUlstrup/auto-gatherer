@@ -177,7 +177,7 @@ resolveDynamicCollision target particle =
     let
         elasticity : Float
         elasticity =
-            0.5
+            min target.elasticity particle.elasticity
 
         dist : Float
         dist =
