@@ -25,7 +25,7 @@ wall : Float -> Float -> Particle GameParticle
 wall x y =
     Particle.new (Vector2.new x y)
         50
-        10000
+        100000
         0
         [ MoveToPosition <| Vector2.new x y
         , Color <| normalizedColor 200
