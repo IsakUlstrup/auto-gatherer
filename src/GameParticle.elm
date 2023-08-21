@@ -1,6 +1,7 @@
 module GameParticle exposing
     ( Component(..)
     , GameParticle
+    , componentToString
     , particleForce
     )
 
@@ -49,6 +50,22 @@ particleForce pointer particles particle =
             List.foldl (\comp force -> Vector2.add force (componentForce pointer particles particle comp)) Vector2.zero particle.state
     in
     Particle.applyForce sumForces particle
+
+
+componentToString : Component -> String
+componentToString component =
+    case component of
+        MoveToPosition pos ->
+            "MoveToPosition " ++ Vector2.toString pos
+
+        FollowPointer ->
+            "FollowPointer"
+
+        Avoid ->
+            "Avoid"
+
+        Color color ->
+            "Color " ++ Color.toString color
 
 
 

@@ -5,7 +5,7 @@ import Browser.Dom
 import Browser.Events
 import Color
 import Content.Worlds
-import Engine.Particle as Particle
+import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -221,8 +221,40 @@ screenSizeString width height =
     "screen: " ++ String.fromInt width ++ "x" ++ String.fromInt height
 
 
-viewParticle : Bool -> Particle.Particle GameParticle -> Svg msg
-viewParticle showVectors particle =
+viewDebugComponent : Int -> Component -> Svg msg
+viewDebugComponent index component =
+    Svg.text_
+        [ Svg.Attributes.class "component"
+        , Svg.Attributes.transform <| "translate(0 " ++ String.fromInt (index * 10) ++ ")"
+        ]
+        [ Svg.text <| GameParticle.componentToString component ]
+
+
+viewParticleDebug : Particle GameParticle -> Svg msg
+viewParticleDebug particle =
+    Svg.g [ Svg.Attributes.class "debug" ]
+        [ Svg.line
+            [ Svg.Attributes.x1 "0"
+            , Svg.Attributes.y1 "0"
+            , Svg.Attributes.x2 <| String.fromInt (round (particle.velocity.x * 300))
+            , Svg.Attributes.y2 <| String.fromInt (round (particle.velocity.y * 300))
+            , Svg.Attributes.class "velocity"
+            ]
+            []
+        , Svg.line
+            [ Svg.Attributes.x1 "0"
+            , Svg.Attributes.y1 "0"
+            , Svg.Attributes.x2 <| String.fromInt (round (particle.impulse.x * 300 / 20))
+            , Svg.Attributes.y2 <| String.fromInt (round (particle.impulse.y * 300 / 20))
+            , Svg.Attributes.class "impulse"
+            ]
+            []
+        , Svg.g [ Svg.Attributes.transform <| "translate(10 0)" ] (List.indexedMap viewDebugComponent particle.state)
+        ]
+
+
+viewParticle : Bool -> Particle GameParticle -> Svg msg
+viewParticle debug particle =
     let
         colors =
             List.filterMap
@@ -246,24 +278,8 @@ viewParticle showVectors particle =
             , Svg.Attributes.fill <| Color.toString <| Color.average colors
             ]
             []
-            :: (if showVectors then
-                    [ Svg.line
-                        [ Svg.Attributes.x1 "0"
-                        , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round (particle.velocity.x * 300))
-                        , Svg.Attributes.y2 <| String.fromInt (round (particle.velocity.y * 300))
-                        , Svg.Attributes.class "velocity"
-                        ]
-                        []
-                    , Svg.line
-                        [ Svg.Attributes.x1 "0"
-                        , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 <| String.fromInt (round (particle.impulse.x * 300 / 20))
-                        , Svg.Attributes.y2 <| String.fromInt (round (particle.impulse.y * 300 / 20))
-                        , Svg.Attributes.class "impulse"
-                        ]
-                        []
-                    ]
+            :: (if debug then
+                    [ viewParticleDebug particle ]
 
                 else
                     []

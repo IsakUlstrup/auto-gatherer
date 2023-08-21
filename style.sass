@@ -22,6 +22,7 @@ main
     display: flex
     flex-direction: column
     touch-action: none
+    user-select: none
 
 .render-stats
     position: absolute
@@ -52,6 +53,7 @@ main
     .body
         stroke-width: 1.5
 
+.debug
     .velocity
         stroke: lighten($player_color, 15)
         stroke-width: 5
@@ -61,3 +63,7 @@ main
         stroke: rgb(238, 126, 178)
         stroke-width: 5
         stroke-linecap: round
+
+    .component
+        font-size: 9px
+        font-weight: lighter
