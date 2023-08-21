@@ -6,14 +6,19 @@ import Engine.Vector2 as Vector2
 import GameParticle exposing (Component(..), GameParticle)
 
 
+normalizedColor : Float -> Color.Color
+normalizedColor hue =
+    Color.new hue 35 60
+
+
 followPointer : Float -> Float -> Particle GameParticle
 followPointer x y =
-    Particle.new (Vector2.new x y) 20 50 1 [ Color <| Color.new 100 50 50, FollowPointer ]
+    Particle.new (Vector2.new x y) 20 50 1 [ Color <| normalizedColor 140, FollowPointer ]
 
 
 idle : Float -> Float -> Particle GameParticle
 idle x y =
-    Particle.new (Vector2.new x y) 25 50 1 [ Color <| Color.new 300 50 50 ]
+    Particle.new (Vector2.new x y) 25 50 1 [ Color <| normalizedColor 300 ]
 
 
 wall : Float -> Float -> Particle GameParticle
@@ -23,5 +28,5 @@ wall x y =
         1000
         0
         [ MoveToPosition <| Vector2.new x y
-        , Color <| Color.new 200 50 50
+        , Color <| normalizedColor 200
         ]
