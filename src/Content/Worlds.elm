@@ -12,3 +12,5 @@ testWorld1 =
         |> World.addParticle (Particles.wall 300 100)
         |> World.addParticle (Particles.wall 250 190)
         |> World.addParticle (Particles.followPointer -100 50)
+        |> World.addParticle (Particles.followPointer -100 150)
+        |> World.addParticle (Particles.followPointer -130 40)

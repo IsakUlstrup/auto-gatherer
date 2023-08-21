@@ -29,7 +29,8 @@ componentForce pointer particles particle component =
 
         FollowPointer ->
             if pointer.pressed then
-                Particle.moveToPosition 0.1 5 pointer.position particle
+                Vector2.direction particle.position pointer.position
+                    |> Vector2.scale 0.1
 
             else
                 Vector2.zero
