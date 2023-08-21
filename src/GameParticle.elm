@@ -26,9 +26,9 @@ type Component
     | Hit Float
 
 
-addComponent : Component -> GameParticle -> GameParticle
+addComponent : Component -> Particle GameParticle -> Particle GameParticle
 addComponent component particle =
-    component :: particle
+    { particle | state = component :: particle.state }
 
 
 componentForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2

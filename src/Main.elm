@@ -41,7 +41,7 @@ movement dt system =
 
 collisionInteraction : ParticleSystem GameParticle -> ParticleSystem GameParticle
 collisionInteraction system =
-    World.collisionAction (\_ p -> { p | state = Hit 100 :: p.state }) system
+    World.collisionAction (\_ p -> GameParticle.addComponent (Hit 100) p) system
 
 
 state : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
