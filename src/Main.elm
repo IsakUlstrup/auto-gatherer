@@ -1,4 +1,4 @@
-module Main exposing (Cursor, Flags, Model, Msg, main)
+module Main exposing (Flags, Model, Msg, main)
 
 import Browser
 import Browser.Dom
@@ -14,6 +14,7 @@ import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import ParticleState exposing (Component(..), GameParticle, particleForce)
+import Pointer exposing (Pointer)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -24,21 +25,13 @@ import Task
 -- SYSTEM
 
 
-forces : Cursor -> ParticleSystem GameParticle -> ParticleSystem GameParticle
-forces cursor world =
+forces : Pointer -> ParticleSystem GameParticle -> ParticleSystem GameParticle
+forces pointer world =
     let
-        cursorForce : Vector2
-        cursorForce =
-            if cursor.pressed then
-                Vector2.direction Vector2.zero cursor.position
-                    |> Vector2.scale ((500 - Vector2.distance Vector2.zero cursor.position) / 500)
-
-            else
-                Vector2.zero
+        worldPointer =
+            { pointer | position = pointer.position |> Vector2.add (World.getPlayer world |> .position) }
     in
-    world
-        |> World.updateParticlesWithTargets particleForce
-        |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -0.1 cursorForce) p)
+    World.updateParticlesWithTargets (particleForce worldPointer) world
 
 
 movement : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
@@ -94,18 +87,12 @@ type alias Model =
     , stepTime : Float
     , timeAccum : Float
     , deltaHistory : List Float
-    , cursor : Cursor
+    , pointer : Pointer
     }
 
 
 type alias Flags =
     ()
-
-
-type alias Cursor =
-    { position : Vector2
-    , pressed : Bool
-    }
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -118,7 +105,7 @@ init _ =
         20
         0
         []
-        (Cursor Vector2.zero False)
+        (Pointer Vector2.zero False)
     , gameResize
     )
 
@@ -131,7 +118,7 @@ type Msg
     = Tick Float
     | ToggleRenderDebug
     | Reset
-    | SetCursor Float Float Bool
+    | SetPointer Float Float Bool
     | WindowResize
     | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
 
@@ -145,7 +132,7 @@ fixedUpdate dt model =
                 model.particles
                     -- |> state model.stepTime
                     -- |> spawn
-                    |> forces model.cursor
+                    |> forces model.pointer
                     |> movement model.stepTime
                     |> World.collisions
 
@@ -178,7 +165,7 @@ update msg model =
         Reset ->
             init ()
 
-        SetCursor x y pressed ->
+        SetPointer x y pressed ->
             let
                 pos : Vector2
                 pos =
@@ -188,7 +175,7 @@ update msg model =
                         (toFloat model.renderConfig.screenWidth)
                         (toFloat model.renderConfig.screenHeight)
             in
-            ( { model | cursor = Cursor pos pressed }, Cmd.none )
+            ( { model | pointer = Pointer pos pressed }, Cmd.none )
 
         WindowResize ->
             ( model, gameResize )
@@ -284,21 +271,21 @@ viewParticle showVectors particle =
         )
 
 
-viewCursor : Cursor -> Svg msg
-viewCursor cursor =
+viewPointer : Pointer -> Svg msg
+viewPointer pointer =
     let
         pressedClass : String
         pressedClass =
-            if cursor.pressed then
+            if pointer.pressed then
                 "pressed"
 
             else
                 "not-pressed"
     in
     Svg.circle
-        [ Engine.SvgRenderer.transformAttr cursor.position
+        [ Engine.SvgRenderer.transformAttr pointer.position
         , Svg.Attributes.r "20"
-        , Svg.Attributes.class "cursor"
+        , Svg.Attributes.class "pointer"
         , Svg.Attributes.class pressedClass
         ]
         []
@@ -321,7 +308,7 @@ view model =
             , Svg.Events.on "pointerup" pointerDecoder
             , Svg.Events.on "pointercancel" pointerDecoder
             ]
-            [ viewCursor model.cursor ]
+            [ viewPointer model.pointer ]
             (viewParticle model.renderConfig.debug)
             model.particles
             model.renderConfig
@@ -336,7 +323,7 @@ pressedDecoder =
 
 pointerDecoder : Decoder Msg
 pointerDecoder =
-    Decode.map3 SetCursor
+    Decode.map3 SetPointer
         (Decode.field "offsetX" Decode.float)
         (Decode.field "offsetY" Decode.float)
         pressedDecoder

@@ -8,7 +8,7 @@ import ParticleState exposing (Component(..), GameParticle)
 
 player : Particle GameParticle
 player =
-    Particle.new Vector2.zero 20 50 [ Color <| Color.new 100 50 50 ]
+    Particle.new Vector2.zero 20 50 [ Color <| Color.new 100 50 50, FollowPointer ]
 
 
 wall : Float -> Float -> Particle GameParticle

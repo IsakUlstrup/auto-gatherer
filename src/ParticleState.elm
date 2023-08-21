@@ -7,6 +7,7 @@ module ParticleState exposing
 import Color exposing (Color)
 import Engine.Particle as Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
+import Pointer exposing (Pointer)
 
 
 type alias GameParticle =
@@ -15,6 +16,7 @@ type alias GameParticle =
 
 type Component
     = MoveToPosition Vector2
+    | FollowPointer
       -- | FollowMoveToPosition Float
       -- | MoveToClosest
     | Avoid
@@ -24,11 +26,18 @@ type Component
     | Color Color
 
 
-componentForce : List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2
-componentForce particles particle component =
+componentForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2
+componentForce pointer particles particle component =
     case component of
         MoveToPosition position ->
             Particle.moveToPosition 0.1 5 position particle
+
+        FollowPointer ->
+            if pointer.pressed then
+                Particle.moveToPosition 0.1 5 pointer.position particle
+
+            else
+                Vector2.zero
 
         Avoid ->
             Particle.moveAwayRange 0.1 100 particles particle
@@ -37,11 +46,11 @@ componentForce particles particle component =
             Vector2.zero
 
 
-particleForce : List (Particle GameParticle) -> Particle GameParticle -> Particle GameParticle
-particleForce particles particle =
+particleForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Particle GameParticle
+particleForce pointer particles particle =
     let
         sumForces =
-            List.foldl (\comp force -> Vector2.add force (componentForce particles particle comp)) Vector2.zero particle.state
+            List.foldl (\comp force -> Vector2.add force (componentForce pointer particles particle comp)) Vector2.zero particle.state
     in
     Particle.applyForce sumForces particle
 
