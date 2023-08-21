@@ -24,14 +24,15 @@ type alias Particle a =
     , impulse : Vector2
     , mass : Float
     , radius : Float
+    , elasticity : Float
     , state : a
     }
 
 
 {-| Particle constructor
 -}
-new : Vector2 -> Float -> Float -> a -> Particle a
-new position size mass state =
+new : Vector2 -> Float -> Float -> Float -> a -> Particle a
+new position size mass elasticity state =
     Particle
         position
         Vector2.zero
@@ -39,6 +40,7 @@ new position size mass state =
         Vector2.zero
         (clamp 1 562949953421311 mass)
         (clamp 1 562949953421311 size)
+        (clamp 0 1 elasticity)
         state
 
 
