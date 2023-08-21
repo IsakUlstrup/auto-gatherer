@@ -39,11 +39,12 @@ main
     height: 100%
 
 .pointer
-    fill: transparent
-    stroke: red
+    fill: none
+    stroke: #262626
+    stroke-opacity: 0
     stroke-width: 1
     &.pressed
-        fill: red
+        stroke-opacity: 1
 
 .particle
     pointer-events: none
