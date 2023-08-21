@@ -241,7 +241,8 @@ viewDebugComponent index component =
 viewParticleDebug : Particle GameParticle -> Svg msg
 viewParticleDebug particle =
     Svg.g [ Svg.Attributes.class "debug" ]
-        [ Svg.line
+        [ Svg.g [ Svg.Attributes.transform <| "translate(10 0)" ] (List.indexedMap viewDebugComponent particle.state)
+        , Svg.line
             [ Svg.Attributes.x1 "0"
             , Svg.Attributes.y1 "0"
             , Svg.Attributes.x2 <| String.fromInt (round (particle.velocity.x * 300))
@@ -257,7 +258,6 @@ viewParticleDebug particle =
             , Svg.Attributes.class "impulse"
             ]
             []
-        , Svg.g [ Svg.Attributes.transform <| "translate(10 0)" ] (List.indexedMap viewDebugComponent particle.state)
         ]
 
 
