@@ -1,19 +1,13 @@
 module Content.Worlds exposing (testWorld1)
 
-import Engine.Particle as Particle exposing (Particle)
+import Content.Particles as Particles
 import Engine.ParticleSystem as World exposing (ParticleSystem)
-import Engine.Vector2 as Vector2
-import ParticleState exposing (ParticleState(..))
+import ParticleState exposing (GameParticle)
 
 
-wallParticle : Float -> Float -> Particle ParticleState
-wallParticle x y =
-    Particle.new (Vector2.new x y) 50 1000 (MoveToPosition <| Vector2.new x y)
-
-
-testWorld1 : ParticleSystem ParticleState
+testWorld1 : ParticleSystem GameParticle
 testWorld1 =
-    World.new (Particle.new Vector2.zero 20 50 Idle)
-        |> World.addParticle (wallParticle 200 100)
-        |> World.addParticle (wallParticle 300 100)
-        |> World.addParticle (wallParticle 250 190)
+    World.new Particles.player
+        |> World.addParticle (Particles.wall 200 100)
+        |> World.addParticle (Particles.wall 300 100)
+        |> World.addParticle (Particles.wall 250 190)

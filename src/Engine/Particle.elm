@@ -189,35 +189,25 @@ moveDirection speed direction particle =
 If none are present, do nothing
 
 -}
-moveAwayRange : Float -> Float -> List (Particle b) -> Particle a -> Particle a
+moveAwayRange : Float -> Float -> List (Particle b) -> Particle a -> Vector2
 moveAwayRange speed range targets particle =
     let
         inRange : List Vector2
         inRange =
             targets
-                -- |> List.filter (\t -> t.id /= particle.id)
                 |> List.filter (\t -> distance t particle < range)
                 |> List.map .position
-
-        force : Vector2
-        force =
-            List.foldl (\t v -> Vector2.direction t particle.position |> Vector2.add v) Vector2.zero inRange
-                |> Vector2.scale speed
     in
-    applyForce force particle
+    List.foldl (\t v -> Vector2.direction t particle.position |> Vector2.add v) Vector2.zero inRange
+        |> Vector2.scale speed
 
 
 {-| Apply force towards target position if particle is more than limitDistance units away
 -}
-moveToPosition : Float -> Float -> Vector2 -> Particle a -> Particle a
+moveToPosition : Float -> Float -> Vector2 -> Particle a -> Vector2
 moveToPosition speed limitDistance position particle =
-    let
-        force : Vector2
-        force =
-            if Vector2.distance particle.position position < limitDistance then
-                Vector2.zero
+    if Vector2.distance particle.position position < limitDistance then
+        Vector2.zero
 
-            else
-                Vector2.direction particle.position position |> Vector2.scale speed
-    in
-    applyForce force particle
+    else
+        Vector2.direction particle.position position |> Vector2.scale speed

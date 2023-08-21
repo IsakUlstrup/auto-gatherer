@@ -3,8 +3,9 @@ module Main exposing (Cursor, Flags, Model, Msg, main)
 import Browser
 import Browser.Dom
 import Browser.Events
+import Color
 import Content.Worlds
-import Engine.Particle as Particle exposing (Particle)
+import Engine.Particle as Particle
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -12,7 +13,7 @@ import Html exposing (Html, main_)
 import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
-import ParticleState as ParticleState exposing (ParticleState(..), particleForce)
+import ParticleState exposing (Component(..), GameParticle, particleForce)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -23,7 +24,7 @@ import Task
 -- SYSTEM
 
 
-forces : Cursor -> ParticleSystem ParticleState -> ParticleSystem ParticleState
+forces : Cursor -> ParticleSystem GameParticle -> ParticleSystem GameParticle
 forces cursor world =
     let
         cursorForce : Vector2
@@ -40,57 +41,47 @@ forces cursor world =
         |> World.updatePlayer (\p -> Particle.applyForce (Vector2.scale -0.1 cursorForce) p)
 
 
-movement : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
+movement : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
-state : Float -> ParticleSystem ParticleState -> ParticleSystem ParticleState
-state dt system =
-    World.updateParticles (ParticleState.stateUpdate dt) system
 
-
-spawn : ParticleSystem ParticleState -> ParticleSystem ParticleState
-spawn system =
-    let
-        readySummoner p =
-            case p.state of
-                Summon cd _ ->
-                    cd <= 0
-
-                _ ->
-                    False
-
-        spawnPosition p =
-            p.position
-                |> Vector2.add (Vector2.new 35 -35)
-
-        ready : List (Particle ParticleState)
-        ready =
-            World.getParticles system
-                |> List.filter readySummoner
-                |> List.map
-                    (\p -> Particle.new (spawnPosition p) 20 10 (DieCooldown 600))
-    in
-    World.addParticles ready system
-
-
-cull : ParticleSystem ParticleState -> ParticleSystem ParticleState
-cull system =
-    let
-        shoudKeepCooldown p =
-            case p.state of
-                DieCooldown cd ->
-                    cd > 0
-
-                _ ->
-                    True
-    in
-    system
-        |> World.filterParticles shoudKeepCooldown
-
-
-
+-- state : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
+-- state dt system =
+--     World.updateParticles (ParticleState.stateUpdate dt) system
+-- spawn : ParticleSystem GameParticle -> ParticleSystem GameParticle
+-- spawn system =
+--     let
+--         readySummoner p =
+--             case p.state of
+--                 Summon cd _ ->
+--                     cd <= 0
+--                 _ ->
+--                     False
+--         spawnPosition p =
+--             p.position
+--                 |> Vector2.add (Vector2.new 35 -35)
+--         ready : List (Particle ParticleState)
+--         ready =
+--             World.getParticles system
+--                 |> List.filter readySummoner
+--                 |> List.map
+--                     (\p -> Particle.new (spawnPosition p) 20 10 (DieCooldown 600))
+--     in
+--     World.addParticles ready system
+-- cull : ParticleSystem GameParticle -> ParticleSystem GameParticle
+-- cull system =
+--     let
+--         shoudKeepCooldown p =
+--             case p.state of
+--                 DieCooldown cd ->
+--                     cd > 0
+--                 _ ->
+--                     True
+--     in
+--     system
+--         |> World.filterParticles shoudKeepCooldown
 -- resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
 -- resolveCollisions system =
 --     World.collisions system
@@ -98,7 +89,7 @@ cull system =
 
 
 type alias Model =
-    { particles : ParticleSystem ParticleState
+    { particles : ParticleSystem GameParticle
     , renderConfig : RenderConfig
     , stepTime : Float
     , timeAccum : Float
@@ -152,12 +143,13 @@ fixedUpdate dt model =
             | timeAccum = dt - model.stepTime
             , particles =
                 model.particles
-                    |> state model.stepTime
-                    |> spawn
+                    -- |> state model.stepTime
+                    -- |> spawn
                     |> forces model.cursor
                     |> movement model.stepTime
                     |> World.collisions
-                    |> cull
+
+            -- |> cull
         }
             |> fixedUpdate (dt - model.stepTime)
 
@@ -242,16 +234,29 @@ screenSizeString width height =
     "screen: " ++ String.fromInt width ++ "x" ++ String.fromInt height
 
 
-viewParticle : Bool -> Particle.Particle ParticleState -> Svg msg
+viewParticle : Bool -> Particle.Particle GameParticle -> Svg msg
 viewParticle showVectors particle =
+    let
+        colors =
+            List.filterMap
+                (\c ->
+                    case c of
+                        Color clr ->
+                            Just clr
+
+                        _ ->
+                            Nothing
+                )
+                particle.state
+    in
     Svg.g
         [ Engine.SvgRenderer.transformAttr particle.position
         , Svg.Attributes.class "particle"
-        , Svg.Attributes.class <| ParticleState.toString particle.state
         ]
         (Svg.circle
             [ Svg.Attributes.r <| String.fromInt (round particle.radius)
             , Svg.Attributes.class "body"
+            , Svg.Attributes.fill <| Color.toString <| Color.average colors
             ]
             []
             :: (if showVectors then
