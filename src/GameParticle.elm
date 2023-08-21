@@ -3,6 +3,7 @@ module GameParticle exposing
     , GameParticle
     , addComponent
     , componentToString
+    , componentTypeToString
     , particleForce
     , stateUpdate
     )
@@ -80,6 +81,25 @@ componentToString component =
 
         Hit duration ->
             "Hit " ++ String.fromFloat duration
+
+
+componentTypeToString : Component -> String
+componentTypeToString component =
+    case component of
+        MoveToPosition _ ->
+            "move-to-position"
+
+        FollowPointer ->
+            "follow-pointer"
+
+        Avoid ->
+            "avoid"
+
+        Color _ ->
+            "color"
+
+        Hit _ ->
+            "hit"
 
 
 

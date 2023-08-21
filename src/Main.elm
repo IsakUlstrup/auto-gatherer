@@ -275,11 +275,18 @@ viewParticle debug particle =
                             Nothing
                 )
                 particle.state
+
+        componentClasses =
+            particle.state
+                |> List.map GameParticle.componentTypeToString
+                |> List.map Svg.Attributes.class
     in
     Svg.g
-        [ Engine.SvgRenderer.transformAttr particle.position
-        , Svg.Attributes.class "particle"
-        ]
+        ([ Engine.SvgRenderer.transformAttr particle.position
+         , Svg.Attributes.class "particle"
+         ]
+            ++ componentClasses
+        )
         (Svg.circle
             [ Svg.Attributes.r <| String.fromInt (round particle.radius)
             , Svg.Attributes.class "body"

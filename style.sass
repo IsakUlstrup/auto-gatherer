@@ -12,7 +12,7 @@ $follow_id_color: lighten($player-color, 20)
     box-sizing: border-box
 
 body
-    background: #fffee9
+    background: $tile_color
 
 main
     color: beige
@@ -28,11 +28,13 @@ main
     position: absolute
     bottom: 0
     left: 0
+    right: 0
     padding: 0.5rem
-    color: #474747
+    color: #262626
     display: flex
     gap: 1rem
     font-size: 0.8rem
+    background-color: rgba(255, 255, 255, 0.3)
 
 .game
     display: block
@@ -49,6 +51,9 @@ main
 
 .particle
     pointer-events: none
+
+    &.hit .body
+        fill: white
 
     .body
         stroke-width: 1.5
