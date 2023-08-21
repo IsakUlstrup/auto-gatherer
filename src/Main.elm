@@ -36,7 +36,7 @@ forces pointer world =
 
 movement : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
 movement dt system =
-    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
+    World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.015 >> Particle.stopIfSlow 0.0001) system
 
 
 collisionInteraction : ParticleSystem GameParticle -> ParticleSystem GameParticle

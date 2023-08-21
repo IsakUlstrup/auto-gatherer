@@ -31,22 +31,27 @@ addComponent component particle =
     { particle | state = component :: particle.state }
 
 
+forceScale : Float
+forceScale =
+    0.02
+
+
 componentForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2
 componentForce pointer particles particle component =
     case component of
         MoveToPosition position ->
-            Particle.moveToPosition 0.1 5 position particle
+            Particle.moveToPosition forceScale 5 position particle
 
         FollowPointer ->
             if pointer.pressed then
                 Vector2.direction particle.position pointer.position
-                    |> Vector2.scale 0.1
+                    |> Vector2.scale forceScale
 
             else
                 Vector2.zero
 
         Avoid ->
-            Particle.moveAwayRange 0.1 100 particles particle
+            Particle.moveAwayRange forceScale 100 particles particle
 
         Color _ ->
             Vector2.zero
