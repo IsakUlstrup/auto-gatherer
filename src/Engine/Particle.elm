@@ -105,7 +105,7 @@ move dt particle =
                 | velocity =
                     p.velocity
                         |> Vector2.add (Vector2.scale dt p.acceleration)
-                        |> Vector2.add (Vector2.scale 0.05 p.impulse)
+                        |> Vector2.add (Vector2.scale (1 / dt) p.impulse)
             }
 
         impulse : Particle a -> Particle a
