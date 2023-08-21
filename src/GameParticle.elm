@@ -1,8 +1,10 @@
 module GameParticle exposing
     ( Component(..)
     , GameParticle
+    , addComponent
     , componentToString
     , particleForce
+    , stateUpdate
     )
 
 import Color exposing (Color)
@@ -20,6 +22,12 @@ type Component
     | FollowPointer
     | Avoid
     | Color Color
+    | Hit Float
+
+
+addComponent : Component -> GameParticle -> GameParticle
+addComponent component particle =
+    component :: particle
 
 
 componentForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2
@@ -40,6 +48,9 @@ componentForce pointer particles particle component =
             Particle.moveAwayRange 0.1 100 particles particle
 
         Color _ ->
+            Vector2.zero
+
+        Hit _ ->
             Vector2.zero
 
 
@@ -66,6 +77,9 @@ componentToString component =
 
         Color color ->
             "Color " ++ Color.toString color
+
+        Hit duration ->
+            "Hit " ++ String.fromFloat duration
 
 
 
@@ -102,15 +116,61 @@ componentToString component =
 --         particle
 --     DieCooldown _ ->
 --         particle
--- stateUpdate : Float -> Particle Component -> Particle Component
--- stateUpdate dt particle =
---     case particle.state of
---         Summon cd maxCd ->
---             if cd <= 0 then
---                 { particle | state = Summon maxCd maxCd }
---             else
---                 { particle | state = Summon (max 0 (cd - dt)) maxCd }
---         DieCooldown cd ->
---             { particle | state = DieCooldown <| max 0 (cd - dt) }
---         _ ->
---             particle
+-- MoveToPosition Vector2
+--     | FollowPointer
+--     | Avoid
+--     | Color Color
+--     | Hit Float
+
+
+stateUpdate : Float -> Particle GameParticle -> Particle GameParticle
+stateUpdate dt particle =
+    let
+        updateComponent c =
+            case c of
+                MoveToPosition _ ->
+                    c
+
+                FollowPointer ->
+                    c
+
+                Avoid ->
+                    c
+
+                Color _ ->
+                    c
+
+                Hit duration ->
+                    Hit (max 0 (duration - dt))
+
+        filterComponent c =
+            case c of
+                MoveToPosition _ ->
+                    True
+
+                FollowPointer ->
+                    True
+
+                Avoid ->
+                    True
+
+                Color _ ->
+                    True
+
+                Hit duration ->
+                    duration > 0
+    in
+    { particle | state = particle.state |> List.map updateComponent |> List.filter filterComponent }
+
+
+
+-- case particle.state of
+--     Summon cd maxCd ->
+--         if cd <= 0 then
+--             { particle | state = Summon maxCd maxCd }
+--         else
+--             { particle | state = Summon (max 0 (cd - dt)) maxCd }
+--     DieCooldown cd ->
+--         { particle | state = DieCooldown <| max 0 (cd - dt) }
+--     _ ->
+--         particle

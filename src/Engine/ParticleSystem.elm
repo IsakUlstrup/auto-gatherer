@@ -2,6 +2,7 @@ module Engine.ParticleSystem exposing
     ( ParticleSystem
     , addParticle
     , addParticles
+    , collisionAction
     , collisions
     , filterParticles
     , getParticles
@@ -140,20 +141,27 @@ isColliding ( pid, particle ) ( tid, target ) =
         False
 
 
+{-| if particle is colliding with target, run function f on particle and return
+-}
+collisionAction : (Particle a -> Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
+collisionAction f (ParticleSystem system) =
+    let
+        collisions2 : ( Int, Particle a ) -> List ( Int, Particle a )
+        collisions2 p =
+            List.filter (isColliding p) (system.player :: system.particles)
 
--- {-| if particle is colliding with target, run function f on particle and return
--- -}
--- collisionAction : (Particle b -> Particle a -> Particle a) -> List (Particle b) -> Particle a -> Particle a
--- collisionAction f targets particle =
---     let
---         collisions : List (Particle b)
---         collisions =
---             List.filter (isColliding particle) targets
---         helper : Particle b -> Particle a -> Particle a
---         helper target obj =
---             f target obj
---     in
---     List.foldl helper particle collisions
+        helper : ( Int, Particle a ) -> ( Int, Particle a ) -> ( Int, Particle a )
+        helper ( tid, target ) ( pid, p ) =
+            ( pid, f target p )
+
+        x p =
+            List.foldl helper p (collisions2 p)
+    in
+    ParticleSystem
+        { system
+            | particles = List.map x system.particles
+            , player = x system.player
+        }
 
 
 {-| calculate how much each particle should move based on the diference in mass

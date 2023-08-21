@@ -39,10 +39,17 @@ movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.05 >> Particle.stopIfSlow 0.0001) system
 
 
+collisionInteraction : ParticleSystem GameParticle -> ParticleSystem GameParticle
+collisionInteraction system =
+    World.collisionAction (\_ p -> { p | state = Hit 100 :: p.state }) system
 
--- state : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
--- state dt system =
---     World.updateParticles (ParticleState.stateUpdate dt) system
+
+state : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
+state dt system =
+    World.updateParticles (GameParticle.stateUpdate dt) system
+
+
+
 -- spawn : ParticleSystem GameParticle -> ParticleSystem GameParticle
 -- spawn system =
 --     let
@@ -130,10 +137,11 @@ fixedUpdate dt model =
             | timeAccum = dt - model.stepTime
             , particles =
                 model.particles
-                    -- |> state model.stepTime
+                    |> state model.stepTime
                     -- |> spawn
                     |> forces model.pointer
                     |> movement model.stepTime
+                    |> collisionInteraction
                     |> World.collisions
 
             -- |> cull
