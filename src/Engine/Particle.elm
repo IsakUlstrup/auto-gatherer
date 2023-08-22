@@ -1,5 +1,6 @@
 module Engine.Particle exposing
     ( Particle
+    , addComponent
     , applyForce
     , applyFriciton
     , applyImpulse
@@ -25,14 +26,14 @@ type alias Particle a =
     , mass : Float
     , radius : Float
     , elasticity : Float
-    , state : a
+    , components : List a
     }
 
 
 {-| Particle constructor
 -}
-new : Vector2 -> Float -> Float -> Float -> a -> Particle a
-new position size mass elasticity state =
+new : Vector2 -> Float -> Float -> Float -> List a -> Particle a
+new position size mass elasticity components =
     Particle
         position
         Vector2.zero
@@ -41,7 +42,12 @@ new position size mass elasticity state =
         (clamp 1 562949953421311 mass)
         (clamp 1 562949953421311 size)
         (clamp 0 1 elasticity)
-        state
+        components
+
+
+addComponent : a -> Particle a -> Particle a
+addComponent component particle =
+    { particle | components = component :: particle.components }
 
 
 

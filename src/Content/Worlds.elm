@@ -2,10 +2,10 @@ module Content.Worlds exposing (testWorld1)
 
 import Content.Particles as Particles
 import Engine.ParticleSystem as World exposing (ParticleSystem)
-import GameParticle exposing (GameParticle)
+import GameParticle exposing (Component)
 
 
-testWorld1 : ParticleSystem GameParticle
+testWorld1 : ParticleSystem Component
 testWorld1 =
     World.new (Particles.followPointer 0 0)
         |> World.addParticle (Particles.wall 200 100)

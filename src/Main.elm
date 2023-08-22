@@ -5,7 +5,7 @@ import Browser.Dom
 import Browser.Events
 import Color
 import Content.Worlds
-import Engine.Particle as Particle exposing (Particle)
+import Engine.Particle as Particle
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -25,7 +25,7 @@ import Task
 -- SYSTEM
 
 
-forces : Pointer -> ParticleSystem GameParticle -> ParticleSystem GameParticle
+forces : Pointer -> ParticleSystem Component -> ParticleSystem Component
 forces pointer world =
     let
         worldPointer =
@@ -34,17 +34,17 @@ forces pointer world =
     World.updateParticlesWithTargets (particleForce worldPointer) world
 
 
-movement : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
+movement : Float -> ParticleSystem Component -> ParticleSystem Component
 movement dt system =
     World.updateParticles (Particle.move dt >> Particle.applyFriciton 0.015 >> Particle.stopIfSlow 0.0001) system
 
 
-collisionInteraction : ParticleSystem GameParticle -> ParticleSystem GameParticle
+collisionInteraction : ParticleSystem Component -> ParticleSystem Component
 collisionInteraction system =
-    World.collisionAction (\_ p -> GameParticle.addComponent (Hit 100) p) system
+    World.collisionAction (\_ p -> Particle.addComponent (Hit 100) p) system
 
 
-state : Float -> ParticleSystem GameParticle -> ParticleSystem GameParticle
+state : Float -> ParticleSystem Component -> ParticleSystem Component
 state dt system =
     World.updateParticles (GameParticle.stateUpdate dt) system
 
@@ -72,7 +72,7 @@ state dt system =
 --     World.addParticles ready system
 
 
-cull : ParticleSystem GameParticle -> ParticleSystem GameParticle
+cull : ParticleSystem Component -> ParticleSystem Component
 cull system =
     World.filterParticles GameParticle.keepParticle system
 
@@ -85,7 +85,7 @@ cull system =
 
 
 type alias Model =
-    { particles : ParticleSystem GameParticle
+    { particles : ParticleSystem Component
     , renderConfig : RenderConfig
     , stepTime : Float
     , timeAccum : Float
@@ -234,10 +234,10 @@ viewDebugComponent index component =
         [ Svg.text <| GameParticle.componentToString component ]
 
 
-viewParticleDebug : Particle GameParticle -> Svg msg
+viewParticleDebug : GameParticle -> Svg msg
 viewParticleDebug particle =
     Svg.g [ Svg.Attributes.class "debug" ]
-        [ Svg.g [ Svg.Attributes.transform <| "translate(10 0)" ] (List.indexedMap viewDebugComponent particle.state)
+        [ Svg.g [ Svg.Attributes.transform <| "translate(10 0)" ] (List.indexedMap viewDebugComponent particle.components)
         , Svg.line
             [ Svg.Attributes.x1 "0"
             , Svg.Attributes.y1 "0"
@@ -257,7 +257,7 @@ viewParticleDebug particle =
         ]
 
 
-viewParticle : Bool -> Particle GameParticle -> Svg msg
+viewParticle : Bool -> GameParticle -> Svg msg
 viewParticle debug particle =
     let
         colors =
@@ -270,10 +270,10 @@ viewParticle debug particle =
                         _ ->
                             Nothing
                 )
-                particle.state
+                particle.components
 
         componentClasses =
-            particle.state
+            particle.components
                 |> List.map GameParticle.componentTypeToString
                 |> List.map Svg.Attributes.class
 
@@ -288,7 +288,7 @@ viewParticle debug particle =
                             o
                 )
                 1
-                particle.state
+                particle.components
     in
     Svg.g
         ([ Engine.SvgRenderer.transformAttr particle.position

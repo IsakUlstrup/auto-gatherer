@@ -1,7 +1,6 @@
 module GameParticle exposing
     ( Component(..)
     , GameParticle
-    , addComponent
     , componentToString
     , componentTypeToString
     , keepParticle
@@ -16,7 +15,7 @@ import Pointer exposing (Pointer)
 
 
 type alias GameParticle =
-    List Component
+    Particle Component
 
 
 type Component
@@ -28,12 +27,7 @@ type Component
     | Die Float Float
 
 
-addComponent : Component -> Particle GameParticle -> Particle GameParticle
-addComponent component particle =
-    { particle | state = component :: particle.state }
-
-
-componentForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2
+componentForce : Pointer -> List GameParticle -> GameParticle -> Component -> Vector2
 componentForce pointer particles particle component =
     case component of
         MoveToPosition position forceMulti ->
@@ -60,11 +54,11 @@ componentForce pointer particles particle component =
             Vector2.zero
 
 
-particleForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Particle GameParticle
+particleForce : Pointer -> List GameParticle -> GameParticle -> GameParticle
 particleForce pointer particles particle =
     let
         sumForces =
-            List.foldl (\comp force -> Vector2.add force (componentForce pointer particles particle comp)) Vector2.zero particle.state
+            List.foldl (\comp force -> Vector2.add force (componentForce pointer particles particle comp)) Vector2.zero particle.components
     in
     Particle.applyForce sumForces particle
 
@@ -113,48 +107,7 @@ componentTypeToString component =
             "die"
 
 
-
--- case particle.state of
---     MoveToCenter ->
---         Particle.moveToPosition 0.1 50 Vector2.zero particle
---     MoveToPosition p ->
---         Particle.moveToPosition 0.1 2 p particle
---     FollowMoveToPosition range ->
---         let
---             followTarget : Particle.Particle Component -> Bool
---             followTarget t =
---                 case t.state of
---                     MoveToPosition _ ->
---                         True
---                     _ ->
---                         False
---             isInRange : Particle Component -> Bool
---             isInRange p =
---                 Particle.distance p particle < range
---         in
---         Particle.moveToNearest 0.1 50 (particles |> List.filter followTarget |> List.filter isInRange) particle
---     MoveToClosest ->
---         Particle.moveToNearest 0.1 50 particles particle
---     Idle ->
---         particle
---     Avoid ->
---         Particle.moveAwayRange 0.1 100 particles particle
---     Meander ->
---         Particle.applyForce Vector2.zero particle
---     DestroyOnHit ->
---         particle
---     Summon _ _ ->
---         particle
---     DieCooldown _ ->
---         particle
--- MoveToPosition Vector2
---     | FollowPointer
---     | Avoid
---     | Color Color
---     | Hit Float
-
-
-stateUpdate : Float -> Particle GameParticle -> Particle GameParticle
+stateUpdate : Float -> GameParticle -> GameParticle
 stateUpdate dt particle =
     let
         updateComponent c =
@@ -197,12 +150,12 @@ stateUpdate dt particle =
                 Die _ _ ->
                     True
     in
-    { particle | state = particle.state |> List.map updateComponent |> List.filter filterComponent }
+    { particle | components = particle.components |> List.map updateComponent |> List.filter filterComponent }
 
 
 {-| Check if particle should stay alive or be removed
 -}
-keepParticle : Particle GameParticle -> Bool
+keepParticle : GameParticle -> Bool
 keepParticle particle =
     let
         keep c =
@@ -225,7 +178,7 @@ keepParticle particle =
                 Die duration _ ->
                     duration > 0
     in
-    particle.state |> List.map keep |> List.all ((==) True)
+    particle.components |> List.map keep |> List.all ((==) True)
 
 
 
