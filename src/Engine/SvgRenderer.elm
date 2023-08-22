@@ -116,16 +116,13 @@ viewSvg attrs children viewParticle particles config =
          ]
             ++ attrs
         )
-        (Svg.g
+        (Svg.Keyed.node "g"
             [ Svg.Attributes.class "camera"
             , transformAttr <| Vector2.scale -1 <| (.position <| World.getPlayer particles)
             ]
-            [ Svg.Keyed.node "g"
-                []
-                (particles
-                    |> World.filterParticles (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
-                    |> World.mapParticles (viewKeyedParticle viewParticle)
-                )
-            ]
+            (particles
+                |> World.filterParticles (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
+                |> World.mapParticles (viewKeyedParticle viewParticle)
+            )
             :: children
         )
