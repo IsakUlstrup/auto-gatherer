@@ -46,4 +46,4 @@ Length is determined by amount of particles and particle radius
 line : Vector2 -> Vector2 -> Int -> (Vector2 -> GameParticle) -> List GameParticle
 line start direction amount particle =
     List.range 0 amount
-        |> List.map (\index -> particle (Vector2.add start (Vector2.scale (toFloat index * (particle Vector2.zero).radius) direction)))
+        |> List.map (\index -> particle (Vector2.add start (Vector2.scale (toFloat index * ((particle Vector2.zero).radius * 2)) (Vector2.normalize direction))))

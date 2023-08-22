@@ -137,7 +137,7 @@ isColliding ( pid, particle ) ( tid, target ) =
             dist =
                 Vector2.subtract particle.position target.position
         in
-        (dist |> Vector2.multiply dist |> Vector2.sum) <= (particle.radius + target.radius) ^ 2
+        (dist |> Vector2.multiply dist |> Vector2.sum) < (particle.radius + target.radius) ^ 2
 
     else
         False
