@@ -19,9 +19,9 @@ type alias GameParticle =
 
 
 type Component
-    = MoveToPosition Vector2
-    | FollowPointer
-    | Avoid
+    = MoveToPosition Vector2 Float
+    | FollowPointer Float
+    | Avoid Float
     | Color Color
     | Hit Float
 
@@ -31,27 +31,22 @@ addComponent component particle =
     { particle | state = component :: particle.state }
 
 
-forceScale : Float
-forceScale =
-    0.02
-
-
 componentForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Component -> Vector2
 componentForce pointer particles particle component =
     case component of
-        MoveToPosition position ->
-            Particle.moveToPosition forceScale 5 position particle
+        MoveToPosition position forceMulti ->
+            Particle.moveToPosition forceMulti 5 position particle
 
-        FollowPointer ->
+        FollowPointer forceMulti ->
             if pointer.pressed then
                 Vector2.direction particle.position pointer.position
-                    |> Vector2.scale forceScale
+                    |> Vector2.scale forceMulti
 
             else
                 Vector2.zero
 
-        Avoid ->
-            Particle.moveAwayRange forceScale 100 particles particle
+        Avoid forceMulti ->
+            Particle.moveAwayRange forceMulti 100 particles particle
 
         Color _ ->
             Vector2.zero
@@ -72,14 +67,14 @@ particleForce pointer particles particle =
 componentToString : Component -> String
 componentToString component =
     case component of
-        MoveToPosition pos ->
-            "MoveToPosition " ++ Vector2.toString pos
+        MoveToPosition pos forceMulti ->
+            "MoveToPosition " ++ Vector2.toString pos ++ " " ++ String.fromFloat forceMulti
 
-        FollowPointer ->
-            "FollowPointer"
+        FollowPointer forceMulti ->
+            "FollowPointer " ++ String.fromFloat forceMulti
 
-        Avoid ->
-            "Avoid"
+        Avoid forceMulti ->
+            "Avoid " ++ String.fromFloat forceMulti
 
         Color color ->
             "Color " ++ Color.toString color
@@ -91,13 +86,13 @@ componentToString component =
 componentTypeToString : Component -> String
 componentTypeToString component =
     case component of
-        MoveToPosition _ ->
+        MoveToPosition _ _ ->
             "move-to-position"
 
-        FollowPointer ->
+        FollowPointer _ ->
             "follow-pointer"
 
-        Avoid ->
+        Avoid _ ->
             "avoid"
 
         Color _ ->
@@ -153,13 +148,13 @@ stateUpdate dt particle =
     let
         updateComponent c =
             case c of
-                MoveToPosition _ ->
+                MoveToPosition _ _ ->
                     c
 
-                FollowPointer ->
+                FollowPointer _ ->
                     c
 
-                Avoid ->
+                Avoid _ ->
                     c
 
                 Color _ ->
@@ -170,13 +165,13 @@ stateUpdate dt particle =
 
         filterComponent c =
             case c of
-                MoveToPosition _ ->
+                MoveToPosition _ _ ->
                     True
 
-                FollowPointer ->
+                FollowPointer _ ->
                     True
 
-                Avoid ->
+                Avoid _ ->
                     True
 
                 Color _ ->

@@ -13,7 +13,7 @@ normalizedColor hue =
 
 followPointer : Float -> Float -> Particle GameParticle
 followPointer x y =
-    Particle.new (Vector2.new x y) 20 50 1 [ Color <| normalizedColor 140, FollowPointer ]
+    Particle.new (Vector2.new x y) 20 50 1 [ Color <| normalizedColor 140, FollowPointer 0.02 ]
 
 
 idle : Float -> Float -> Particle GameParticle
@@ -27,6 +27,6 @@ wall x y =
         50
         100000
         0
-        [ MoveToPosition <| Vector2.new x y
+        [ MoveToPosition (Vector2.new x y) 0.5
         , Color <| normalizedColor 200
         ]
