@@ -7,6 +7,7 @@ module Engine.ParticleSystem exposing
     , filterParticles
     , getParticles
     , getPlayer
+    , mapParticles
     , new
     , updateParticles
     , updateParticlesWithTargets
@@ -103,6 +104,11 @@ updateParticlesWithTargets f (ParticleSystem system) =
             | particles = List.map (\( id, p ) -> ( id, f (targets id) p )) system.particles
             , player = (\( id, p ) -> ( id, f (targets id) p )) system.player
         }
+
+
+mapParticles : (( Int, Particle a ) -> b) -> ParticleSystem a -> List b
+mapParticles f (ParticleSystem system) =
+    List.map f (system.player :: system.particles)
 
 
 getParticles : ParticleSystem a -> List (Particle a)

@@ -16,6 +16,7 @@ import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Svg exposing (Svg)
 import Svg.Attributes
+import Svg.Keyed
 
 
 
@@ -101,6 +102,11 @@ screenToWorldCoords x y screenWidth screenHeight =
         |> Vector2.scale ratio
 
 
+viewKeyedParticle : (Particle a -> Svg msg) -> ( Int, Particle a ) -> ( String, Svg msg )
+viewKeyedParticle f ( id, particle ) =
+    ( String.fromInt id, f particle )
+
+
 viewSvg : List (Svg.Attribute msg) -> List (Svg msg) -> (Particle a -> Svg msg) -> ParticleSystem a -> RenderConfig -> Svg msg
 viewSvg attrs children viewParticle particles config =
     Svg.svg
@@ -114,10 +120,11 @@ viewSvg attrs children viewParticle particles config =
             [ Svg.Attributes.class "camera"
             , transformAttr <| Vector2.scale -1 <| (.position <| World.getPlayer particles)
             ]
-            [ Svg.g []
-                (World.getParticles particles
-                    |> List.filter (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
-                    |> List.map viewParticle
+            [ Svg.Keyed.node "g"
+                []
+                (particles
+                    |> World.filterParticles (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
+                    |> World.mapParticles (viewKeyedParticle viewParticle)
                 )
             ]
             :: children
