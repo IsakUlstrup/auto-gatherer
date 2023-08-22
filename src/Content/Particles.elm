@@ -23,7 +23,8 @@ idle x y =
 
 dying : Float -> Float -> Particle GameParticle
 dying x y =
-    Particle.new (Vector2.new x y) 25 30 1 [ Color <| normalizedColor 350, Die 1000 1000 ]
+    Particle.new (Vector2.new x y) 25 30 0 [ Color <| normalizedColor 350, Die 1000 1000 ]
+        |> Particle.applyForce (Vector2.new 1 0)
 
 
 wall : Float -> Float -> Particle GameParticle
