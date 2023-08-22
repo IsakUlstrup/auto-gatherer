@@ -1,4 +1,4 @@
-module Content.Particles exposing (followPointer, idle, wall)
+module Content.Particles exposing (dying, followPointer, idle, wall)
 
 import Color
 import Engine.Particle as Particle exposing (Particle)
@@ -19,6 +19,11 @@ followPointer x y =
 idle : Float -> Float -> Particle GameParticle
 idle x y =
     Particle.new (Vector2.new x y) 25 50 1 [ Color <| normalizedColor 300 ]
+
+
+dying : Float -> Float -> Particle GameParticle
+dying x y =
+    Particle.new (Vector2.new x y) 25 30 1 [ Color <| normalizedColor 350, Die 1000 ]
 
 
 wall : Float -> Float -> Particle GameParticle

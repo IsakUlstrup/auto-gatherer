@@ -4,6 +4,7 @@ module GameParticle exposing
     , addComponent
     , componentToString
     , componentTypeToString
+    , keepParticle
     , particleForce
     , stateUpdate
     )
@@ -24,6 +25,7 @@ type Component
     | Avoid Float
     | Color Color
     | Hit Float
+    | Die Float
 
 
 addComponent : Component -> Particle GameParticle -> Particle GameParticle
@@ -54,6 +56,9 @@ componentForce pointer particles particle component =
         Hit _ ->
             Vector2.zero
 
+        Die _ ->
+            Vector2.zero
+
 
 particleForce : Pointer -> List (Particle GameParticle) -> Particle GameParticle -> Particle GameParticle
 particleForce pointer particles particle =
@@ -82,6 +87,9 @@ componentToString component =
         Hit duration ->
             "Hit " ++ String.fromFloat duration
 
+        Die duration ->
+            "Die " ++ String.fromFloat duration
+
 
 componentTypeToString : Component -> String
 componentTypeToString component =
@@ -100,6 +108,9 @@ componentTypeToString component =
 
         Hit _ ->
             "hit"
+
+        Die _ ->
+            "die"
 
 
 
@@ -163,6 +174,9 @@ stateUpdate dt particle =
                 Hit duration ->
                     Hit (max 0 (duration - dt))
 
+                Die duration ->
+                    Die (max 0 (duration - dt))
+
         filterComponent c =
             case c of
                 MoveToPosition _ _ ->
@@ -179,8 +193,39 @@ stateUpdate dt particle =
 
                 Hit duration ->
                     duration > 0
+
+                Die _ ->
+                    True
     in
     { particle | state = particle.state |> List.map updateComponent |> List.filter filterComponent }
+
+
+{-| Check if particle should stay alive or be removed
+-}
+keepParticle : Particle GameParticle -> Bool
+keepParticle particle =
+    let
+        keep c =
+            case c of
+                MoveToPosition _ _ ->
+                    True
+
+                FollowPointer _ ->
+                    True
+
+                Avoid _ ->
+                    True
+
+                Color _ ->
+                    True
+
+                Hit _ ->
+                    True
+
+                Die duration ->
+                    duration > 0
+    in
+    particle.state |> List.map keep |> List.all ((==) True)
 
 
 

@@ -13,3 +13,4 @@ testWorld1 =
         |> World.addParticle (Particles.wall 250 190)
         |> World.addParticle (Particles.wall 405 195)
         |> World.addParticle (Particles.idle -55 195)
+        |> World.addParticle (Particles.dying 55 -195)

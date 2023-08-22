@@ -70,18 +70,14 @@ state dt system =
 --                     (\p -> Particle.new (spawnPosition p) 20 10 (DieCooldown 600))
 --     in
 --     World.addParticles ready system
--- cull : ParticleSystem GameParticle -> ParticleSystem GameParticle
--- cull system =
---     let
---         shoudKeepCooldown p =
---             case p.state of
---                 DieCooldown cd ->
---                     cd > 0
---                 _ ->
---                     True
---     in
---     system
---         |> World.filterParticles shoudKeepCooldown
+
+
+cull : ParticleSystem GameParticle -> ParticleSystem GameParticle
+cull system =
+    World.filterParticles GameParticle.keepParticle system
+
+
+
 -- resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
 -- resolveCollisions system =
 --     World.collisions system
@@ -138,7 +134,7 @@ fixedUpdate dt model =
             , particles =
                 model.particles
                     |> state model.stepTime
-                    -- |> spawn
+                    |> cull
                     |> forces model.pointer
                     |> movement model.stepTime
                     |> collisionInteraction
