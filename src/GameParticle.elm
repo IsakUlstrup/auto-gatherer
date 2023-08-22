@@ -25,7 +25,7 @@ type Component
     | Avoid Float
     | Color Color
     | Hit Float
-    | Die Float
+    | Die Float Float
 
 
 addComponent : Component -> Particle GameParticle -> Particle GameParticle
@@ -56,7 +56,7 @@ componentForce pointer particles particle component =
         Hit _ ->
             Vector2.zero
 
-        Die _ ->
+        Die _ _ ->
             Vector2.zero
 
 
@@ -87,8 +87,8 @@ componentToString component =
         Hit duration ->
             "Hit " ++ String.fromFloat duration
 
-        Die duration ->
-            "Die " ++ String.fromFloat duration
+        Die duration maxDuration ->
+            "Die " ++ String.fromFloat duration ++ " " ++ String.fromFloat maxDuration
 
 
 componentTypeToString : Component -> String
@@ -109,7 +109,7 @@ componentTypeToString component =
         Hit _ ->
             "hit"
 
-        Die _ ->
+        Die _ _ ->
             "die"
 
 
@@ -174,8 +174,8 @@ stateUpdate dt particle =
                 Hit duration ->
                     Hit (max 0 (duration - dt))
 
-                Die duration ->
-                    Die (max 0 (duration - dt))
+                Die duration maxDuration ->
+                    Die (max 0 (duration - dt)) maxDuration
 
         filterComponent c =
             case c of
@@ -194,7 +194,7 @@ stateUpdate dt particle =
                 Hit duration ->
                     duration > 0
 
-                Die _ ->
+                Die _ _ ->
                     True
     in
     { particle | state = particle.state |> List.map updateComponent |> List.filter filterComponent }
@@ -222,7 +222,7 @@ keepParticle particle =
                 Hit _ ->
                     True
 
-                Die duration ->
+                Die duration _ ->
                     duration > 0
     in
     particle.state |> List.map keep |> List.all ((==) True)

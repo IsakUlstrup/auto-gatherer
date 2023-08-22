@@ -276,6 +276,19 @@ viewParticle debug particle =
             particle.state
                 |> List.map GameParticle.componentTypeToString
                 |> List.map Svg.Attributes.class
+
+        opacity =
+            List.foldl
+                (\c o ->
+                    case c of
+                        Die dur maxDur ->
+                            dur / maxDur
+
+                        _ ->
+                            o
+                )
+                1
+                particle.state
     in
     Svg.g
         ([ Engine.SvgRenderer.transformAttr particle.position
@@ -287,6 +300,7 @@ viewParticle debug particle =
             [ Svg.Attributes.r <| String.fromInt (round particle.radius)
             , Svg.Attributes.class "body"
             , Svg.Attributes.fill <| Color.toString <| Color.average colors
+            , Svg.Attributes.opacity <| String.fromFloat opacity
             ]
             []
             :: (if debug then
