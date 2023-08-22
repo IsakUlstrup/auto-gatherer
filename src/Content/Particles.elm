@@ -1,8 +1,8 @@
-module Content.Particles exposing (dying, followPointer, idle, wall)
+module Content.Particles exposing (dying, followPointer, idle, line, wall)
 
 import Color
 import Engine.Particle as Particle
-import Engine.Vector2 as Vector2
+import Engine.Vector2 as Vector2 exposing (Vector2)
 import GameParticle exposing (Component(..), GameParticle)
 
 
@@ -36,3 +36,14 @@ wall x y =
         [ MoveToPosition (Vector2.new x y) 0.5
         , Color <| normalizedColor 200
         ]
+
+
+{-| Create a line of particles that go from start point in provided direction.
+
+Length is determined by amount of particles and particle radius
+
+-}
+line : Vector2 -> Vector2 -> Int -> (Vector2 -> GameParticle) -> List GameParticle
+line start direction amount particle =
+    List.range 0 amount
+        |> List.map (\index -> particle (Vector2.add start (Vector2.scale (toFloat index * (particle Vector2.zero).radius) direction)))

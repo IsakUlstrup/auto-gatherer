@@ -49,11 +49,7 @@ addParticle particle (ParticleSystem world) =
 
 addParticles : List (Particle a) -> ParticleSystem a -> ParticleSystem a
 addParticles particles system =
-    let
-        addHelper p =
-            addParticle p
-    in
-    List.foldl addHelper system particles
+    List.foldl addParticle system particles
 
 
 updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSystem a
