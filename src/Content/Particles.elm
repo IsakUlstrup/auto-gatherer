@@ -3,6 +3,7 @@ module Content.Particles exposing
     , followPointer
     , idle
     , line
+    , ring
     , shootAtCursor
     , wall
     )
@@ -59,3 +60,22 @@ line : Vector2 -> Vector2 -> Int -> (Vector2 -> GameParticle) -> List GamePartic
 line start direction amount particle =
     List.range 0 amount
         |> List.map (\index -> particle (Vector2.add start (Vector2.scale (toFloat index * ((particle Vector2.zero).radius * 2)) (Vector2.normalize direction))))
+
+
+ring : Vector2 -> Int -> (Vector2 -> GameParticle) -> List GameParticle
+ring center amount particle =
+    let
+        particleRadius =
+            particle Vector2.zero |> .radius
+
+        pos i =
+            let
+                angle =
+                    toFloat i * pi / (toFloat amount / 2)
+            in
+            center
+                |> Vector2.add (Vector2.scale (particleRadius * (toFloat amount * 0.32)) (Vector2.new (sin angle) (cos angle)))
+                |> particle
+    in
+    List.range 1 amount
+        |> List.map pos
