@@ -2,6 +2,7 @@ module Content.Particles exposing (dying, followPointer, idle, line, wall)
 
 import Color
 import Engine.Particle as Particle
+import Engine.Progress as Progress
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import GameParticle exposing (Component(..), GameParticle)
 
@@ -23,7 +24,7 @@ idle x y =
 
 dying : Float -> Float -> GameParticle
 dying x y =
-    Particle.new (Vector2.new x y) 25 30 0 [ Color <| normalizedColor 350, Die 1000 1000 ]
+    Particle.new (Vector2.new x y) 25 30 0 [ Color <| normalizedColor 350, Die (Progress.new 1000) ]
         |> Particle.applyForce (Vector2.new 1 0)
 
 

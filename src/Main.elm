@@ -281,8 +281,8 @@ viewParticle debug particle =
             List.foldl
                 (\c o ->
                     case c of
-                        Die dur maxDur ->
-                            dur / maxDur
+                        Die progress ->
+                            progress.current / progress.max
 
                         _ ->
                             o

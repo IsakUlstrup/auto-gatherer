@@ -10,6 +10,7 @@ module GameParticle exposing
 
 import Color exposing (Color)
 import Engine.Particle as Particle exposing (Particle)
+import Engine.Progress as Progress exposing (Progress)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Pointer exposing (Pointer)
 
@@ -24,7 +25,7 @@ type Component
     | Avoid Float
     | Color Color
     | Hit Float
-    | Die Float Float
+    | Die Progress
 
 
 componentForce : Pointer -> List GameParticle -> GameParticle -> Component -> Vector2
@@ -50,7 +51,7 @@ componentForce pointer particles particle component =
         Hit _ ->
             Vector2.zero
 
-        Die _ _ ->
+        Die _ ->
             Vector2.zero
 
 
@@ -81,8 +82,8 @@ componentToString component =
         Hit duration ->
             "Hit " ++ String.fromFloat duration
 
-        Die duration maxDuration ->
-            "Die " ++ String.fromFloat duration ++ " " ++ String.fromFloat maxDuration
+        Die progress ->
+            "Die " ++ Progress.toString progress
 
 
 componentTypeToString : Component -> String
@@ -103,7 +104,7 @@ componentTypeToString component =
         Hit _ ->
             "hit"
 
-        Die _ _ ->
+        Die _ ->
             "die"
 
 
@@ -127,8 +128,8 @@ stateUpdate dt particle =
                 Hit duration ->
                     Hit (max 0 (duration - dt))
 
-                Die duration maxDuration ->
-                    Die (max 0 (duration - dt)) maxDuration
+                Die progress ->
+                    Die <| Progress.tick dt progress
 
         filterComponent c =
             case c of
@@ -147,7 +148,7 @@ stateUpdate dt particle =
                 Hit duration ->
                     duration > 0
 
-                Die _ _ ->
+                Die _ ->
                     True
     in
     { particle | components = particle.components |> List.map updateComponent |> List.filter filterComponent }
@@ -175,8 +176,8 @@ keepParticle particle =
                 Hit _ ->
                     True
 
-                Die duration _ ->
-                    duration > 0
+                Die progress ->
+                    Progress.isNotDone progress
     in
     particle.components |> List.map keep |> List.all ((==) True)
 
