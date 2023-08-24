@@ -26,6 +26,7 @@ type Component
     | Color Color
     | Hit Float
     | Die Progress
+    | FireParticleAtCursor Progress GameParticle
 
 
 componentForce : Pointer -> List GameParticle -> GameParticle -> Component -> Vector2
@@ -53,6 +54,13 @@ componentForce pointer particles particle component =
 
         Die _ ->
             Vector2.zero
+
+        FireParticleAtCursor progress p ->
+            if Progress.isDone progress && pointer.pressed then
+                Vector2.direction particle.position pointer.position |> Vector2.scale -(p.mass * 0.01)
+
+            else
+                Vector2.zero
 
 
 particleForce : Pointer -> List GameParticle -> GameParticle -> GameParticle
@@ -85,6 +93,9 @@ componentToString component =
         Die progress ->
             "Die " ++ Progress.toString progress
 
+        FireParticleAtCursor progress _ ->
+            "FireParticleAtCursor " ++ Progress.toString progress
+
 
 componentTypeToString : Component -> String
 componentTypeToString component =
@@ -107,9 +118,12 @@ componentTypeToString component =
         Die _ ->
             "die"
 
+        FireParticleAtCursor _ _ ->
+            "fire-particle-at-cursor"
 
-stateUpdate : Float -> GameParticle -> GameParticle
-stateUpdate dt particle =
+
+stateUpdate : Pointer -> Float -> GameParticle -> GameParticle
+stateUpdate pointer dt particle =
     let
         updateComponent c =
             case c of
@@ -131,6 +145,13 @@ stateUpdate dt particle =
                 Die progress ->
                     Die <| Progress.tick dt progress
 
+                FireParticleAtCursor progress p ->
+                    if Progress.isDone progress && pointer.pressed then
+                        FireParticleAtCursor (Progress.reset progress) p
+
+                    else
+                        FireParticleAtCursor (Progress.tick dt progress) p
+
         filterComponent c =
             case c of
                 MoveToPosition _ _ ->
@@ -149,6 +170,9 @@ stateUpdate dt particle =
                     duration > 0
 
                 Die _ ->
+                    True
+
+                FireParticleAtCursor _ _ ->
                     True
     in
     { particle | components = particle.components |> List.map updateComponent |> List.filter filterComponent }
@@ -178,18 +202,8 @@ keepParticle particle =
 
                 Die progress ->
                     Progress.isNotDone progress
+
+                FireParticleAtCursor _ _ ->
+                    True
     in
     particle.components |> List.map keep |> List.all ((==) True)
-
-
-
--- case particle.state of
---     Summon cd maxCd ->
---         if cd <= 0 then
---             { particle | state = Summon maxCd maxCd }
---         else
---             { particle | state = Summon (max 0 (cd - dt)) maxCd }
---     DieCooldown cd ->
---         { particle | state = DieCooldown <| max 0 (cd - dt) }
---     _ ->
---         particle

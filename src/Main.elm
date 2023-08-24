@@ -7,6 +7,7 @@ import Color
 import Content.Worlds
 import Engine.Particle as Particle
 import Engine.ParticleSystem as World exposing (ParticleSystem)
+import Engine.Progress as Progress
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import GameParticle exposing (Component(..), GameParticle, particleForce)
@@ -44,32 +45,48 @@ collisionInteraction system =
     World.collisionAction (\_ p -> Particle.addComponent (Hit 100) p) system
 
 
-state : Float -> ParticleSystem Component -> ParticleSystem Component
-state dt system =
-    World.updateParticles (GameParticle.stateUpdate dt) system
+state : Pointer -> Float -> ParticleSystem Component -> ParticleSystem Component
+state pointer dt system =
+    World.updateParticles (GameParticle.stateUpdate pointer dt) system
 
 
+spawn : Pointer -> ParticleSystem Component -> ParticleSystem Component
+spawn pointer system =
+    let
+        worldPointer =
+            { pointer | position = pointer.position |> Vector2.add (World.getPlayer system |> .position) }
 
--- spawn : ParticleSystem GameParticle -> ParticleSystem GameParticle
--- spawn system =
---     let
---         readySummoner p =
---             case p.state of
---                 Summon cd _ ->
---                     cd <= 0
---                 _ ->
---                     False
---         spawnPosition p =
---             p.position
---                 |> Vector2.add (Vector2.new 35 -35)
---         ready : List (Particle ParticleState)
---         ready =
---             World.getParticles system
---                 |> List.filter readySummoner
---                 |> List.map
---                     (\p -> Particle.new (spawnPosition p) 20 10 (DieCooldown 600))
---     in
---     World.addParticles ready system
+        readySpawn : GameParticle -> Component -> Maybe GameParticle
+        readySpawn p c =
+            case c of
+                FireParticleAtCursor progress particle ->
+                    if Progress.isDone progress && pointer.pressed then
+                        Just
+                            ({ particle
+                                | position =
+                                    Vector2.add p.position
+                                        (Vector2.direction p.position worldPointer.position
+                                            |> Vector2.scale (p.radius + particle.radius)
+                                        )
+                             }
+                                |> (\part -> Particle.applyForce (Vector2.direction p.position part.position |> Vector2.scale (particle.mass * 0.01)) part)
+                            )
+
+                    else
+                        Nothing
+
+                _ ->
+                    Nothing
+
+        readySummoner p =
+            List.filterMap (readySpawn p) p.components
+
+        ready : List GameParticle
+        ready =
+            World.getParticles system
+                |> List.concatMap readySummoner
+    in
+    World.addParticles ready system
 
 
 cull : ParticleSystem Component -> ParticleSystem Component
@@ -78,9 +95,6 @@ cull system =
 
 
 
--- resolveCollisions : ParticleSystem ParticleState -> ParticleSystem ParticleState
--- resolveCollisions system =
---     World.collisions system
 -- MODEL
 
 
@@ -133,14 +147,13 @@ fixedUpdate dt model =
             | timeAccum = dt - model.stepTime
             , particles =
                 model.particles
-                    |> state model.stepTime
                     |> cull
                     |> forces model.pointer
                     |> movement model.stepTime
                     |> collisionInteraction
                     |> World.collisions
-
-            -- |> cull
+                    |> spawn model.pointer
+                    |> state model.pointer model.stepTime
         }
             |> fixedUpdate (dt - model.stepTime)
 

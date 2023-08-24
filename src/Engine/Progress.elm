@@ -1,4 +1,4 @@
-module Engine.Progress exposing (Progress, isDone, isNotDone, new, tick, toString)
+module Engine.Progress exposing (Progress, isDone, isNotDone, new, reset, tick, toString)
 
 
 type alias Progress =
@@ -13,6 +13,11 @@ new max =
 tick : Float -> Progress -> Progress
 tick dt progress =
     { progress | current = progress.current - dt |> max 0 }
+
+
+reset : Progress -> Progress
+reset progress =
+    { progress | current = progress.max }
 
 
 toString : Progress -> String
