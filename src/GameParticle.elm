@@ -5,7 +5,6 @@ module GameParticle exposing
     , componentToString
     , componentTypeToString
     , keepParticle
-    , stateUpdate
     )
 
 import Color exposing (Color)
@@ -111,62 +110,6 @@ componentTypeToString component =
 
         FireParticleAtCursor _ _ ->
             "fire-particle-at-cursor"
-
-
-stateUpdate : Pointer -> Float -> GameParticle -> GameParticle
-stateUpdate pointer dt particle =
-    let
-        updateComponent c =
-            case c of
-                MoveToPosition _ _ ->
-                    c
-
-                FollowPointer _ ->
-                    c
-
-                Avoid _ ->
-                    c
-
-                Color _ ->
-                    c
-
-                Hit duration ->
-                    Hit (max 0 (duration - dt))
-
-                Die progress ->
-                    Die <| Progress.tick dt progress
-
-                FireParticleAtCursor progress p ->
-                    if Progress.isDone progress && pointer.pressed then
-                        FireParticleAtCursor (Progress.reset progress) p
-
-                    else
-                        FireParticleAtCursor (Progress.tick dt progress) p
-
-        filterComponent c =
-            case c of
-                MoveToPosition _ _ ->
-                    True
-
-                FollowPointer _ ->
-                    True
-
-                Avoid _ ->
-                    True
-
-                Color _ ->
-                    True
-
-                Hit duration ->
-                    duration > 0
-
-                Die _ ->
-                    True
-
-                FireParticleAtCursor _ _ ->
-                    True
-    in
-    { particle | components = particle.components |> List.map updateComponent |> List.filter filterComponent }
 
 
 {-| Check if particle should stay alive or be removed
