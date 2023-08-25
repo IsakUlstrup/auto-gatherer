@@ -1,10 +1,10 @@
 module GameParticle exposing
     ( Component(..)
     , GameParticle
+    , componentForce
     , componentToString
     , componentTypeToString
     , keepParticle
-    , particleForce
     , stateUpdate
     )
 
@@ -30,21 +30,21 @@ type Component
 
 
 componentForce : Pointer -> List GameParticle -> GameParticle -> Component -> Vector2
-componentForce pointer particles particle component =
+componentForce pointer particles parent component =
     case component of
         MoveToPosition position forceMulti ->
-            Particle.moveToPosition forceMulti 5 position particle
+            Particle.moveToPosition forceMulti 5 position parent
 
         FollowPointer forceMulti ->
             if pointer.pressed then
-                Vector2.direction particle.position pointer.position
+                Vector2.direction parent.position pointer.position
                     |> Vector2.scale forceMulti
 
             else
                 Vector2.zero
 
         Avoid forceMulti ->
-            Particle.moveAwayRange forceMulti 100 particles particle
+            Particle.moveAwayRange forceMulti 100 particles parent
 
         Color _ ->
             Vector2.zero
@@ -57,19 +57,10 @@ componentForce pointer particles particle component =
 
         FireParticleAtCursor progress p ->
             if Progress.isDone progress && pointer.pressed then
-                Vector2.direction particle.position pointer.position |> Vector2.scale -(p.mass * 0.01)
+                Vector2.direction parent.position pointer.position |> Vector2.scale -(p.mass * 0.01)
 
             else
                 Vector2.zero
-
-
-particleForce : Pointer -> List GameParticle -> GameParticle -> GameParticle
-particleForce pointer particles particle =
-    let
-        sumForces =
-            List.foldl (\comp force -> Vector2.add force (componentForce pointer particles particle comp)) Vector2.zero particle.components
-    in
-    Particle.applyForce sumForces particle
 
 
 componentToString : Component -> String

@@ -10,7 +10,7 @@ import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Progress as Progress
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
-import GameParticle exposing (Component(..), GameParticle, particleForce)
+import GameParticle exposing (Component(..), GameParticle)
 import Html exposing (Html, main_)
 import Html.Attributes
 import Html.Events
@@ -32,7 +32,7 @@ forces pointer world =
         worldPointer =
             { pointer | position = pointer.position |> Vector2.add (World.getPlayer world |> .position) }
     in
-    World.updateParticlesWithTargets (particleForce worldPointer) world
+    World.updateParticlesWithTargets (\targets -> Particle.applyComponentForce (GameParticle.componentForce worldPointer targets)) world
 
 
 movement : Float -> ParticleSystem Component -> ParticleSystem Component

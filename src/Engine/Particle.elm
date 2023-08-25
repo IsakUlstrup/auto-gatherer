@@ -1,6 +1,7 @@
 module Engine.Particle exposing
     ( Particle
     , addComponent
+    , applyComponentForce
     , applyForce
     , applyFriciton
     , applyImpulse
@@ -52,6 +53,20 @@ addComponent component particle =
 
 
 -- FORCES
+
+
+applyComponentForce : (Particle a -> a -> Vector2) -> Particle a -> Particle a
+applyComponentForce componentForce particle =
+    let
+        addForce : a -> Vector2 -> Vector2
+        addForce component force =
+            Vector2.add force (componentForce particle component)
+
+        sumForces : Vector2
+        sumForces =
+            List.foldl addForce Vector2.zero particle.components
+    in
+    applyForce sumForces particle
 
 
 {-| Apply force to object
