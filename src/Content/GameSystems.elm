@@ -1,11 +1,76 @@
 module Content.GameSystems exposing (collisionInteraction, cull, forces, movement, spawn, state)
 
-import Engine.Particle as Particle
+import Component exposing (Component(..))
+import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as ParticleSystem exposing (ParticleSystem)
 import Engine.Progress as Progress
-import Engine.Vector2 as Vector2
-import GameParticle exposing (Component(..), GameParticle)
+import Engine.Vector2 as Vector2 exposing (Vector2)
 import Pointer exposing (Pointer)
+
+
+componentForce : Pointer -> List (Particle Component) -> Particle Component -> Component -> Vector2
+componentForce pointer particles parent component =
+    case component of
+        MoveToPosition position forceMulti ->
+            Particle.moveToPosition forceMulti 5 position parent
+
+        FollowPointer forceMulti ->
+            if pointer.pressed then
+                Vector2.direction parent.position pointer.position
+                    |> Vector2.scale forceMulti
+
+            else
+                Vector2.zero
+
+        Avoid forceMulti ->
+            Particle.moveAwayRange forceMulti 100 particles parent
+
+        Color _ ->
+            Vector2.zero
+
+        Hit _ ->
+            Vector2.zero
+
+        Die _ ->
+            Vector2.zero
+
+        FireParticleAtCursor progress p ->
+            if Progress.isDone progress && pointer.pressed then
+                Vector2.direction parent.position pointer.position |> Vector2.scale -(p.mass * 0.01)
+
+            else
+                Vector2.zero
+
+
+{-| Check if particle should stay alive or be removed
+-}
+keepParticle : Particle Component -> Bool
+keepParticle particle =
+    let
+        keep c =
+            case c of
+                MoveToPosition _ _ ->
+                    True
+
+                FollowPointer _ ->
+                    True
+
+                Avoid _ ->
+                    True
+
+                Color _ ->
+                    True
+
+                Hit _ ->
+                    True
+
+                Die progress ->
+                    Progress.isNotDone progress
+
+                FireParticleAtCursor _ _ ->
+                    True
+    in
+    particle.components |> List.map keep |> List.all ((==) True)
 
 
 
@@ -18,7 +83,7 @@ forces pointer world =
         worldPointer =
             { pointer | position = pointer.position |> Vector2.add (ParticleSystem.getPlayer world |> .position) }
     in
-    ParticleSystem.updateParticlesWithTargets (\targets -> Particle.applyComponentForce (GameParticle.componentForce worldPointer targets)) world
+    ParticleSystem.updateParticlesWithTargets (\targets -> Particle.applyComponentForce (componentForce worldPointer targets)) world
 
 
 movement : Float -> ParticleSystem Component -> ParticleSystem Component
@@ -31,7 +96,7 @@ collisionInteraction system =
     ParticleSystem.collisionAction (\_ p -> Particle.addComponent (Hit 100) p) system
 
 
-stateUpdate : Pointer -> Float -> GameParticle -> GameParticle
+stateUpdate : Pointer -> Float -> Particle Component -> Particle Component
 stateUpdate pointer dt particle =
     let
         updateComponent c =
@@ -98,7 +163,7 @@ spawn pointer system =
         worldPointer =
             { pointer | position = pointer.position |> Vector2.add (ParticleSystem.getPlayer system |> .position) }
 
-        readySpawn : GameParticle -> Component -> Maybe GameParticle
+        readySpawn : Particle Component -> Component -> Maybe (Particle Component)
         readySpawn p c =
             case c of
                 FireParticleAtCursor progress particle ->
@@ -123,7 +188,7 @@ spawn pointer system =
         readySummoner p =
             List.filterMap (readySpawn p) p.components
 
-        ready : List GameParticle
+        ready : List (Particle Component)
         ready =
             ParticleSystem.getParticles system
                 |> List.concatMap readySummoner
@@ -133,4 +198,4 @@ spawn pointer system =
 
 cull : ParticleSystem Component -> ParticleSystem Component
 cull system =
-    ParticleSystem.filterParticles GameParticle.keepParticle system
+    ParticleSystem.filterParticles keepParticle system

@@ -1,9 +1,9 @@
 module Content.Worlds exposing (testWorld1)
 
+import Component exposing (Component)
 import Content.Particles as Particles
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.Vector2 as Vector2
-import GameParticle exposing (Component)
 
 
 testWorld1 : ParticleSystem Component

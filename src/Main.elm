@@ -4,12 +4,13 @@ import Browser
 import Browser.Dom
 import Browser.Events
 import Color
+import Component exposing (Component(..))
 import Content.GameSystems as GameSystems
 import Content.Worlds
+import Engine.Particle exposing (Particle)
 import Engine.ParticleSystem as World exposing (ParticleSystem)
 import Engine.SvgRenderer exposing (RenderConfig)
 import Engine.Vector2 as Vector2 exposing (Vector2)
-import GameParticle exposing (Component(..), GameParticle)
 import Html exposing (Html, main_)
 import Html.Attributes
 import Html.Events
@@ -171,10 +172,10 @@ viewDebugComponent index component =
         [ Svg.Attributes.class "component"
         , Svg.Attributes.transform <| "translate(0 " ++ String.fromInt (index * 10) ++ ")"
         ]
-        [ Svg.text <| GameParticle.componentToString component ]
+        [ Svg.text <| Component.componentToString component ]
 
 
-viewParticleDebug : GameParticle -> Svg msg
+viewParticleDebug : Particle Component -> Svg msg
 viewParticleDebug particle =
     Svg.g [ Svg.Attributes.class "debug" ]
         [ Svg.g [ Svg.Attributes.transform <| "translate(10 0)" ] (List.indexedMap viewDebugComponent particle.components)
@@ -197,7 +198,7 @@ viewParticleDebug particle =
         ]
 
 
-viewParticle : Bool -> GameParticle -> Svg msg
+viewParticle : Bool -> Particle Component -> Svg msg
 viewParticle debug particle =
     let
         colors =
@@ -214,7 +215,7 @@ viewParticle debug particle =
 
         componentClasses =
             particle.components
-                |> List.map GameParticle.componentTypeToString
+                |> List.map Component.componentTypeToString
                 |> List.map Svg.Attributes.class
 
         opacity =
