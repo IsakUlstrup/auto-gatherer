@@ -99,33 +99,6 @@ collisionInteraction system =
 stateUpdate : Pointer -> Float -> Particle Component -> Particle Component
 stateUpdate pointer dt particle =
     let
-        updateComponent c =
-            case c of
-                MoveToPosition _ _ ->
-                    c
-
-                FollowPointer _ ->
-                    c
-
-                Avoid _ ->
-                    c
-
-                Color _ ->
-                    c
-
-                Hit duration ->
-                    Hit (max 0 (duration - dt))
-
-                Die progress ->
-                    Die <| Progress.tick dt progress
-
-                FireParticleAtCursor progress p ->
-                    if Progress.isDone progress && pointer.pressed then
-                        FireParticleAtCursor (Progress.reset progress) p
-
-                    else
-                        FireParticleAtCursor (Progress.tick dt progress) p
-
         filterComponent c =
             case c of
                 MoveToPosition _ _ ->
@@ -149,7 +122,7 @@ stateUpdate pointer dt particle =
                 FireParticleAtCursor _ _ ->
                     True
     in
-    { particle | components = particle.components |> List.map updateComponent |> List.filter filterComponent }
+    { particle | components = particle.components |> List.map (Component.tickComponent pointer dt) |> List.filter filterComponent }
 
 
 state : Pointer -> Float -> ParticleSystem Component -> ParticleSystem Component

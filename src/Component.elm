@@ -2,12 +2,14 @@ module Component exposing
     ( Component(..)
     , componentToString
     , componentTypeToString
+    , tickComponent
     )
 
 import Color exposing (Color)
 import Engine.Particle exposing (Particle)
 import Engine.Progress as Progress exposing (Progress)
 import Engine.Vector2 as Vector2 exposing (Vector2)
+import Pointer exposing (Pointer)
 
 
 type Component
@@ -18,6 +20,26 @@ type Component
     | Hit Float
     | Die Progress
     | FireParticleAtCursor Progress (Particle Component)
+
+
+tickComponent : Pointer -> Float -> Component -> Component
+tickComponent pointer dt component =
+    case component of
+        Hit duration ->
+            Hit (max 0 (duration - dt))
+
+        Die progress ->
+            Die <| Progress.tick dt progress
+
+        FireParticleAtCursor progress p ->
+            if Progress.isDone progress && pointer.pressed then
+                FireParticleAtCursor (Progress.reset progress) p
+
+            else
+                FireParticleAtCursor (Progress.tick dt progress) p
+
+        _ ->
+            component
 
 
 componentToString : Component -> String
