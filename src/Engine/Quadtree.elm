@@ -1,4 +1,4 @@
-module Engine.Quadtree exposing (Boundary, QuadTree(..), insert, new, newBoundary, pointIsInBoundary)
+module Engine.QuadTree exposing (Boundary, QuadTree(..), insert, new, newBoundary, pointIsInBoundary)
 
 import Engine.Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)

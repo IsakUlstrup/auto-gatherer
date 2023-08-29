@@ -1,7 +1,7 @@
 module QuadTree exposing (boundary, quadTree)
 
 import Engine.Particle as Particle
-import Engine.Quadtree as QuadTree exposing (QuadTree(..))
+import Engine.QuadTree as QuadTree exposing (QuadTree(..))
 import Engine.Vector2 as Vector2
 import Expect
 import Fuzz exposing (float)
