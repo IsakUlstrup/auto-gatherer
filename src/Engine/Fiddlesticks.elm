@@ -1,4 +1,4 @@
-module Engine.QuadTree exposing
+module Engine.Fiddlesticks exposing
     ( Boundary
     , QuadTree(..)
     , insert
@@ -32,6 +32,11 @@ new x y size =
     Node (Boundary (Vector2.new x y) size) []
 
 
+defaultCapacity : Int
+defaultCapacity =
+    4
+
+
 pointIsInBoundary : Vector2 -> QuadTree a -> Bool
 pointIsInBoundary { x, y } tree =
     let
@@ -51,6 +56,16 @@ pointIsInBoundary { x, y } tree =
 
         Leaf boundary _ _ _ _ ->
             isIn boundary
+
+
+hasCapacity : QuadTree a -> Bool
+hasCapacity tree =
+    case tree of
+        Node _ ps ->
+            List.length ps < defaultCapacity
+
+        Leaf _ _ _ _ _ ->
+            False
 
 
 insert : Particle a -> QuadTree a -> QuadTree a

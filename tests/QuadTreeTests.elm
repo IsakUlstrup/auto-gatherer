@@ -1,7 +1,7 @@
 module QuadTreeTests exposing (boundary, quadTree)
 
+import Engine.Fiddlesticks as QuadTree exposing (QuadTree(..))
 import Engine.Particle as Particle
-import Engine.QuadTree as QuadTree exposing (QuadTree(..))
 import Engine.Vector2 as Vector2
 import Expect
 import Fuzz exposing (float)
@@ -13,14 +13,24 @@ testTree =
     QuadTree.new 0 0 100
 
 
-isUnchanged : QuadTree () -> Bool
-isUnchanged tree =
+isEmpty : QuadTree () -> Bool
+isEmpty tree =
     case tree of
         Node _ ps ->
             List.isEmpty ps
 
         Leaf _ _ _ _ _ ->
             False
+
+
+isSubdivided : QuadTree () -> Bool
+isSubdivided tree =
+    case tree of
+        Node _ _ ->
+            False
+
+        Leaf _ _ _ _ _ ->
+            True
 
 
 boundary : Test
@@ -51,12 +61,22 @@ quadTree =
             \_ ->
                 testTree
                     |> QuadTree.insert (Particle.new (Vector2.new 300 0) 10 100 1 [])
-                    |> isUnchanged
+                    |> isEmpty
                     |> Expect.equal True
         , test "insert point inside boundary, should return tree with point added" <|
             \_ ->
                 testTree
                     |> QuadTree.insert (Particle.new (Vector2.new 30 0) 10 100 1 [])
-                    |> isUnchanged
+                    |> isEmpty
                     |> Expect.equal False
+        , test "insert five points inside boundary, should return subdivided tree with points added" <|
+            \_ ->
+                testTree
+                    |> QuadTree.insert (Particle.new (Vector2.new 30 0) 10 100 1 [])
+                    |> QuadTree.insert (Particle.new (Vector2.new 30 0) 10 100 1 [])
+                    |> QuadTree.insert (Particle.new (Vector2.new 30 0) 10 100 1 [])
+                    |> QuadTree.insert (Particle.new (Vector2.new 30 0) 10 100 1 [])
+                    |> QuadTree.insert (Particle.new (Vector2.new 30 0) 10 100 1 [])
+                    |> isSubdivided
+                    |> Expect.equal True
         ]
