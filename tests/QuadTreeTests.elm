@@ -1,4 +1,4 @@
-module QuadTree exposing (boundary, quadTree)
+module QuadTreeTests exposing (boundary, quadTree)
 
 import Engine.Particle as Particle
 import Engine.QuadTree as QuadTree exposing (QuadTree(..))

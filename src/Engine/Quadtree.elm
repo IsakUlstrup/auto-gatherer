@@ -1,11 +1,20 @@
-module Engine.QuadTree exposing (Boundary, QuadTree(..), insert, new, newBoundary, pointIsInBoundary)
+module Engine.QuadTree exposing
+    ( Boundary
+    , QuadTree(..)
+    , insert
+    , new
+    , newBoundary
+    , pointIsInBoundary
+    )
 
 import Engine.Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
 type alias Boundary =
-    { center : Vector2, size : Float }
+    { center : Vector2
+    , size : Float
+    }
 
 
 newBoundary : Float -> Float -> Float -> Boundary
@@ -27,16 +36,14 @@ pointIsInBoundary : Vector2 -> QuadTree a -> Bool
 pointIsInBoundary { x, y } tree =
     let
         isIn b =
-            (x
+            x
                 < (b.center.x + b.size)
                 && x
                 > (b.center.x - b.size)
-            )
-                && (y
-                        < (b.center.y + b.size)
-                        && y
-                        > (b.center.y - b.size)
-                   )
+                && y
+                < (b.center.y + b.size)
+                && y
+                > (b.center.y - b.size)
     in
     case tree of
         Node boundary _ ->
@@ -58,7 +65,6 @@ insert particle tree =
                     t
     in
     if pointIsInBoundary particle.position tree then
-        -- do stuff
         insertHelper particle tree
 
     else
