@@ -138,27 +138,18 @@ boundaryTransform : Boundary -> Svg.Attribute msg
 boundaryTransform boundary =
     Svg.Attributes.transform <|
         "translate("
-            ++ String.fromFloat (boundary.center.x - boundary.size)
+            ++ String.fromInt (round <| boundary.center.x - boundary.size)
             ++ " , "
-            ++ String.fromFloat (boundary.center.y - boundary.size)
+            ++ String.fromInt (round <| boundary.center.y - boundary.size)
             ++ ")"
 
 
-viewParticle2 : Particle a -> Svg msg
-viewParticle2 particle =
-    let
-        transform =
-            Svg.Attributes.transform <|
-                "translate("
-                    ++ String.fromFloat particle.position.x
-                    ++ " , "
-                    ++ String.fromFloat particle.position.y
-                    ++ ")"
-    in
+simpleViewParticle : Particle a -> Svg msg
+simpleViewParticle particle =
     Svg.circle
-        [ transform
+        [ transformAttr particle.position
         , Svg.Attributes.class "particle"
-        , Svg.Attributes.r <| String.fromFloat particle.radius
+        , Svg.Attributes.r <| String.fromInt (round particle.radius)
         ]
         []
 
@@ -167,19 +158,18 @@ viewKeyedBoundary : Int -> Boundary -> List (Particle a) -> ( String, Svg msg )
 viewKeyedBoundary index boundary particles =
     ( String.fromInt index
     , Svg.g
-        [ Svg.Attributes.style <| "fill: hsl(" ++ String.fromInt (index * 70) ++ ", 100%, 50%)"
+        [ Svg.Attributes.style <| "fill: hsl(" ++ String.fromInt (index * 60) ++ ", 70%, 60%)"
         ]
-        [ Svg.g [] (List.map viewParticle2 particles)
-        , Svg.rect
+        [ Svg.rect
             [ Svg.Attributes.class "leaf"
             , Svg.Attributes.class <| String.fromInt index
             , boundaryTransform boundary
-            , Svg.Attributes.width <| String.fromFloat (boundary.size * 2)
-            , Svg.Attributes.height <| String.fromFloat (boundary.size * 2)
-            , Svg.Attributes.style <| "fill-opacity: 0"
-            , Svg.Attributes.stroke <| "hsl(" ++ String.fromInt (index * 70) ++ ", 100%, 50%)"
+            , Svg.Attributes.width <| String.fromInt (round <| boundary.size * 2)
+            , Svg.Attributes.height <| String.fromInt (round <| boundary.size * 2)
+            , Svg.Attributes.style <| "fill-opacity: 0.3"
             ]
             []
+        , Svg.g [] (List.map simpleViewParticle particles)
         ]
     )
 
