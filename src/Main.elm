@@ -33,6 +33,7 @@ type alias Model =
     , timeAccum : Float
     , deltaHistory : List Float
     , pointer : Pointer
+    , quadTreeRender : Bool
     }
 
 
@@ -51,6 +52,7 @@ init _ =
         0
         []
         (Pointer Vector2.zero False)
+        False
     , gameResize
     )
 
@@ -66,6 +68,7 @@ type Msg
     | SetPointer Float Float Bool
     | WindowResize
     | GetGameElement (Result Browser.Dom.Error Browser.Dom.Element)
+    | ToggleQuadTreeRender
 
 
 fixedUpdate : Float -> Model -> Model
@@ -137,6 +140,9 @@ update msg model =
 
         GetGameElement (Err _) ->
             ( model, Cmd.none )
+
+        ToggleQuadTreeRender ->
+            ( { model | quadTreeRender = not model.quadTreeRender }, Cmd.none )
 
 
 
@@ -281,19 +287,34 @@ view model =
             , Html.div [] [ Html.text <| screenSizeString model.renderConfig.screenWidth model.renderConfig.screenHeight ]
             , Html.div [] [ Html.text <| "particle count: " ++ (World.getParticles model.particles |> List.length |> String.fromInt) ]
             , Html.button [ Html.Events.onClick ToggleRenderDebug ] [ Html.text "debug" ]
+            , Html.button [ Html.Events.onClick ToggleQuadTreeRender ] [ Html.text "qt render" ]
             , Html.button [ Html.Events.onClick Reset ] [ Html.text "reset" ]
             ]
-        , Engine.SvgRenderer.viewQuadTreeSvg
-            [ Svg.Attributes.id "game-view"
-            , Svg.Events.on "pointermove" pointerDecoder
-            , Svg.Events.on "pointerdown" pointerDecoder
-            , Svg.Events.on "pointerup" pointerDecoder
-            , Svg.Events.on "pointercancel" pointerDecoder
-            ]
-            [ viewPointer model.pointer ]
-            (viewParticle model.renderConfig.debug)
-            model.particles
-            model.renderConfig
+        , if model.quadTreeRender then
+            Engine.SvgRenderer.viewQuadTreeSvg
+                [ Svg.Attributes.id "game-view"
+                , Svg.Events.on "pointermove" pointerDecoder
+                , Svg.Events.on "pointerdown" pointerDecoder
+                , Svg.Events.on "pointerup" pointerDecoder
+                , Svg.Events.on "pointercancel" pointerDecoder
+                ]
+                [ viewPointer model.pointer ]
+                (viewParticle model.renderConfig.debug)
+                model.particles
+                model.renderConfig
+
+          else
+            Engine.SvgRenderer.viewSvg
+                [ Svg.Attributes.id "game-view"
+                , Svg.Events.on "pointermove" pointerDecoder
+                , Svg.Events.on "pointerdown" pointerDecoder
+                , Svg.Events.on "pointerup" pointerDecoder
+                , Svg.Events.on "pointercancel" pointerDecoder
+                ]
+                [ viewPointer model.pointer ]
+                (viewParticle model.renderConfig.debug)
+                model.particles
+                model.renderConfig
         ]
 
 
