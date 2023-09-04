@@ -1,6 +1,7 @@
 module Engine.QuadTree exposing
     ( Boundary
     , QuadTree(..)
+    , fromList
     , indexedMap
     , insert
     , isIn
@@ -127,6 +128,11 @@ insert particle tree =
                 (insert particle ne1)
                 (insert particle sw1)
                 (insert particle se1)
+
+
+fromList : List (Particle a) -> QuadTree a
+fromList particles =
+    List.foldl insert (new 0 0 1000) particles
 
 
 indexedMap : (Int -> Boundary -> List (Particle a) -> b) -> QuadTree a -> List b

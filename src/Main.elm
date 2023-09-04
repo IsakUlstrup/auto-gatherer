@@ -283,7 +283,7 @@ view model =
             , Html.button [ Html.Events.onClick ToggleRenderDebug ] [ Html.text "debug" ]
             , Html.button [ Html.Events.onClick Reset ] [ Html.text "reset" ]
             ]
-        , Engine.SvgRenderer.viewSvg
+        , Engine.SvgRenderer.viewQuadTreeSvg
             [ Svg.Attributes.id "game-view"
             , Svg.Events.on "pointermove" pointerDecoder
             , Svg.Events.on "pointerdown" pointerDecoder

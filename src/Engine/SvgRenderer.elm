@@ -3,6 +3,7 @@ module Engine.SvgRenderer exposing
     , initRenderConfig
     , screenToWorldCoords
     , transformAttr
+    , viewQuadTreeSvg
     , viewSvg
     , withDebug
     , withHeight
@@ -13,6 +14,7 @@ module Engine.SvgRenderer exposing
 
 import Engine.Particle as Particle exposing (Particle)
 import Engine.ParticleSystem as World exposing (ParticleSystem)
+import Engine.QuadTree as QuadTree exposing (Boundary)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -123,6 +125,82 @@ viewSvg attrs children viewParticle particles config =
             (particles
                 |> World.filterParticles (\o -> Particle.distance (World.getPlayer particles) o < config.renderDistance)
                 |> World.mapParticles (viewKeyedParticle viewParticle)
+            )
+            :: children
+        )
+
+
+
+-- QUAD TREE
+
+
+boundaryTransform : Boundary -> Svg.Attribute msg
+boundaryTransform boundary =
+    Svg.Attributes.transform <|
+        "translate("
+            ++ String.fromFloat (boundary.center.x - boundary.size)
+            ++ " , "
+            ++ String.fromFloat (boundary.center.y - boundary.size)
+            ++ ")"
+
+
+viewParticle2 : Particle a -> Svg msg
+viewParticle2 particle =
+    let
+        transform =
+            Svg.Attributes.transform <|
+                "translate("
+                    ++ String.fromFloat particle.position.x
+                    ++ " , "
+                    ++ String.fromFloat particle.position.y
+                    ++ ")"
+    in
+    Svg.circle
+        [ transform
+        , Svg.Attributes.class "particle"
+        , Svg.Attributes.r <| String.fromFloat particle.radius
+        ]
+        []
+
+
+viewKeyedBoundary : Int -> Boundary -> List (Particle a) -> ( String, Svg msg )
+viewKeyedBoundary index boundary particles =
+    ( String.fromInt index
+    , Svg.g
+        [ Svg.Attributes.style <| "fill: hsl(" ++ String.fromInt (index * 70) ++ ", 100%, 50%)"
+        ]
+        [ Svg.g [] (List.map viewParticle2 particles)
+        , Svg.rect
+            [ Svg.Attributes.class "leaf"
+            , Svg.Attributes.class <| String.fromInt index
+            , boundaryTransform boundary
+            , Svg.Attributes.width <| String.fromFloat (boundary.size * 2)
+            , Svg.Attributes.height <| String.fromFloat (boundary.size * 2)
+            , Svg.Attributes.style <| "fill-opacity: 0"
+            , Svg.Attributes.stroke <| "hsl(" ++ String.fromInt (index * 70) ++ ", 100%, 50%)"
+            ]
+            []
+        ]
+    )
+
+
+viewQuadTreeSvg : List (Svg.Attribute msg) -> List (Svg msg) -> (Particle a -> Svg msg) -> ParticleSystem a -> RenderConfig -> Svg msg
+viewQuadTreeSvg attrs children _ particles _ =
+    Svg.svg
+        ([ Svg.Attributes.class "game"
+         , Svg.Attributes.viewBox "-500 -500 1000 1000"
+         , Svg.Attributes.preserveAspectRatio "xMidYMid slice"
+         ]
+            ++ attrs
+        )
+        (Svg.Keyed.node "g"
+            [ Svg.Attributes.class "camera"
+            , transformAttr <| Vector2.scale -1 <| (.position <| World.getPlayer particles)
+            ]
+            (particles
+                |> World.getParticles
+                |> QuadTree.fromList
+                |> QuadTree.indexedMap viewKeyedBoundary
             )
             :: children
         )
