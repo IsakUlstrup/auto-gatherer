@@ -1,8 +1,8 @@
 module QuadTreeTests exposing (boundary, quadTree)
 
-import Engine.Fiddlesticks as QuadTree exposing (QuadTree(..))
 import Engine.Particle as Particle
-import Engine.Vector2 as Vector2
+import Engine.QuadTree as QuadTree exposing (QuadTree(..))
+import Engine.Vector2 as Vector2 exposing (Vector2)
 import Expect
 import Fuzz exposing (float)
 import Test exposing (Test, describe, fuzz, test)
@@ -19,7 +19,7 @@ isEmpty tree =
         Node _ ps ->
             List.isEmpty ps
 
-        Leaf _ _ _ _ _ ->
+        Leaf _ _ _ _ ->
             False
 
 
@@ -29,8 +29,18 @@ isSubdivided tree =
         Node _ _ ->
             False
 
-        Leaf _ _ _ _ _ ->
+        Leaf _ _ _ _ ->
             True
+
+
+pointIsIn : Vector2 -> QuadTree a -> Bool
+pointIsIn point tree =
+    case tree of
+        Node b _ ->
+            QuadTree.isIn b (Particle.new point 0 0 0 [])
+
+        Leaf nw ne se sw ->
+            pointIsIn point nw || pointIsIn point ne || pointIsIn point se || pointIsIn point sw
 
 
 boundary : Test
@@ -39,17 +49,17 @@ boundary =
         [ test "Test if point is within boundary, should be true" <|
             \_ ->
                 testTree
-                    |> QuadTree.pointIsInBoundary (Vector2.new 50 50)
+                    |> pointIsIn (Vector2.new 50 50)
                     |> Expect.equal True
         , test "Test if point is within boundary, should be false" <|
             \_ ->
                 testTree
-                    |> QuadTree.pointIsInBoundary (Vector2.new 300 100)
+                    |> pointIsIn (Vector2.new 300 100)
                     |> Expect.equal False
         , fuzz float "Test if point with random x position is within boundary" <|
             \xpos ->
                 testTree
-                    |> QuadTree.pointIsInBoundary (Vector2.new xpos 50)
+                    |> pointIsIn (Vector2.new xpos 50)
                     |> Expect.equal (xpos < 100 && xpos > -100)
         ]
 
