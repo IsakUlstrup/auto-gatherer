@@ -9,7 +9,6 @@ module Engine.QuadTree exposing
     , subdivide
     )
 
-import Engine.Particle exposing (Particle)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 
 
@@ -20,7 +19,7 @@ type alias Boundary =
 
 
 type QuadTree a
-    = Node Boundary (List (Particle a))
+    = Node Boundary (List a)
     | Leaf (QuadTree a) (QuadTree a) (QuadTree a) (QuadTree a)
 
 
@@ -29,20 +28,20 @@ new x y size =
     Node (Boundary (Vector2.new x y) size) []
 
 
-isIn : Boundary -> Particle a -> Bool
-isIn boundary particle =
-    particle.position.x
+isIn : (a -> Vector2) -> Boundary -> a -> Bool
+isIn getPos boundary particle =
+    (getPos particle).x
         >= (boundary.center.x - boundary.size)
-        && particle.position.x
+        && (getPos particle).x
         <= (boundary.center.x + boundary.size)
-        && particle.position.y
+        && (getPos particle).y
         >= (boundary.center.y - boundary.size)
-        && particle.position.y
+        && (getPos particle).y
         <= (boundary.center.y + boundary.size)
 
 
-nw : Boundary -> List (Particle a) -> QuadTree a
-nw boundary xs =
+nw : (a -> Vector2) -> Boundary -> List a -> QuadTree a
+nw getPos boundary xs =
     let
         newBoundary =
             Boundary
@@ -52,11 +51,11 @@ nw boundary xs =
                 )
                 (boundary.size / 2)
     in
-    Node newBoundary (List.filter (isIn newBoundary) xs)
+    Node newBoundary (List.filter (isIn getPos newBoundary) xs)
 
 
-ne : Boundary -> List (Particle a) -> QuadTree a
-ne boundary xs =
+ne : (a -> Vector2) -> Boundary -> List a -> QuadTree a
+ne getPos boundary xs =
     let
         newBoundary =
             Boundary
@@ -66,11 +65,11 @@ ne boundary xs =
                 )
                 (boundary.size / 2)
     in
-    Node newBoundary (List.filter (isIn newBoundary) xs)
+    Node newBoundary (List.filter (isIn getPos newBoundary) xs)
 
 
-se : Boundary -> List (Particle a) -> QuadTree a
-se boundary xs =
+se : (a -> Vector2) -> Boundary -> List a -> QuadTree a
+se getPos boundary xs =
     let
         newBoundary =
             Boundary
@@ -80,11 +79,11 @@ se boundary xs =
                 )
                 (boundary.size / 2)
     in
-    Node newBoundary (List.filter (isIn newBoundary) xs)
+    Node newBoundary (List.filter (isIn getPos newBoundary) xs)
 
 
-sw : Boundary -> List (Particle a) -> QuadTree a
-sw boundary xs =
+sw : (a -> Vector2) -> Boundary -> List a -> QuadTree a
+sw getPos boundary xs =
     let
         newBoundary =
             Boundary
@@ -94,17 +93,17 @@ sw boundary xs =
                 )
                 (boundary.size / 2)
     in
-    Node newBoundary (List.filter (isIn newBoundary) xs)
+    Node newBoundary (List.filter (isIn getPos newBoundary) xs)
 
 
 {-| Subdivide node, is tree is a leaf do nothing
 -}
-subdivide : QuadTree a -> QuadTree a
-subdivide tree =
+subdivide : (a -> Vector2) -> QuadTree a -> QuadTree a
+subdivide getPos tree =
     case tree of
         Node b xs ->
             if List.length xs >= 4 then
-                Leaf (nw b xs) (ne b xs) (se b xs) (sw b xs)
+                Leaf (nw getPos b xs) (ne getPos b xs) (se getPos b xs) (sw getPos b xs)
 
             else
                 tree
@@ -113,29 +112,29 @@ subdivide tree =
             tree
 
 
-insert : Particle a -> QuadTree a -> QuadTree a
-insert particle tree =
+insert : (a -> Vector2) -> a -> QuadTree a -> QuadTree a
+insert getPos particle tree =
     case tree of
         Node b ps ->
-            if isIn b particle then
-                subdivide (Node b (particle :: ps))
+            if isIn getPos b particle then
+                subdivide getPos (Node b (particle :: ps))
 
             else
                 tree
 
         Leaf nw1 ne1 se1 sw1 ->
-            Leaf (insert particle nw1)
-                (insert particle ne1)
-                (insert particle sw1)
-                (insert particle se1)
+            Leaf (insert getPos particle nw1)
+                (insert getPos particle ne1)
+                (insert getPos particle sw1)
+                (insert getPos particle se1)
 
 
-fromList : List (Particle a) -> QuadTree a
-fromList particles =
-    List.foldl insert (new 0 0 1000) particles
+fromList : (a -> Vector2) -> List a -> QuadTree a
+fromList getPos particles =
+    List.foldl (insert getPos) (new 0 0 1000) particles
 
 
-indexedMap : (Int -> Boundary -> List (Particle a) -> b) -> QuadTree a -> List b
+indexedMap : (Int -> Boundary -> List a -> b) -> QuadTree a -> List b
 indexedMap f tree =
     let
         helper i accum t =

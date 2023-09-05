@@ -37,7 +37,7 @@ pointIsIn : Vector2 -> QuadTree a -> Bool
 pointIsIn point tree =
     case tree of
         Node b _ ->
-            QuadTree.isIn b (Particle.new point 0 0 0 [])
+            QuadTree.isIn .position b (Particle.new point 0 0 0 [])
 
         Leaf nw ne se sw ->
             pointIsIn point nw || pointIsIn point ne || pointIsIn point se || pointIsIn point sw

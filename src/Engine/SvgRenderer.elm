@@ -189,7 +189,7 @@ viewQuadTreeSvg attrs children _ particles _ =
             ]
             (particles
                 |> World.getParticles
-                |> QuadTree.fromList
+                |> QuadTree.fromList .position
                 |> QuadTree.indexedMap viewKeyedBoundary
             )
             :: children
