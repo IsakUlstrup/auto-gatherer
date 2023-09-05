@@ -1,12 +1,15 @@
 module Engine.QuadTree exposing
     ( Boundary
     , QuadTree(..)
+    , filter
     , fromList
     , indexedMap
     , insert
     , isIn
+    , map
     , new
     , subdivide
+    , toList
     )
 
 import Engine.Vector2 as Vector2 exposing (Vector2)
@@ -132,6 +135,40 @@ insert getPos particle tree =
 fromList : (a -> Vector2) -> List a -> QuadTree a
 fromList getPos particles =
     List.foldl (insert getPos) (new 0 0 1000) particles
+
+
+toList : QuadTree a -> List a
+toList tree =
+    let
+        helper accum t =
+            case t of
+                Node _ xs ->
+                    xs ++ accum
+
+                Leaf nw1 ne1 se1 sw1 ->
+                    helper accum nw1 ++ helper accum ne1 ++ helper accum se1 ++ helper accum sw1
+    in
+    helper [] tree
+
+
+filter : (a -> Bool) -> QuadTree a -> QuadTree a
+filter pred tree =
+    case tree of
+        Node b xs ->
+            Node b (List.filter pred xs)
+
+        Leaf nw1 ne1 se1 sw1 ->
+            Leaf (filter pred nw1) (filter pred ne1) (filter pred se1) (filter pred sw1)
+
+
+map : (a -> b) -> QuadTree a -> QuadTree b
+map f tree =
+    case tree of
+        Node b xs ->
+            Node b (List.map f xs)
+
+        Leaf nw1 ne1 se1 sw1 ->
+            Leaf (map f nw1) (map f ne1) (map f se1) (map f sw1)
 
 
 indexedMap : (Int -> Boundary -> List a -> b) -> QuadTree a -> List b

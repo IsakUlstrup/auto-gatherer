@@ -15,13 +15,14 @@ module Engine.ParticleSystem exposing
     )
 
 import Engine.Particle as Particle exposing (Particle)
+import Engine.QuadTree as QuadTree exposing (QuadTree)
 import Engine.Vector2 as Vector2 exposing (Vector2)
 import Random
 
 
 type ParticleSystem a
     = ParticleSystem
-        { particles : List ( Int, Particle a )
+        { particles : QuadTree ( Int, Particle a )
         , player : ( Int, Particle a )
         , idCounter : Int
         , seed : Random.Seed
@@ -31,7 +32,7 @@ type ParticleSystem a
 new : Particle a -> ParticleSystem a
 new player =
     ParticleSystem
-        { particles = []
+        { particles = QuadTree.new 0 0 5000
         , player = ( 0, player )
         , idCounter = 1
         , seed = Random.initialSeed 2
@@ -42,7 +43,7 @@ addParticle : Particle a -> ParticleSystem a -> ParticleSystem a
 addParticle particle (ParticleSystem world) =
     ParticleSystem
         { world
-            | particles = ( world.idCounter, particle ) :: world.particles
+            | particles = QuadTree.insert (Tuple.second >> .position) ( world.idCounter, particle ) world.particles
             , idCounter = world.idCounter + 1
         }
 
@@ -56,7 +57,7 @@ updateParticles : (Particle a -> Particle a) -> ParticleSystem a -> ParticleSyst
 updateParticles f (ParticleSystem world) =
     ParticleSystem
         { world
-            | particles = List.map (Tuple.mapSecond f) world.particles
+            | particles = QuadTree.map (Tuple.mapSecond f) world.particles
             , player = Tuple.mapSecond f world.player
         }
 
@@ -68,7 +69,7 @@ updatePlayer f (ParticleSystem world) =
 
 filterParticles : (Particle a -> Bool) -> ParticleSystem a -> ParticleSystem a
 filterParticles pred (ParticleSystem system) =
-    ParticleSystem { system | particles = List.filter (\p -> pred (Tuple.second p)) system.particles }
+    ParticleSystem { system | particles = QuadTree.filter (\p -> pred (Tuple.second p)) system.particles }
 
 
 
@@ -92,25 +93,25 @@ updateParticlesWithTargets : (List (Particle a) -> Particle a -> Particle a) -> 
 updateParticlesWithTargets f (ParticleSystem system) =
     let
         targets pid =
-            List.filter (\( id, _ ) -> id /= pid) (system.player :: system.particles)
+            List.filter (\( id, _ ) -> id /= pid) (system.player :: QuadTree.toList system.particles)
                 |> List.map Tuple.second
     in
     ParticleSystem
         { system
-            | particles = List.map (\( id, p ) -> ( id, f (targets id) p )) system.particles
+            | particles = QuadTree.map (\( id, p ) -> ( id, f (targets id) p )) system.particles
             , player = (\( id, p ) -> ( id, f (targets id) p )) system.player
         }
 
 
 mapParticles : (( Int, Particle a ) -> b) -> ParticleSystem a -> List b
 mapParticles f (ParticleSystem system) =
-    List.map f (system.player :: system.particles)
+    List.map f (system.player :: QuadTree.toList system.particles)
 
 
 getParticles : ParticleSystem a -> List (Particle a)
 getParticles (ParticleSystem world) =
     (world.player
-        :: world.particles
+        :: QuadTree.toList world.particles
     )
         |> List.map Tuple.second
 
@@ -150,7 +151,7 @@ collisionAction f (ParticleSystem system) =
     let
         collisions2 : ( Int, Particle a ) -> List ( Int, Particle a )
         collisions2 p =
-            List.filter (isColliding p) (system.player :: system.particles)
+            List.filter (isColliding p) (system.player :: QuadTree.toList system.particles)
 
         helper : ( Int, Particle a ) -> ( Int, Particle a ) -> ( Int, Particle a )
         helper ( tid, target ) ( pid, p ) =
@@ -161,7 +162,7 @@ collisionAction f (ParticleSystem system) =
     in
     ParticleSystem
         { system
-            | particles = List.map x system.particles
+            | particles = QuadTree.map x system.particles
             , player = x system.player
         }
 
@@ -242,6 +243,6 @@ collisions : ParticleSystem a -> ParticleSystem a
 collisions (ParticleSystem system) =
     ParticleSystem
         { system
-            | particles = List.map (resolveCollisions (system.player :: system.particles)) system.particles
-            , player = resolveCollisions (system.player :: system.particles) system.player
+            | particles = QuadTree.map (resolveCollisions (system.player :: QuadTree.toList system.particles)) system.particles
+            , player = resolveCollisions (system.player :: QuadTree.toList system.particles) system.player
         }
