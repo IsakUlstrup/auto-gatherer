@@ -27,7 +27,7 @@ followPointer x y =
 
 shootAtCursor : Float -> Float -> Particle Component
 shootAtCursor x y =
-    Particle.new (Vector2.new x y) 20 50 1 [ Color <| normalizedColor 105, FireParticleAtCursor (Progress.new 100) (dying 0 0) ]
+    Particle.new (Vector2.new x y) 20 50 1 [ Color <| normalizedColor 105, FireParticleAtCursor (Progress.new 1000) (dying 0 0) ]
 
 
 idle : Float -> Float -> Particle Component

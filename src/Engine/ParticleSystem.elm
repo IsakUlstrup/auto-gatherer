@@ -22,7 +22,7 @@ import Random
 
 type ParticleSystem a
     = ParticleSystem
-        { particles : QuadTree ( Int, Particle a )
+        { particles : QuadTree a
         , player : ( Int, Particle a )
         , idCounter : Int
         , seed : Random.Seed
@@ -43,7 +43,7 @@ addParticle : Particle a -> ParticleSystem a -> ParticleSystem a
 addParticle particle (ParticleSystem world) =
     ParticleSystem
         { world
-            | particles = QuadTree.insert (Tuple.second >> .position) ( world.idCounter, particle ) world.particles
+            | particles = QuadTree.insert ( world.idCounter, particle ) world.particles
             , idCounter = world.idCounter + 1
         }
 
@@ -227,14 +227,16 @@ resolveDynamicCollision target particle =
 
 {-| Detect and react to collisions
 -}
-resolveCollisions : List ( Int, Particle b ) -> ( Int, Particle a ) -> ( Int, Particle a )
-resolveCollisions targets particle =
+resolveCollisions : QuadTree a -> ( Int, Particle a ) -> ( Int, Particle a ) -> ( Int, Particle a )
+resolveCollisions tree player particle =
     let
         resolve : ( Int, Particle b ) -> ( Int, Particle a ) -> ( Int, Particle a )
         resolve ( _, res ) ( pid, p ) =
             ( pid, resolveDynamicCollision res p )
     in
-    targets
+    tree
+        |> QuadTree.query (QuadTree.Boundary (Tuple.second particle).position 1000)
+        |> (\ts -> player :: ts)
         |> List.filter (isColliding particle)
         |> List.foldl resolve particle
 
@@ -243,6 +245,6 @@ collisions : ParticleSystem a -> ParticleSystem a
 collisions (ParticleSystem system) =
     ParticleSystem
         { system
-            | particles = QuadTree.map (resolveCollisions (system.player :: QuadTree.toList system.particles)) system.particles
-            , player = resolveCollisions (system.player :: QuadTree.toList system.particles) system.player
+            | particles = QuadTree.map (resolveCollisions system.particles system.player) system.particles
+            , player = resolveCollisions system.particles system.player system.player
         }

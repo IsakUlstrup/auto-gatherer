@@ -144,34 +144,37 @@ boundaryTransform boundary =
             ++ ")"
 
 
-simpleViewParticle : Particle a -> Svg msg
+simpleViewParticle : Particle a -> ( String, Svg msg )
 simpleViewParticle particle =
-    Svg.circle
+    ( "p"
+    , Svg.circle
         [ transformAttr particle.position
         , Svg.Attributes.class "particle"
         , Svg.Attributes.r <| String.fromInt (round particle.radius)
         ]
         []
-
-
-viewKeyedBoundary : Int -> Boundary -> List (Particle a) -> ( String, Svg msg )
-viewKeyedBoundary index boundary particles =
-    ( String.fromInt index
-    , Svg.g
-        [ Svg.Attributes.style <| "fill: hsl(" ++ String.fromInt (index * 60) ++ ", 70%, 60%)"
-        ]
-        [ Svg.rect
-            [ Svg.Attributes.class "leaf"
-            , Svg.Attributes.class <| String.fromInt index
-            , boundaryTransform boundary
-            , Svg.Attributes.width <| String.fromInt (round <| boundary.size * 2)
-            , Svg.Attributes.height <| String.fromInt (round <| boundary.size * 2)
-            , Svg.Attributes.style <| "fill-opacity: 0.3"
-            ]
-            []
-        , Svg.g [] (List.map simpleViewParticle particles)
-        ]
     )
+
+
+
+-- viewKeyedBoundary : Int -> Boundary -> List (Particle a) -> ( String, Svg msg )
+-- viewKeyedBoundary index boundary particles =
+--     ( String.fromInt index
+--     , Svg.g
+--         [ Svg.Attributes.style <| "fill: hsl(" ++ String.fromInt (index * 60) ++ ", 70%, 60%)"
+--         ]
+--         [ Svg.rect
+--             [ Svg.Attributes.class "leaf"
+--             , Svg.Attributes.class <| String.fromInt index
+--             , boundaryTransform boundary
+--             , Svg.Attributes.width <| String.fromInt (round <| boundary.size * 2)
+--             , Svg.Attributes.height <| String.fromInt (round <| boundary.size * 2)
+--             , Svg.Attributes.style <| "fill-opacity: 0.3"
+--             ]
+--             []
+--         , Svg.g [] (List.map simpleViewParticle particles)
+--         ]
+--     )
 
 
 viewQuadTreeSvg : List (Svg.Attribute msg) -> List (Svg msg) -> (Particle a -> Svg msg) -> ParticleSystem a -> RenderConfig -> Svg msg
@@ -189,8 +192,7 @@ viewQuadTreeSvg attrs children _ particles _ =
             ]
             (particles
                 |> World.getParticles
-                |> QuadTree.fromList .position
-                |> QuadTree.indexedMap viewKeyedBoundary
+                |> List.map simpleViewParticle
             )
             :: children
         )
