@@ -1,3 +1,3 @@
 # auto-gatherer
 
-A game
+A game, currently semi-broken while I make a proper physics engine
